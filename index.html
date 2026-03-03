@@ -1,152 +1,181 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ร้านสั่งอาหาร</title>
-
-<style>
-body {
-  margin: 0;
-  font-family: sans-serif;
-  background: #f5f5f5;
-}
-
-.header {
-  background: #16a34a;
-  color: white;
-  text-align: center;
-  padding: 18px;
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.menu {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  padding: 15px;
-}
-
-.card {
-  background: white;
-  border-radius: 16px;
-  padding: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.card:active {
-  transform: scale(0.96);
-}
-
-.price {
-  color: #16a34a;
-  font-weight: bold;
-  margin-top: 8px;
-}
-
-.cart {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: white;
-  box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
-  padding: 15px;
-}
-
-.total {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.cart-buttons {
-  margin-top: 10px;
-  display: flex;
-  gap: 10px;
-}
-
-button {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.clear-btn {
-  background: #ef4444;
-  color: white;
-}
-
-.order-btn {
-  background: #16a34a;
-  color: white;
-}
-</style>
-</head>
-
-<body>
-
-<div class="header">ร้านสั่งอาหาร</div>
-
-<div class="menu" id="menu"></div>
-
-<div class="cart">
-  <div class="total">รวมทั้งหมด: <span id="total">0</span> บาท</div>
-  <div class="cart-buttons">
-    <button class="clear-btn" onclick="clearCart()">ล้างตะกร้า</button>
-    <button class="order-btn" onclick="order()">สั่งอาหาร</button>
-  </div>
-</div>
-
 <script>
-const menuItems = [
-  {name: "บีทาเก้นท์ปั่น", price: 40},
-  {name: "นมสดปีโป้", price: 35},
-  {name: "นมสดกล้วยปั่น", price: 40},
-  {name: "นมสดสตรอเบอร์รี่ปั่น", price: 35},
-  {name: "มะพร้าวนมสดปั่น", price: 40},
-  {name: "แตงโมปั่น", price: 40},
-  {name: "นมสดช็อคโกแลต", price: 30},
-  {name: "นมสดไวท์มอลต์", price: 30},
-  {name: "นมสดโอริโอ้", price: 40},
-  {name: "นมสดแคนตาลูป", price: 30},
-  {name: "นมสดเผือก", price: 30},
-  {name: "นมสดคาราเมล", price: 30}
-];
+const BASE_URL = "https://script.google.com/macros/s/AKfycbz8_IG78KrGiV7Kg9gJBGA7tcH79vmDVgEIUWPbUBy-SDTM1mjAJ5znm8dYGbfa1m9Q/exec";
 
-let total = 0;
+let ITEMS = [];
+let MODIFIERS = [];
+let CART = [];
 
-const menuDiv = document.getElementById("menu");
+async function loadData() {
+  const itemsRes = await fetch(BASE_URL + "?path=items");
+  const itemsData = await itemsRes.json();
+  ITEMS = itemsData.items;
 
-menuItems.forEach(item => {
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerHTML = `
-    <div>${item.name}</div>
-    <div class="price">${item.price} บาท</div>
-  `;
-  card.onclick = () => addToCart(item.price);
-  menuDiv.appendChild(card);
-});
+  const modRes = await fetch(BASE_URL + "?path=modifiers");
+  const modData = await modRes.json();
+  MODIFIERS = modData.modifiers;
 
-function addToCart(price) {
-  total += price;
-  document.getElementById("total").innerText = total;
+  renderMenu();
+}
+
+function renderMenu() {
+  const menuDiv = document.getElementById("menu");
+  menuDiv.innerHTML = "";
+
+  ITEMS.forEach(item => {
+    const price = item.variants[0].price;
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div>${item.item_name}</div>
+      <div class="price">${price} บาท</div>
+    `;
+    card.onclick = () => openItem(item);
+
+    menuDiv.appendChild(card);
+  });
+}
+
+function openItem(item) {
+  const basePrice = parseFloat(item.variants[0].price);
+
+  let selected = {
+    sweetness: null,
+    type: null,
+    toppings: []
+  };
+
+  let total = basePrice;
+
+  const relatedModifiers = MODIFIERS
+    .filter(m => item.modifier_ids?.includes(m.id));
+
+  const groups = {};
+  relatedModifiers.forEach(mod => {
+    const group = mod.modifier_list_name;
+    if (!groups[group]) groups[group] = [];
+    groups[group].push(mod);
+  });
+
+  let modal = document.createElement("div");
+  modal.style.position = "fixed";
+  modal.style.bottom = "0";
+  modal.style.left = "0";
+  modal.style.right = "0";
+  modal.style.background = "white";
+  modal.style.padding = "20px";
+  modal.style.borderRadius = "20px 20px 0 0";
+  modal.style.maxHeight = "80vh";
+  modal.style.overflowY = "auto";
+  modal.style.boxShadow = "0 -4px 20px rgba(0,0,0,0.2)";
+
+  modal.innerHTML = `<h3>${item.item_name}</h3>`;
+
+  function updateTotal() {
+    total = basePrice;
+
+    if (selected.sweetness) total += parseFloat(selected.sweetness.price);
+    if (selected.type) total += parseFloat(selected.type.price);
+    selected.toppings.forEach(t => total += parseFloat(t.price));
+
+    totalDiv.innerHTML = "รวม: " + total + " บาท";
+    addBtn.innerHTML = "เพิ่มลงตะกร้า (" + total + " บาท)";
+  }
+
+  Object.keys(groups).forEach(groupName => {
+    const groupDiv = document.createElement("div");
+    groupDiv.innerHTML = `<h4>${groupName}</h4>`;
+
+    groups[groupName].forEach(mod => {
+
+      const wrapper = document.createElement("div");
+
+      const input = document.createElement("input");
+
+      if (groupName === "ระดับความหวาน" || groupName === "เย็น/ปั่น") {
+        input.type = "radio";
+        input.name = groupName;
+      } else {
+        input.type = "checkbox";
+      }
+
+      input.onchange = () => {
+        if (groupName === "ระดับความหวาน")
+          selected.sweetness = mod;
+
+        else if (groupName === "เย็น/ปั่น")
+          selected.type = mod;
+
+        else {
+          if (input.checked)
+            selected.toppings.push(mod);
+          else
+            selected.toppings = selected.toppings.filter(x => x.id !== mod.id);
+        }
+
+        updateTotal();
+      };
+
+      wrapper.appendChild(input);
+      wrapper.append(" " + mod.name + " +" + mod.price + " บาท");
+      groupDiv.appendChild(wrapper);
+    });
+
+    modal.appendChild(groupDiv);
+  });
+
+  const totalDiv = document.createElement("div");
+  totalDiv.style.marginTop = "15px";
+  totalDiv.innerHTML = "รวม: " + total + " บาท";
+
+  const addBtn = document.createElement("button");
+  addBtn.style.marginTop = "10px";
+  addBtn.style.background = "#16a34a";
+  addBtn.style.color = "white";
+  addBtn.style.width = "100%";
+  addBtn.style.padding = "12px";
+  addBtn.style.borderRadius = "10px";
+
+  addBtn.innerHTML = "เพิ่มลงตะกร้า (" + total + " บาท)";
+
+  addBtn.onclick = () => {
+
+    if (!selected.sweetness) {
+      alert("กรุณาเลือกระดับความหวาน");
+      return;
+    }
+
+    if (!selected.type) {
+      alert("กรุณาเลือก เย็น หรือ ปั่น");
+      return;
+    }
+
+    CART.push(total);
+    updateCart();
+
+    document.body.removeChild(modal);
+  };
+
+  modal.appendChild(totalDiv);
+  modal.appendChild(addBtn);
+
+  document.body.appendChild(modal);
+}
+
+function updateCart() {
+  const totalAmount = CART.reduce((a,b) => a+b,0);
+  document.getElementById("total").innerText = totalAmount;
 }
 
 function clearCart() {
-  total = 0;
-  document.getElementById("total").innerText = total;
+  CART = [];
+  updateCart();
 }
 
 function order() {
-  alert("ยอดทั้งหมด " + total + " บาท");
+  const totalAmount = CART.reduce((a,b) => a+b,0);
+  alert("ยอดทั้งหมด " + totalAmount + " บาท");
 }
-</script>
 
-</body>
-</html>
+loadData();
+    </script>
