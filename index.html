@@ -9,17 +9,56 @@
   <div id="menu"></div>
 
   <script>
-    fetch('/api/items')
-      .then(res => res.json())
-      .then(data => {
-        const menu = document.getElementById('menu');
-        data.items.forEach(item => {
+    async function loadItems() {
+      const res = await fetch('/api/items');
+      const data = await res.json();
+      const menu = document.getElementById('menu');
+
+      data.items.forEach(item => {
+
+        // ถ้ามีหลาย variants
+        if (item.variants && item.variants.length > 0) {
+
+          item.variants.forEach(variant => {
+
+            const price =
+              variant.price ??
+              variant.default_price ??
+              0;
+
+            const btn = document.createElement('button');
+
+            // ถ้ามีชื่อ variant ให้แสดงด้วย
+            const variantName = variant.variant_name
+              ? ` (${variant.variant_name})`
+              : '';
+
+            btn.innerText =
+              `${item.item_name}${variantName} - ${price} บาท`;
+
+            menu.appendChild(btn);
+            menu.appendChild(document.createElement('br'));
+          });
+
+        } else {
+          // กรณีไม่มี variant
+          const price =
+            item.price ??
+            item.default_price ??
+            0;
+
           const btn = document.createElement('button');
-          btn.innerText = item.item_name + ' - ' + item.price + ' บาท';
+          btn.innerText =
+            `${item.item_name} - ${price} บาท`;
+
           menu.appendChild(btn);
           menu.appendChild(document.createElement('br'));
-        });
+        }
+
       });
+    }
+
+    loadItems();
   </script>
 </body>
 </html>
