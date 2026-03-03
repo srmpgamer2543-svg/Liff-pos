@@ -1,64 +1,126 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>ร้านสั่งอาหาร</title>
+<meta charset="utf-8">
+<title>ร้านสั่งอาหาร</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#f5f5f5;
+}
+
+header{
+  background:#00B900;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-size:20px;
+  font-weight:bold;
+}
+
+.container{
+  padding:15px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:12px;
+}
+
+.card{
+  background:white;
+  border-radius:12px;
+  padding:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.card:hover{
+  transform:scale(1.03);
+}
+
+.name{
+  font-weight:bold;
+  margin-bottom:6px;
+}
+
+.price{
+  color:#00B900;
+  font-weight:bold;
+}
+
+</style>
 </head>
 <body>
-  <h2>เมนูอาหาร</h2>
-  <div id="menu"></div>
 
-  <script>
-    async function loadItems() {
-      const res = await fetch('/api/items');
-      const data = await res.json();
-      const menu = document.getElementById('menu');
+<header>ร้านสั่งอาหาร</header>
 
-      data.items.forEach(item => {
+<div class="container">
+  <div class="grid" id="menu"></div>
+</div>
 
-        // ถ้ามีหลาย variants
-        if (item.variants && item.variants.length > 0) {
+<script>
+async function loadItems(){
+  const res = await fetch('/api/items');
+  const data = await res.json();
+  const menu = document.getElementById('menu');
 
-          item.variants.forEach(variant => {
+  data.items.forEach(item => {
 
-            const price =
-              variant.price ??
-              variant.default_price ??
-              0;
+    if(item.variants && item.variants.length > 0){
 
-            const btn = document.createElement('button');
+      item.variants.forEach(variant => {
 
-            // ถ้ามีชื่อ variant ให้แสดงด้วย
-            const variantName = variant.variant_name
-              ? ` (${variant.variant_name})`
-              : '';
+        const price =
+          variant.price ??
+          variant.default_price ??
+          0;
 
-            btn.innerText =
-              `${item.item_name}${variantName} - ${price} บาท`;
+        const card = document.createElement('div');
+        card.className = "card";
 
-            menu.appendChild(btn);
-            menu.appendChild(document.createElement('br'));
-          });
+        const variantName = variant.variant_name
+          ? ` (${variant.variant_name})`
+          : '';
 
-        } else {
-          // กรณีไม่มี variant
-          const price =
-            item.price ??
-            item.default_price ??
-            0;
+        card.innerHTML = `
+          <div class="name">${item.item_name}${variantName}</div>
+          <div class="price">${price} บาท</div>
+        `;
 
-          const btn = document.createElement('button');
-          btn.innerText =
-            `${item.item_name} - ${price} บาท`;
-
-          menu.appendChild(btn);
-          menu.appendChild(document.createElement('br'));
-        }
+        menu.appendChild(card);
 
       });
+
+    }else{
+
+      const price =
+        item.price ??
+        item.default_price ??
+        0;
+
+      const card = document.createElement('div');
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="name">${item.item_name}</div>
+        <div class="price">${price} บาท</div>
+      `;
+
+      menu.appendChild(card);
+
     }
 
-    loadItems();
-  </script>
+  });
+}
+
+loadItems();
+</script>
+
 </body>
 </html>
