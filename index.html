@@ -1,27 +1,163 @@
-async function openPopup(item) {
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ร้านสั่งอาหาร</title>
 
-  let basePrice = item.variants[0].default_price;
+<style>
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #f5f5f5;
+}
+
+.header {
+  background: #16a34a;
+  color: white;
+  text-align: center;
+  padding: 18px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.menu {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 15px;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.card:active {
+  transform: scale(0.96);
+}
+
+.price {
+  color: #16a34a;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.cart {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: white;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+  padding: 15px;
+}
+
+.total {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.cart-buttons {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.clear-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.order-btn {
+  background: #16a34a;
+  color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">ร้านสั่งอาหาร</div>
+<div class="menu" id="menu"></div>
+
+<div class="cart">
+  <div class="total">รวมทั้งหมด: <span id="total">0</span> บาท</div>
+  <div class="cart-buttons">
+    <button class="clear-btn" onclick="clearCart()">ล้างตะกร้า</button>
+    <button class="order-btn" onclick="order()">สั่งอาหาร</button>
+  </div>
+</div>
+
+<script>
+
+const menuItems = [
+  {name: "บีทาเก้นท์ปั่น", price: 40},
+  {name: "นมสดปีโป้", price: 35},
+  {name: "นมสดกล้วยปั่น", price: 40},
+  {name: "นมสดสตรอเบอร์รี่ปั่น", price: 35},
+  {name: "มะพร้าวนมสดปั่น", price: 40},
+  {name: "แตงโมปั่น", price: 40},
+  {name: "นมสดช็อคโกแลต", price: 30},
+  {name: "นมสดไวท์มอลต์", price: 30},
+  {name: "นมสดโอริโอ้", price: 40},
+  {name: "นมสดแคนตาลูป", price: 30},
+  {name: "นมสดเผือก", price: 30},
+  {name: "นมสดคาราเมล", price: 30}
+];
+
+let total = 0;
+const menuDiv = document.getElementById("menu");
+
+menuItems.forEach(item => {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <div>${item.name}</div>
+    <div class="price">${item.price} บาท</div>
+  `;
+  card.onclick = () => openPopup(item);
+  menuDiv.appendChild(card);
+});
+
+function openPopup(item) {
+
+  let basePrice = item.price;
   let selectedSweet = null;
   let selectedType = null;
   let selectedToppings = [];
 
-  // ดึง modifier จาก API
-  const modRes = await fetch(BASE_URL + "?path=modifiers");
-  const ALL_MODIFIERS = await modRes.json();
+  const sweetnessOptions = [
+    {name:"หวาน 100%", price:0},
+    {name:"หวาน 50%", price:0},
+    {name:"หวาน 25%", price:0},
+    {name:"ไม่หวาน", price:0}
+  ];
 
-  const itemModifierIds = item.modifier_list_ids || item.modifier_ids || [];
+  const typeOptions = [
+    {name:"เย็น", price:0},
+    {name:"ปั่น", price:5}
+  ];
 
-  const relatedModifiers = ALL_MODIFIERS.filter(m =>
-    itemModifierIds.includes(m.modifier_list_id || m.id)
-  );
-
-  // แยกตาม group
-  const groups = {};
-  relatedModifiers.forEach(mod => {
-    const groupName = mod.modifier_list_name;
-    if (!groups[groupName]) groups[groupName] = [];
-    groups[groupName].push(mod);
-  });
+  const toppingOptions = [
+  {name:"ไข่มุก", price:5},
+  {name:"เฉาก๊วย", price:5},
+  {name:"ปีโป้", price:5},
+  {name:"วิปปิ้งครีม", price:10},
+  {name:"ครีมชีส", price:15}
+];
 
   const modal = document.createElement("div");
   modal.style.position = "fixed";
@@ -33,83 +169,79 @@ async function openPopup(item) {
   modal.style.borderRadius = "20px 20px 0 0";
   modal.style.maxHeight = "80vh";
   modal.style.overflowY = "auto";
+  modal.style.boxShadow = "0 -4px 20px rgba(0,0,0,0.3)";
 
-  modal.innerHTML = `<h3>${item.item_name}</h3>`;
+  modal.innerHTML = `<h3>${item.name}</h3>`;
 
   const totalDiv = document.createElement("div");
+  totalDiv.style.marginTop = "10px";
 
   function updateTotal() {
-    let total = basePrice;
-
-    if (selectedSweet) total += parseFloat(selectedSweet.price || 0);
-    if (selectedType) total += parseFloat(selectedType.price || 0);
-    selectedToppings.forEach(t => total += parseFloat(t.price || 0));
-
-    totalDiv.innerHTML = "รวม: " + total + " บาท";
-    addBtn.innerHTML = "เพิ่มลงตะกร้า ("+total+" บาท)";
+    let totalPrice = basePrice;
+    if(selectedType) totalPrice += selectedType.price;
+    selectedToppings.forEach(t => totalPrice += t.price);
+    totalDiv.innerHTML = "รวม: " + totalPrice + " บาท";
+    addBtn.innerHTML = "เพิ่มลงตะกร้า ("+ totalPrice +" บาท)";
   }
 
-  Object.keys(groups).forEach(groupName => {
-
+  function createRadioGroup(title, options, groupName, callback) {
     const div = document.createElement("div");
-    div.innerHTML = "<h4>"+groupName+"</h4>";
-
-    groups[groupName].forEach(mod => {
-
+    div.innerHTML = "<h4>"+title+"</h4>";
+    options.forEach(opt => {
       const input = document.createElement("input");
-
-      // ถ้าเป็น group ที่เลือกได้ 1 อัน
-      if (groupName === "ระดับความหวาน" || groupName === "เย็น/ปั่น") {
-        input.type = "radio";
-        input.name = groupName;
-      } else {
-        input.type = "checkbox";
-      }
-
-      input.onchange = () => {
-
-        if (groupName === "ระดับความหวาน") {
-          selectedSweet = mod;
-        }
-        else if (groupName === "เย็น/ปั่น") {
-          selectedType = mod;
-        }
-        else {
-          if (input.checked)
-            selectedToppings.push(mod);
-          else
-            selectedToppings = selectedToppings.filter(x => x.id !== mod.id);
-        }
-
-        updateTotal();
-      };
-
+      input.type = "radio";
+      input.name = groupName;
+      input.onchange = () => callback(opt);
       div.appendChild(input);
-      div.append(" " + mod.modifier_name + " +" + mod.price);
+      div.append(" "+opt.name+(opt.price>0?" +"+opt.price:""));
       div.appendChild(document.createElement("br"));
     });
-
     modal.appendChild(div);
+  }
+
+  createRadioGroup("ระดับความหวาน", sweetnessOptions, "sweet", opt => {
+    selectedSweet = opt;
+    updateTotal();
   });
 
+  createRadioGroup("เย็น / ปั่น", typeOptions, "type", opt => {
+    selectedType = opt;
+    updateTotal();
+  });
+
+  const topDiv = document.createElement("div");
+  topDiv.innerHTML = "<h4>ท็อปปิ้ง</h4>";
+  toppingOptions.forEach(opt => {
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.onchange = () => {
+      if(input.checked) selectedToppings.push(opt);
+      else selectedToppings = selectedToppings.filter(t => t.name !== opt.name);
+      updateTotal();
+    };
+    topDiv.appendChild(input);
+    topDiv.append(" "+opt.name+" +"+opt.price);
+    topDiv.appendChild(document.createElement("br"));
+  });
+  modal.appendChild(topDiv);
+
   const addBtn = document.createElement("button");
+  addBtn.style.marginTop = "15px";
   addBtn.style.background = "#16a34a";
   addBtn.style.color = "white";
   addBtn.style.width = "100%";
   addBtn.style.padding = "12px";
   addBtn.style.borderRadius = "10px";
+  addBtn.innerHTML = "เพิ่มลงตะกร้า ("+basePrice+" บาท)";
 
   addBtn.onclick = () => {
+    if(!selectedSweet) return alert("กรุณาเลือกระดับความหวาน");
+    if(!selectedType) return alert("กรุณาเลือก เย็น หรือ ปั่น");
 
-    if (!selectedSweet) return alert("กรุณาเลือกระดับความหวาน");
-    if (!selectedType) return alert("กรุณาเลือก เย็น หรือ ปั่น");
+    let finalPrice = basePrice + selectedType.price;
+    selectedToppings.forEach(t => finalPrice += t.price);
 
-    let final = basePrice;
-    if (selectedSweet) final += parseFloat(selectedSweet.price || 0);
-    if (selectedType) final += parseFloat(selectedType.price || 0);
-    selectedToppings.forEach(t => final += parseFloat(t.price || 0));
-
-    addToCart(final);
+    addToCart(finalPrice);
     document.body.removeChild(modal);
   };
 
@@ -119,3 +251,22 @@ async function openPopup(item) {
 
   updateTotal();
 }
+
+function addToCart(price) {
+  total += price;
+  document.getElementById("total").innerText = total;
+}
+
+function clearCart() {
+  total = 0;
+  document.getElementById("total").innerText = total;
+}
+
+function order() {
+  alert("ยอดทั้งหมด " + total + " บาท");
+}
+
+</script>
+
+</body>
+</html>
