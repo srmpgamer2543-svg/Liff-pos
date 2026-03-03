@@ -6,141 +6,110 @@
 <title>ร้านสั่งอาหาร</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: sans-serif;
-  background: #f5f5f5;
-}
+body { margin:0; font-family:sans-serif; background:#f5f5f5; }
 
 .header {
-  background: #16a34a;
-  color: white;
-  text-align: center;
-  padding: 18px;
-  font-size: 22px;
-  font-weight: bold;
+  background:#16a34a;
+  color:white;
+  text-align:center;
+  padding:18px;
+  font-size:22px;
+  font-weight:bold;
 }
 
 .menu {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  padding: 15px;
-  padding-bottom: 120px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  padding:15px;
+  padding-bottom:200px;
 }
 
 .card {
-  background: white;
-  border-radius: 16px;
-  padding: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  cursor: pointer;
-  transition: 0.2s;
+  background:white;
+  border-radius:16px;
+  padding:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  cursor:pointer;
 }
 
-.card:active {
-  transform: scale(0.96);
-}
-
-.price {
-  color: #16a34a;
-  font-weight: bold;
-  margin-top: 8px;
-}
+.price { color:#16a34a; font-weight:bold; margin-top:8px; }
 
 .cart {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: white;
-  box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
-  padding: 15px;
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:white;
+  box-shadow:0 -4px 12px rgba(0,0,0,0.1);
+  padding:15px;
+  max-height:45vh;
+  overflow:auto;
 }
 
-.total {
-  font-size: 18px;
-  font-weight: bold;
+.cart-item {
+  background:#f3f4f6;
+  padding:10px;
+  border-radius:12px;
+  margin-bottom:8px;
 }
 
-.cart-buttons {
-  margin-top: 10px;
-  display: flex;
-  gap: 10px;
+.qty {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:5px;
 }
 
-button {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  cursor: pointer;
+.qty button {
+  width:30px;
+  height:30px;
+  border:none;
+  border-radius:8px;
+  background:#16a34a;
+  color:white;
 }
 
-.clear-btn {
-  background: #ef4444;
-  color: white;
+.total { font-weight:bold; margin-top:10px; }
+
+button.main-btn {
+  width:100%;
+  margin-top:8px;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:bold;
 }
 
-.order-btn {
-  background: #16a34a;
-  color: white;
-}
+.clear-btn { background:#ef4444; color:white; }
+.checkout-btn { background:#16a34a; color:white; }
 
-/* ===== Overlay ===== */
+/* Modal */
 .overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: flex-end;
-  z-index: 999;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.5);
+  display:flex;
+  align-items:flex-end;
+  z-index:999;
 }
 
-/* ===== Modal ===== */
 .modal {
-  background: white;
-  width: 100%;
-  border-radius: 24px 24px 0 0;
-  padding: 20px;
-  max-height: 85vh;
-  overflow-y: auto;
-  animation: slideUp 0.25s ease;
-}
-
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-
-.option-group {
-  margin-bottom: 20px;
-}
-
-.option-title {
-  font-weight: bold;
-  margin-bottom: 10px;
+  background:white;
+  width:100%;
+  border-radius:24px 24px 0 0;
+  padding:20px;
+  max-height:85vh;
+  overflow:auto;
 }
 
 .option-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f3f4f6;
-  padding: 12px;
-  border-radius: 12px;
-  margin-bottom: 8px;
-  cursor: pointer;
-}
-
-.add-btn {
-  width: 100%;
-  background: #16a34a;
-  color: white;
-  padding: 14px;
-  border-radius: 14px;
-  font-size: 16px;
-  font-weight: bold;
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  background:#f3f4f6;
+  border-radius:10px;
+  margin-bottom:6px;
 }
 </style>
 </head>
@@ -151,171 +120,177 @@ button {
 <div class="menu" id="menu"></div>
 
 <div class="cart">
+  <div id="cart-items"></div>
   <div class="total">รวมทั้งหมด: <span id="total">0</span> บาท</div>
-  <div class="cart-buttons">
-    <button class="clear-btn" onclick="clearCart()">ล้างตะกร้า</button>
-    <button class="order-btn" onclick="order()">สั่งอาหาร</button>
-  </div>
+  <button class="main-btn clear-btn" onclick="clearCart()">ล้างตะกร้า</button>
+  <button class="main-btn checkout-btn" onclick="checkout()">Checkout</button>
 </div>
 
 <script>
 
 const menuItems = [
-  {name: "บีทาเก้นท์ปั่น", price: 40},
-  {name: "นมสดปีโป้", price: 35},
-  {name: "นมสดกล้วยปั่น", price: 40},
-  {name: "นมสดสตรอเบอร์รี่ปั่น", price: 35},
-  {name: "มะพร้าวนมสดปั่น", price: 40},
-  {name: "แตงโมปั่น", price: 40},
-  {name: "นมสดช็อคโกแลต", price: 30},
-  {name: "นมสดไวท์มอลต์", price: 30},
-  {name: "นมสดโอริโอ้", price: 40},
-  {name: "นมสดแคนตาลูป", price: 30},
-  {name: "นมสดเผือก", price: 30},
-  {name: "นมสดคาราเมล", price: 30}
+  {name:"บีทาเก้นท์ปั่น",price:40},
+  {name:"นมสดปีโป้",price:35},
+  {name:"นมสดกล้วยปั่น",price:40},
+  {name:"นมสดสตรอเบอร์รี่ปั่น",price:35},
+  {name:"มะพร้าวนมสดปั่น",price:40},
+  {name:"แตงโมปั่น",price:40}
 ];
 
-let total = 0;
+let cart = [];
+
 const menuDiv = document.getElementById("menu");
 
-menuItems.forEach(item => {
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerHTML = `
-    <div>${item.name}</div>
-    <div class="price">${item.price} บาท</div>
-  `;
-  card.onclick = () => openPopup(item);
+menuItems.forEach(item=>{
+  const card=document.createElement("div");
+  card.className="card";
+  card.innerHTML=`<div>${item.name}</div><div class="price">${item.price} บาท</div>`;
+  card.onclick=()=>openPopup(item);
   menuDiv.appendChild(card);
 });
 
-function openPopup(item) {
+function openPopup(item){
 
-  let basePrice = item.price;
-  let selectedSweet = null;
-  let selectedType = null;
-  let selectedToppings = [];
-
-  const sweetnessOptions = ["หวาน 100%","หวาน 50%","หวาน 25%","ไม่หวาน"];
-  const typeOptions = [{name:"เย็น",price:0},{name:"ปั่น",price:5}];
-
-  const toppingOptions = [
-    {name:"ไข่มุก", price:5},
-    {name:"เฉาก๊วย", price:5},
-    {name:"ปีโป้", price:5},
-    {name:"วิปปิ้งครีม", price:10},
-    {name:"ครีมชีส", price:15}
+  const sweetness=["หวาน 100%","หวาน 50%","หวาน 25%","ไม่หวาน"];
+  const types=[{name:"เย็น",price:0},{name:"ปั่น",price:5}];
+  const toppings=[
+    {name:"ไข่มุก",price:5},
+    {name:"เฉาก๊วย",price:5},
+    {name:"ปีโป้",price:5},
+    {name:"วิปปิ้งครีม",price:10},
+    {name:"ครีมชีส",price:15}
   ];
 
-  const overlay = document.createElement("div");
-  overlay.className = "overlay";
+  let selectedSweet=null;
+  let selectedType=null;
+  let selectedToppings=[];
 
-  const modal = document.createElement("div");
-  modal.className = "modal";
+  const overlay=document.createElement("div");
+  overlay.className="overlay";
 
-  modal.innerHTML = `<h3>${item.name}</h3>`;
+  const modal=document.createElement("div");
+  modal.className="modal";
+  modal.innerHTML=`<h3>${item.name}</h3>`;
 
-  function updateTotal() {
-    let totalPrice = basePrice;
-    if(selectedType) totalPrice += selectedType.price;
-    selectedToppings.forEach(t => totalPrice += t.price);
-    addBtn.innerHTML = "เพิ่มลงตะกร้า ("+ totalPrice +" บาท)";
-  }
+  function addOption(title,options,isRadio,callback){
+    const group=document.createElement("div");
+    group.innerHTML=`<h4>${title}</h4>`;
+    options.forEach(opt=>{
+      const label=document.createElement("label");
+      label.className="option-item";
 
-  function createRadio(title, options, callback) {
-    const group = document.createElement("div");
-    group.className = "option-group";
-    group.innerHTML = `<div class="option-title">${title}</div>`;
+      const text=document.createElement("div");
+      text.innerText=typeof opt==="string"?opt:opt.name+(opt.price?` +${opt.price}`:"");
 
-    options.forEach(opt => {
-      const label = document.createElement("label");
-      label.className = "option-item";
-
-      const text = document.createElement("div");
-      text.innerText = typeof opt === "string" ? opt : opt.name+(opt.price>0?" +"+opt.price:"");
-
-      const input = document.createElement("input");
-      input.type = "radio";
-      input.name = title;
-      input.onchange = () => callback(opt);
+      const input=document.createElement("input");
+      input.type=isRadio?"radio":"checkbox";
+      input.name=title;
+      input.onchange=()=>callback(opt,input.checked);
 
       label.appendChild(text);
       label.appendChild(input);
       group.appendChild(label);
     });
-
     modal.appendChild(group);
   }
 
-  createRadio("ระดับความหวาน", sweetnessOptions, opt => selectedSweet = opt);
-  createRadio("เย็น / ปั่น", typeOptions, opt => {selectedType = opt; updateTotal();});
-
-  const topGroup = document.createElement("div");
-  topGroup.className = "option-group";
-  topGroup.innerHTML = `<div class="option-title">ท็อปปิ้ง</div>`;
-
-  toppingOptions.forEach(opt => {
-    const label = document.createElement("label");
-    label.className = "option-item";
-
-    const text = document.createElement("div");
-    text.innerText = opt.name+" +"+opt.price;
-
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.onchange = () => {
-      if(input.checked) selectedToppings.push(opt);
-      else selectedToppings = selectedToppings.filter(t=>t.name!==opt.name);
-      updateTotal();
-    };
-
-    label.appendChild(text);
-    label.appendChild(input);
-    topGroup.appendChild(label);
+  addOption("ระดับความหวาน",sweetness,true,(opt)=>selectedSweet=opt);
+  addOption("เย็น / ปั่น",types,true,(opt)=>selectedType=opt);
+  addOption("ท็อปปิ้ง",toppings,false,(opt,checked)=>{
+    if(checked) selectedToppings.push(opt);
+    else selectedToppings=selectedToppings.filter(t=>t.name!==opt.name);
   });
 
-  modal.appendChild(topGroup);
+  const btn=document.createElement("button");
+  btn.className="main-btn checkout-btn";
+  btn.innerText="เพิ่มลงตะกร้า";
+  btn.onclick=()=>{
+    if(!selectedSweet||!selectedType)return alert("เลือกให้ครบก่อน");
 
-  const addBtn = document.createElement("button");
-  addBtn.className = "add-btn";
-  addBtn.innerHTML = "เพิ่มลงตะกร้า ("+basePrice+" บาท)";
+    let price=item.price+selectedType.price;
+    selectedToppings.forEach(t=>price+=t.price);
 
-  addBtn.onclick = () => {
-    if(!selectedSweet) return alert("กรุณาเลือกระดับความหวาน");
-    if(!selectedType) return alert("กรุณาเลือก เย็น หรือ ปั่น");
+    cart.push({
+      name:item.name,
+      sweet:selectedSweet,
+      type:selectedType.name,
+      toppings:selectedToppings.map(t=>t.name),
+      price,
+      qty:1
+    });
 
-    let finalPrice = basePrice;
-    finalPrice += selectedType.price;
-    selectedToppings.forEach(t => finalPrice += t.price);
-
-    addToCart(finalPrice);
+    updateCart();
     document.body.removeChild(overlay);
   };
 
-  modal.appendChild(addBtn);
+  modal.appendChild(btn);
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
 
-  overlay.onclick = (e) => {
-    if(e.target === overlay) document.body.removeChild(overlay);
+  overlay.onclick=e=>{
+    if(e.target===overlay)document.body.removeChild(overlay);
   };
 }
 
-function addToCart(price) {
-  total += price;
-  document.getElementById("total").innerText = total;
+function updateCart(){
+  const cartDiv=document.getElementById("cart-items");
+  cartDiv.innerHTML="";
+  let total=0;
+
+  cart.forEach((item,index)=>{
+    total+=item.price*item.qty;
+
+    const div=document.createElement("div");
+    div.className="cart-item";
+    div.innerHTML=`
+      <div><b>${item.name}</b></div>
+      <div>(${item.sweet} / ${item.type})</div>
+      <div>ท็อปปิ้ง: ${item.toppings.join(", ")||"-"}</div>
+      <div class="qty">
+        <button onclick="changeQty(${index},-1)">-</button>
+        ${item.qty}
+        <button onclick="changeQty(${index},1)">+</button>
+        <span style="margin-left:auto">${item.price*item.qty} บาท</span>
+      </div>
+    `;
+    cartDiv.appendChild(div);
+  });
+
+  document.getElementById("total").innerText=total;
 }
 
-function clearCart() {
-  total = 0;
-  document.getElementById("total").innerText = total;
+function changeQty(i,delta){
+  cart[i].qty+=delta;
+  if(cart[i].qty<=0)cart.splice(i,1);
+  updateCart();
 }
 
-function order() {
-  alert("ยอดทั้งหมด " + total + " บาท");
+function clearCart(){
+  cart=[];
+  updateCart();
+}
+
+function checkout(){
+  if(cart.length===0)return alert("ไม่มีสินค้าในตะกร้า");
+
+  let message="🧾 รายการสั่งซื้อ\n\n";
+  let total=0;
+
+  cart.forEach(item=>{
+    message+=`${item.name} x${item.qty}\n`;
+    message+=`(${item.sweet} / ${item.type})\n`;
+    if(item.toppings.length)message+=`ท็อปปิ้ง: ${item.toppings.join(", ")}\n`;
+    message+="\n";
+    total+=item.price*item.qty;
+  });
+
+  message+=`รวมทั้งหมด ${total} บาท`;
+
+  const phone="66812345678"; // 🔥 เปลี่ยนเป็นเบอร์ร้าน
+  const url=`https://line.me/R/msg/text/?${encodeURIComponent(message)}`;
+  window.open(url,"_blank");
 }
 
 </script>
-
 </body>
 </html>
