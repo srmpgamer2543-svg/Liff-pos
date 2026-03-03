@@ -1,125 +1,151 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ร้านสั่งอาหาร</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body{
-  margin:0;
-  font-family: Arial, sans-serif;
-  background:#f5f5f5;
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #f5f5f5;
 }
 
-header{
-  background:#00B900;
-  color:white;
-  padding:15px;
-  text-align:center;
-  font-size:20px;
-  font-weight:bold;
+.header {
+  background: #16a34a;
+  color: white;
+  text-align: center;
+  padding: 18px;
+  font-size: 22px;
+  font-weight: bold;
 }
 
-.container{
-  padding:15px;
-}
-
-.grid{
-  display:grid;
+.menu {
+  display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap:12px;
+  gap: 12px;
+  padding: 15px;
 }
 
-.card{
-  background:white;
-  border-radius:12px;
-  padding:12px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.1);
-  cursor:pointer;
-  transition:0.2s;
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.card:hover{
-  transform:scale(1.03);
+.card:active {
+  transform: scale(0.96);
 }
 
-.name{
-  font-weight:bold;
-  margin-bottom:6px;
+.price {
+  color: #16a34a;
+  font-weight: bold;
+  margin-top: 8px;
 }
 
-.price{
-  color:#00B900;
-  font-weight:bold;
+.cart {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: white;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+  padding: 15px;
 }
 
+.total {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.cart-buttons {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.clear-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.order-btn {
+  background: #16a34a;
+  color: white;
+}
 </style>
 </head>
+
 <body>
 
-<header>ร้านสั่งอาหาร</header>
+<div class="header">ร้านสั่งอาหาร</div>
 
-<div class="container">
-  <div class="grid" id="menu"></div>
+<div class="menu" id="menu"></div>
+
+<div class="cart">
+  <div class="total">รวมทั้งหมด: <span id="total">0</span> บาท</div>
+  <div class="cart-buttons">
+    <button class="clear-btn" onclick="clearCart()">ล้างตะกร้า</button>
+    <button class="order-btn" onclick="order()">สั่งอาหาร</button>
+  </div>
 </div>
 
 <script>
-async function loadItems(){
-  const res = await fetch('/api/items');
-  const data = await res.json();
-  const menu = document.getElementById('menu');
+const menuItems = [
+  {name: "บีทาเก้นท์ปั่น", price: 40},
+  {name: "นมสดปีโป้", price: 35},
+  {name: "นมสดกล้วยปั่น", price: 40},
+  {name: "นมสดสตรอเบอร์รี่ปั่น", price: 35},
+  {name: "มะพร้าวนมสดปั่น", price: 40},
+  {name: "แตงโมปั่น", price: 40},
+  {name: "นมสดช็อคโกแลต", price: 30},
+  {name: "นมสดไวท์มอลต์", price: 30},
+  {name: "นมสดโอริโอ้", price: 40},
+  {name: "นมสดแคนตาลูป", price: 30},
+  {name: "นมสดเผือก", price: 30},
+  {name: "นมสดคาราเมล", price: 30}
+];
 
-  data.items.forEach(item => {
+let total = 0;
 
-    if(item.variants && item.variants.length > 0){
+const menuDiv = document.getElementById("menu");
 
-      item.variants.forEach(variant => {
+menuItems.forEach(item => {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <div>${item.name}</div>
+    <div class="price">${item.price} บาท</div>
+  `;
+  card.onclick = () => addToCart(item.price);
+  menuDiv.appendChild(card);
+});
 
-        const price =
-          variant.price ??
-          variant.default_price ??
-          0;
-
-        const card = document.createElement('div');
-        card.className = "card";
-
-        const variantName = variant.variant_name
-          ? ` (${variant.variant_name})`
-          : '';
-
-        card.innerHTML = `
-          <div class="name">${item.item_name}${variantName}</div>
-          <div class="price">${price} บาท</div>
-        `;
-
-        menu.appendChild(card);
-
-      });
-
-    }else{
-
-      const price =
-        item.price ??
-        item.default_price ??
-        0;
-
-      const card = document.createElement('div');
-      card.className = "card";
-
-      card.innerHTML = `
-        <div class="name">${item.item_name}</div>
-        <div class="price">${price} บาท</div>
-      `;
-
-      menu.appendChild(card);
-
-    }
-
-  });
+function addToCart(price) {
+  total += price;
+  document.getElementById("total").innerText = total;
 }
 
-loadItems();
+function clearCart() {
+  total = 0;
+  document.getElementById("total").innerText = total;
+}
+
+function order() {
+  alert("ยอดทั้งหมด " + total + " บาท");
+}
 </script>
 
 </body>
