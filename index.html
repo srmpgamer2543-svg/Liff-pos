@@ -3,24 +3,23 @@
 <head>
   <meta charset="utf-8">
   <title>ร้านสั่งอาหาร</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
   <h2>เมนูอาหาร</h2>
+  <div id="menu"></div>
 
-  <button onclick="order('ข้าวผัด')">ข้าวผัด</button><br><br>
-  <button onclick="order('กะเพรา')">กะเพรา</button><br><br>
-  <button onclick="order('ผัดไทย')">ผัดไทย</button>
-
-<script>
-  async function main() {
-    await liff.init({ liffId: "2009308319-UJFcBTYm" })
-  }
-  main()
-
-  function order(menu) {
-    alert("สั่งแล้ว: " + menu)
-  }
-</script>
+  <script>
+    fetch('/api/items')
+      .then(res => res.json())
+      .then(data => {
+        const menu = document.getElementById('menu');
+        data.items.forEach(item => {
+          const btn = document.createElement('button');
+          btn.innerText = item.item_name + ' - ' + item.price + ' บาท';
+          menu.appendChild(btn);
+          menu.appendChild(document.createElement('br'));
+        });
+      });
+  </script>
 </body>
 </html>
