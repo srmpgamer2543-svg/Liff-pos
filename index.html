@@ -1,94 +1,39 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ร้านสั่งอาหาร</title>
-
-<style>
-body { margin:0; font-family:sans-serif; background:#f5f5f5; }
-.header { background:#16a34a; color:white; text-align:center; padding:18px; font-size:22px; font-weight:bold; }
-.menu { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:15px; }
-.card { background:white; border-radius:16px; padding:15px; box-shadow:0 4px 10px rgba(0,0,0,0.08); cursor:pointer; }
-.price { color:#16a34a; font-weight:bold; margin-top:8px; }
-.cart { position:fixed; bottom:0; width:100%; background:white; box-shadow:0 -4px 12px rgba(0,0,0,0.1); padding:15px; }
-.total { font-size:18px; font-weight:bold; }
-button { padding:10px; border:none; border-radius:10px; font-size:16px; cursor:pointer; }
-.clear-btn { background:#ef4444; color:white; }
-.order-btn { background:#16a34a; color:white; }
-</style>
-</head>
-
-<body>
-
-<div class="header">ร้านสั่งอาหาร</div>
-<div class="menu" id="menu"></div>
-
-<div class="cart">
-  <div class="total">รวมทั้งหมด: <span id="total">0</span> บาท</div>
-  <div style="display:flex; gap:10px; margin-top:10px;">
-    <button class="clear-btn" onclick="clearCart()">ล้างตะกร้า</button>
-    <button class="order-btn" onclick="order()">สั่งอาหาร</button>
-  </div>
-</div>
-
 <script>
 
-const BASE_URL = "https://script.google.com/macros/s/PUT_YOUR_SCRIPT_URL/exec";
+let total = 0;
+const menuDiv = document.getElementById("menu");
 
-let ITEMS = [];
-let MODIFIERS = [];
-let CART_TOTAL = 0;
+async function loadMenu() {
+  try {
+    const res = await fetch("/api/items");
+    const items = await res.json();
 
-async function loadData() {
-  const itemRes = await fetch(BASE_URL + "?path=items");
-  ITEMS = await itemRes.json();
+    menuDiv.innerHTML = "";
 
-  const modRes = await fetch(BASE_URL + "?path=modifiers");
-  MODIFIERS = await modRes.json();
+    items.forEach(item => {
 
-  renderMenu();
-}
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div>${item.item_name}</div>
+        <div class="price">${item.price} บาท</div>
+      `;
 
-function renderMenu() {
-  const menuDiv = document.getElementById("menu");
-  menuDiv.innerHTML = "";
+      card.onclick = () => openPopup(item);
 
-  ITEMS.forEach(item => {
+      menuDiv.appendChild(card);
+    });
 
-    const price = item.variants?.[0]?.default_price || 0;
-
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div>${item.item_name}</div>
-      <div class="price">${price} บาท</div>
-    `;
-
-    card.onclick = () => openPopup(item);
-    menuDiv.appendChild(card);
-  });
+  } catch (err) {
+    menuDiv.innerHTML = "โหลดเมนูไม่สำเร็จ";
+    console.error(err);
+  }
 }
 
 function openPopup(item) {
 
-  const basePrice = parseFloat(item.variants?.[0]?.default_price || 0);
-
-  let selectedSingle = {};
-  let selectedMulti = {};
-
-  const itemModifierIds = item.modifier_list_ids || item.modifier_ids || [];
-
-  const relatedModifiers = MODIFIERS.filter(m =>
-    itemModifierIds.includes(m.modifier_list_id || m.id)
-  );
-
-  const groups = {};
-  relatedModifiers.forEach(mod => {
-    const groupName = mod.modifier_list_name;
-    if (!groups[groupName]) groups[groupName] = [];
-    groups[groupName].push(mod);
-  });
+  let basePrice = item.price;
+  let selectedModifiers = [];
 
   const modal = document.createElement("div");
   modal.style.position = "fixed";
@@ -100,77 +45,72 @@ function openPopup(item) {
   modal.style.borderRadius = "20px 20px 0 0";
   modal.style.maxHeight = "80vh";
   modal.style.overflowY = "auto";
+  modal.style.boxShadow = "0 -4px 20px rgba(0,0,0,0.3)";
 
   modal.innerHTML = `<h3>${item.item_name}</h3>`;
 
   const totalDiv = document.createElement("div");
-  totalDiv.style.marginTop = "10px";
 
   function updateTotal() {
-    let total = basePrice;
-
-    Object.values(selectedSingle).forEach(m => total += parseFloat(m.price || 0));
-    Object.values(selectedMulti).forEach(arr =>
-      arr.forEach(m => total += parseFloat(m.price || 0))
-    );
-
-    totalDiv.innerHTML = "รวม: " + total + " บาท";
-    addBtn.innerHTML = "เพิ่มลงตะกร้า ("+total+" บาท)";
+    let totalPrice = basePrice;
+    selectedModifiers.forEach(m => totalPrice += m.price);
+    totalDiv.innerHTML = "รวม: " + totalPrice + " บาท";
+    addBtn.innerHTML = "เพิ่มลงตะกร้า ("+ totalPrice +" บาท)";
   }
 
-  Object.keys(groups).forEach(groupName => {
+  // 🔥 ดึง modifier_set จาก Loyverse
+  if(item.modifier_sets && item.modifier_sets.length > 0) {
 
-    const div = document.createElement("div");
-    div.innerHTML = "<h4>"+groupName+"</h4>";
+    item.modifier_sets.forEach(set => {
 
-    const isSingle = true; // ถ้าอยากใช้ min/max จาก Loyverse บอกได้
+      const setDiv = document.createElement("div");
+      setDiv.innerHTML = `<h4>${set.name}</h4>`;
 
-    groups[groupName].forEach(mod => {
+      set.modifiers.forEach(mod => {
 
-      const input = document.createElement("input");
-      input.type = isSingle ? "radio" : "checkbox";
-      input.name = groupName;
+        const input = document.createElement("input");
+        input.type = set.min_selected === 1 && set.max_selected === 1 ? "radio" : "checkbox";
+        input.name = set.name;
 
-      input.onchange = () => {
+        input.onchange = () => {
 
-        if (isSingle) {
-          selectedSingle[groupName] = mod;
-        } else {
-          if (!selectedMulti[groupName]) selectedMulti[groupName] = [];
-          if (input.checked)
-            selectedMulti[groupName].push(mod);
-          else
-            selectedMulti[groupName] =
-              selectedMulti[groupName].filter(x => x.id !== mod.id);
-        }
+          if(input.type === "radio") {
+            selectedModifiers = selectedModifiers.filter(m => m.set !== set.name);
+          }
 
-        updateTotal();
-      };
+          if(input.checked) {
+            selectedModifiers.push({
+              set: set.name,
+              name: mod.name,
+              price: mod.price
+            });
+          } else {
+            selectedModifiers = selectedModifiers.filter(m => m.name !== mod.name);
+          }
 
-      div.appendChild(input);
-      div.append(" " + mod.modifier_name + " +" + (mod.price || 0));
-      div.appendChild(document.createElement("br"));
+          updateTotal();
+        };
+
+        setDiv.appendChild(input);
+        setDiv.append(" " + mod.name + " +" + mod.price);
+        setDiv.appendChild(document.createElement("br"));
+      });
+
+      modal.appendChild(setDiv);
     });
-
-    modal.appendChild(div);
-  });
+  }
 
   const addBtn = document.createElement("button");
+  addBtn.style.marginTop = "15px";
   addBtn.style.background = "#16a34a";
   addBtn.style.color = "white";
   addBtn.style.width = "100%";
   addBtn.style.padding = "12px";
   addBtn.style.borderRadius = "10px";
+  addBtn.innerHTML = "เพิ่มลงตะกร้า ("+basePrice+" บาท)";
 
   addBtn.onclick = () => {
-    let final = basePrice;
-
-    Object.values(selectedSingle).forEach(m => final += parseFloat(m.price || 0));
-    Object.values(selectedMulti).forEach(arr =>
-      arr.forEach(m => final += parseFloat(m.price || 0))
-    );
-
-    addToCart(final);
+    addToCart(basePrice + selectedModifiers.reduce((a,b)=>a+b.price,0));
     document.body.removeChild(modal);
   };
 
@@ -182,21 +122,19 @@ function openPopup(item) {
 }
 
 function addToCart(price) {
-  CART_TOTAL += price;
-  document.getElementById("total").innerText = CART_TOTAL;
+  total += price;
+  document.getElementById("total").innerText = total;
 }
 
 function clearCart() {
-  CART_TOTAL = 0;
-  document.getElementById("total").innerText = 0;
+  total = 0;
+  document.getElementById("total").innerText = total;
 }
 
 function order() {
-  alert("ยอดทั้งหมด " + CART_TOTAL + " บาท");
+  alert("ยอดทั้งหมด " + total + " บาท");
 }
 
-loadData();
+loadMenu();
 
 </script>
-</body>
-</html>
