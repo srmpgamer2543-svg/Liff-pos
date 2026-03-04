@@ -174,9 +174,11 @@ async function loadProducts() {
     const box = document.createElement("div");
     box.className = "card";
 
-    const image = item.image 
-      ? `<img src="${item.image}" />`
-      : `<img src="https://via.placeholder.com/300x200?text=No+Image" />`;
+    const imageUrl = item.image_url && item.image_url.trim() !== ""
+  ? item.image_url
+  : "https://via.placeholder.com/300x200?text=No+Image";
+
+const image = `<img src="${imageUrl}" />`;
 
     box.innerHTML = `
       ${image}
