@@ -17,16 +17,20 @@ h2 {
   margin-bottom: 20px;
 }
 
+/* 🔥 ตารางสินค้า */
 #menu {
   display: grid;
-  gap: 15px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
+/* การ์ดสินค้า */
 .card {
   background: white;
   border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  padding: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  text-align: center;
   transition: 0.2s;
 }
 
@@ -35,25 +39,25 @@ h2 {
 }
 
 .card h3 {
-  margin: 0 0 8px;
-  font-size: 18px;
+  font-size: 14px;
+  margin: 0 0 6px;
 }
 
 .price {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
   color: #ff6a00;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 button {
   width: 100%;
-  padding: 10px;
+  padding: 6px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #ff6a00;
   color: white;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   cursor: pointer;
 }
@@ -95,7 +99,7 @@ async function loadProducts() {
         <h3>${item.name}</h3>
         <div class="price">${price} บาท</div>
         <button onclick="alert('เพิ่มแล้ว')">
-          เพิ่มลงตะกร้า
+          เพิ่ม
         </button>
       `;
 
