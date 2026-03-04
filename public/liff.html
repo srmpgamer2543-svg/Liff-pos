@@ -13,24 +13,26 @@ body {
   color: white;
 }
 
+/* หัวข้อใหญ่ขึ้น */
 h2 {
   text-align: center;
-  margin-bottom: 20px;
-  font-size: 28px;
+  margin-bottom: 25px;
+  font-size: 36px;
 }
 
+/* เมนู */
 #menu {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
 }
 
 .card {
   background: white;
-  border-radius: 20px;
+  border-radius: 22px;
   position: relative;
   min-height: 200px;
-  padding: 15px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -40,43 +42,54 @@ h2 {
   position: absolute;
   top: 15px;
   right: 15px;
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   border: none;
   background: #ff6a00;
   color: white;
-  font-size: 30px;
+  font-size: 34px;
   cursor: pointer;
 }
 
 .price {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: bold;
   color: #ff6a00;
   text-align: right;
 }
 
 .name {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: bold;
   color: #222;
 }
 
+/* ปุ่มเปิดตะกร้า */
 .cart-open-btn {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   background: #ff6a00;
   color: white;
-  font-size: 32px;
+  font-size: 38px;
   border: none;
   cursor: pointer;
+  z-index: 1000;
 }
 
+/* พื้นหลังมืด */
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+}
+
+/* ตะกร้า */
 #cartModal {
   position: fixed;
   bottom: -100%;
@@ -84,11 +97,11 @@ h2 {
   right: 0;
   background: white;
   color: black;
-  height: 70%;
-  border-radius: 25px 25px 0 0;
+  height: 75%;
+  border-radius: 30px 30px 0 0;
   padding: 20px;
-  overflow-y: auto;
   transition: 0.3s;
+  overflow-y: auto;
 }
 
 #cartModal.active {
@@ -96,34 +109,48 @@ h2 {
 }
 
 .drag-bar {
-  width: 50px;
-  height: 5px;
+  width: 60px;
+  height: 6px;
   background: #ccc;
-  margin: 0 auto 10px;
-  border-radius: 5px;
+  margin: 0 auto 15px;
+  border-radius: 6px;
+}
+
+/* รายการ */
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 15px 0;
+  font-size: 22px;
 }
 
 .qty-btn {
-  padding: 4px 10px;
-  font-size: 16px;
-  margin: 0 5px;
+  padding: 6px 14px;
+  font-size: 20px;
+  margin: 0 6px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
 .plus { background: #4CAF50; color: white; }
 .minus { background: #f44336; color: white; }
 
+.total {
+  font-size: 26px;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
 .order-btn {
   width: 100%;
-  padding: 12px;
-  margin-top: 15px;
+  padding: 16px;
+  margin-top: 20px;
   background: #ff6a00;
   color: white;
   border: none;
-  border-radius: 20px;
-  font-size: 18px;
+  border-radius: 25px;
+  font-size: 22px;
   cursor: pointer;
 }
 </style>
@@ -136,14 +163,18 @@ h2 {
 
 <button class="cart-open-btn" onclick="openCart()">🛍</button>
 
+<div id="overlay" onclick="closeCart()"></div>
+
 <div id="cartModal">
-  <div class="drag-bar" onclick="closeCart()"></div>
+  <div class="drag-bar"></div>
   <div id="cartContent"></div>
 </div>
 
 <script>
 
 let cart = [];
+let startY = 0;
+let currentY = 0;
 
 async function loadProducts() {
   const container = document.getElementById("menu");
@@ -154,28 +185,22 @@ async function loadProducts() {
     const box = document.createElement("div");
     box.className = "card";
 
-    const btn = document.createElement("button");
-    btn.className = "cart-btn";
-    btn.textContent = "🛒";
-    btn.onclick = () => addToCart(item);
-
     box.innerHTML = `
+      <button class="cart-btn">🛒</button>
       <div class="price">${item.price} บาท</div>
       <div class="name">${item.name}</div>
     `;
 
-    box.appendChild(btn);
+    box.querySelector(".cart-btn").onclick = () => addToCart(item);
     container.appendChild(box);
   });
 }
 
 function addToCart(product) {
   const found = cart.find(i => i.id === product.id);
-  if (found) {
-    found.qty++;
-  } else {
-    cart.push({ ...product, qty: 1 });
-  }
+  if (found) found.qty++;
+  else cart.push({ ...product, qty: 1 });
+
   renderCart();
 }
 
@@ -184,9 +209,9 @@ function changeQty(id, delta) {
   if (!item) return;
 
   item.qty += delta;
-  if (item.qty <= 0) {
+  if (item.qty <= 0)
     cart = cart.filter(i => i.id !== id);
-  }
+
   renderCart();
 }
 
@@ -205,10 +230,10 @@ function renderCart() {
     total += item.price * item.qty;
 
     container.innerHTML += `
-      <div style="display:flex;justify-content:space-between;margin:10px 0;">
+      <div class="item-row">
         <div>
           ${item.name}<br>
-          <button class="qty-btn minus" onclick="changeQty(${item.id},-1)">-</button>
+          <button class="qty-btn minus" onclick="changeQty(${item.id},-1)">−</button>
           ${item.qty}
           <button class="qty-btn plus" onclick="changeQty(${item.id},1)">+</button>
         </div>
@@ -218,8 +243,7 @@ function renderCart() {
   });
 
   container.innerHTML += `
-    <hr>
-    <h3>รวมทั้งหมด: ${total} บาท</h3>
+    <div class="total">รวมทั้งหมด: ${total} บาท</div>
     <button class="order-btn" onclick="submitOrder()">สั่งซื้อ</button>
   `;
 }
@@ -233,11 +257,27 @@ function submitOrder() {
 
 function openCart() {
   document.getElementById("cartModal").classList.add("active");
+  document.getElementById("overlay").style.display = "block";
 }
 
 function closeCart() {
   document.getElementById("cartModal").classList.remove("active");
+  document.getElementById("overlay").style.display = "none";
 }
+
+/* ลากลงปิดได้ */
+const modal = document.getElementById("cartModal");
+
+modal.addEventListener("touchstart", e => {
+  startY = e.touches[0].clientY;
+});
+
+modal.addEventListener("touchmove", e => {
+  currentY = e.touches[0].clientY;
+  if (currentY - startY > 100) {
+    closeCart();
+  }
+});
 
 document.addEventListener("DOMContentLoaded", loadProducts);
 
