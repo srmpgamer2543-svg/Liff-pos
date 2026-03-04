@@ -16,24 +16,22 @@ body {
 h2 {
   text-align: center;
   margin-bottom: 30px;
-  font-size: 34px; /* ใหญ่ขึ้น */
+  font-size: 34px;
   font-weight: bold;
 }
 
-/* 3 คอลัมน์ */
 #menu {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
-/* การ์ด */
 .card {
   background: white;
   border-radius: 22px;
   box-shadow: 0 10px 22px rgba(0,0,0,0.7);
   position: relative;
-  min-height: 240px; /* สูงขึ้น */
+  min-height: 240px;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -45,7 +43,6 @@ h2 {
   transform: translateY(-8px);
 }
 
-/* แถบเขียว */
 .card::before {
   content: "";
   position: absolute;
@@ -56,45 +53,66 @@ h2 {
   background: linear-gradient(90deg, #1b5e20, #43a047);
 }
 
-/* ปุ่มตะกร้าใหญ่ 3 เท่า */
 .cart-btn {
   position: absolute;
   top: 18px;
   right: 18px;
-  width: 90px;   /* ใหญ่ขึ้น */
-  height: 90px;  /* ใหญ่ขึ้น */
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   border: none;
   background: #ff6a00;
   color: white;
-  font-size: 42px; /* ไอคอนใหญ่ */
+  font-size: 42px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-  transition: 0.2s;
 }
 
-.cart-btn:active {
-  transform: scale(0.92);
-  background: #e65c00;
-}
-
-/* ราคา */
 .price {
-  font-size: 34px; /* ใหญ่สุด */
+  font-size: 34px;
   font-weight: bold;
   color: #ff6a00;
   align-self: flex-end;
 }
 
-/* ชื่อเมนู */
 .name {
-  font-size: 26px; /* ใหญ่ขึ้น */
+  font-size: 26px;
   font-weight: bold;
   color: #222;
   margin-top: 8px;
+}
+
+/* ปุ่มเปิดตะกร้า */
+.cart-open-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 16px 22px;
+  font-size: 20px;
+  border: none;
+  border-radius: 40px;
+  background: #ff6a00;
+  color: white;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+  cursor: pointer;
+}
+
+/* modal ตะกร้า */
+#cartModal {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  color: black;
+  padding: 25px;
+  max-height: 65%;
+  overflow-y: auto;
+  border-radius: 25px 25px 0 0;
 }
 </style>
 </head>
@@ -104,7 +122,13 @@ h2 {
 <h2>เมนูสินค้า</h2>
 <div id="menu">กำลังโหลด...</div>
 
+<button class="cart-open-btn" onclick="toggleCart()">🛍 ตะกร้า</button>
+<div id="cartModal"></div>
+
 <script>
+
+let cart = [];
+
 async function loadProducts() {
   const container = document.getElementById("menu");
 
@@ -127,7 +151,13 @@ async function loadProducts() {
       const price = Number(item.price || 0);
 
       box.innerHTML = `
-        <button class="cart-btn" onclick="alert('เพิ่มแล้ว')">🛒</button>
+        <button class="cart-btn"
+        onclick='addToCart(${JSON.stringify({
+          id: item.id,
+          name: item.name,
+          price: price
+        })})'>🛒</button>
+
         <div class="price">${price} บาท</div>
         <div class="name">${item.name}</div>
       `;
@@ -141,7 +171,64 @@ async function loadProducts() {
   }
 }
 
+function addToCart(product) {
+  const existing = cart.find(item => item.id === product.id);
+
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({ ...product, qty: 1 });
+  }
+
+  renderCart();
+}
+
+function toggleCart() {
+  const modal = document.getElementById("cartModal");
+  modal.style.display = modal.style.display === "none" ? "block" : "none";
+  renderCart();
+}
+
+function renderCart() {
+  const modal = document.getElementById("cartModal");
+
+  if (cart.length === 0) {
+    modal.innerHTML = "<h3>ตะกร้าว่าง</h3>";
+    return;
+  }
+
+  let total = 0;
+  modal.innerHTML = "<h3>รายการสินค้า</h3>";
+
+  cart.forEach(item => {
+    total += item.price * item.qty;
+
+    modal.innerHTML += `
+      <div style="display:flex;justify-content:space-between;margin:10px 0;font-size:18px;">
+        <span>${item.name} x${item.qty}</span>
+        <span>${item.price * item.qty} บาท</span>
+      </div>
+    `;
+  });
+
+  modal.innerHTML += `
+    <hr>
+    <h3>รวมทั้งหมด: ${total} บาท</h3>
+    <button onclick="clearCart()"
+    style="padding:12px 20px;background:red;color:white;
+    border:none;border-radius:25px;font-size:18px;">
+    ล้างตะกร้า
+    </button>
+  `;
+}
+
+function clearCart() {
+  cart = [];
+  renderCart();
+}
+
 document.addEventListener("DOMContentLoaded", loadProducts);
+
 </script>
 
 </body>
