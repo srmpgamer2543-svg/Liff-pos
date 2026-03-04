@@ -2,9 +2,23 @@
 async function loadProducts() {
   const container = document.getElementById("menu");
 
+  if (!container) {
+    console.error("ไม่พบ div id=menu");
+    return;
+  }
+
+  container.innerHTML = "กำลังโหลดข้อมูล...";
+
   try {
-    const res = await fetch("/api/products");
+    // ✅ ใช้ URL เต็ม ป้องกัน path เพี้ยนใน LIFF
+    const res = await fetch("https://liff-pos.vercel.app/api/products");
+
+    if (!res.ok) {
+      throw new Error("HTTP Status " + res.status);
+    }
+
     const data = await res.json();
+    console.log("API DATA:", data);
 
     container.innerHTML = "";
 
@@ -23,12 +37,18 @@ async function loadProducts() {
 
       let priceHTML = "";
 
-      // ✅ ถ้ามีหลาย variant
+      // ✅ อ่านราคาทุก variant
       if (item.variants && item.variants.length > 0) {
 
         item.variants.forEach(variant => {
-          const price = variant.price / 100;
-          priceHTML += `<p>${variant.variant_name || "ราคา"} : ${price} บาท</p>`;
+          const price = Number(variant.price || 0) / 100;
+
+          priceHTML += `
+            <p>
+              ${variant.variant_name || "ราคา"} :
+              ${price.toFixed(2)} บาท
+            </p>
+          `;
         });
 
       } else {
@@ -36,7 +56,7 @@ async function loadProducts() {
       }
 
       box.innerHTML = `
-        <h3>${item.item_name}</h3>
+        <h3>${item.item_name || "ไม่มีชื่อสินค้า"}</h3>
         ${priceHTML}
         <button onclick="alert('เพิ่มแล้ว')">เพิ่มลงตะกร้า</button>
       `;
@@ -45,10 +65,10 @@ async function loadProducts() {
     });
 
   } catch (err) {
-    container.innerHTML = "โหลดสินค้าไม่สำเร็จ";
-    console.error(err);
+    console.error("ERROR:", err);
+    container.innerHTML = "โหลดสินค้าไม่สำเร็จ (" + err.message + ")";
   }
 }
 
-loadProducts();
+document.addEventListener("DOMContentLoaded", loadProducts);
 </script>
