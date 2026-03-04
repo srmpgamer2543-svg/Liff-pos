@@ -12,7 +12,10 @@ export default async function handler(req, res) {
     const products = data.items.map(item => ({
       id: item.id,
       name: item.item_name,
-      price: item.variants?.[0]?.price || 0,
+      price:
+        item.variants?.[0]?.default_price ||
+        item.variants?.[0]?.price ||
+        0,
       image: item.image_url || ""
     }));
 
