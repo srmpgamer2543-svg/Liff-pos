@@ -1,14 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>LIFF POS</title>
-</head>
-<body>
-
-<h2>เมนูสินค้า</h2>
-<div id="menu">กำลังโหลด...</div>
-
 <script>
 async function loadProducts() {
   const container = document.getElementById("menu");
@@ -19,16 +8,12 @@ async function loadProducts() {
 
     container.innerHTML = "";
 
-    if (!data.items) {
+    if (!data.items || data.items.length === 0) {
       container.innerHTML = "ไม่มีข้อมูลสินค้า";
       return;
     }
 
     data.items.forEach(item => {
-      let price = 0;
-
-      if (item.variants && item.variants.length > 0) {
-        price = item.variants[0].price;
 
       const box = document.createElement("div");
       box.style.border = "1px solid orange";
@@ -36,9 +21,23 @@ async function loadProducts() {
       box.style.padding = "10px";
       box.style.borderRadius = "8px";
 
+      let priceHTML = "";
+
+      // ✅ ถ้ามีหลาย variant
+      if (item.variants && item.variants.length > 0) {
+
+        item.variants.forEach(variant => {
+          const price = variant.price / 100;
+          priceHTML += `<p>${variant.variant_name || "ราคา"} : ${price} บาท</p>`;
+        });
+
+      } else {
+        priceHTML = "<p>ไม่มีราคา</p>";
+      }
+
       box.innerHTML = `
         <h3>${item.item_name}</h3>
-        <p>ราคา: ${price} บาท</p>
+        ${priceHTML}
         <button onclick="alert('เพิ่มแล้ว')">เพิ่มลงตะกร้า</button>
       `;
 
@@ -53,6 +52,3 @@ async function loadProducts() {
 
 loadProducts();
 </script>
-
-</body>
-</html>
