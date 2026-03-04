@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Menu</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body style="font-family:sans-serif;text-align:center;padding:20px;">
+  <h2 style="color:#ff6f00;">กำลังโหลดเมนู...</h2>
+
+  <script>
+    async function main() {
+      await liff.init({ liffId: "YOUR_LIFF_ID" });
+
+      if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
+      }
+
+      const profile = await liff.getProfile();
+
+      await fetch("/api/menu", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userId: profile.userId
+        })
+      });
+
+      document.body.innerHTML = "<h2 style='color:#ff6f00;'>เปิดเมนูในแชท LINE ได้เลย</h2>";
+    }
+
+    main();
+  </script>
+</body>
+</html>
