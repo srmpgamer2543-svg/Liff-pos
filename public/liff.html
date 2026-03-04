@@ -7,19 +7,17 @@
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #111; /* 🔥 พื้นหลังดำ */
+  background: #111;
   margin: 0;
   padding: 20px;
   color: white;
 }
 
-/* หัวข้อ */
 h2 {
   text-align: center;
   margin-bottom: 25px;
   font-size: 26px;
   font-weight: bold;
-  letter-spacing: 1px;
 }
 
 /* 3 คอลัมน์ */
@@ -34,61 +32,71 @@ h2 {
   background: white;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.6); /* 🔥 ลอยบนพื้นดำ */
+  box-shadow: 0 8px 18px rgba(0,0,0,0.6);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-height: 190px;
+  justify-content: flex-end; /* 🔥 ดันเนื้อหาลงล่าง */
+  min-height: 200px;
   transition: 0.25s ease;
+  position: relative;
 }
 
 .card:hover {
   transform: translateY(-6px);
 }
 
-/* แถบเขียว */
+/* แถบเขียวด้านบน */
 .card-top {
+  position: absolute;
+  top: 0;
+  width: 100%;
   height: 10px;
   background: linear-gradient(90deg, #1b5e20, #43a047);
 }
 
-/* เนื้อหา */
+/* โซนล่าง */
 .card-content {
-  padding: 16px;
-  text-align: center;
-  flex-grow: 1;
+  padding: 14px;
   color: #222;
 }
 
+/* ชื่อสินค้า */
 .card h3 {
-  font-size: 20px; /* 🔥 ใหญ่ขึ้น */
-  margin: 10px 0;
+  font-size: 18px;
+  margin: 6px 0;
   font-weight: bold;
 }
 
+/* ราคา */
 .price {
-  font-size: 22px; /* 🔥 ใหญ่ขึ้น */
+  font-size: 20px;
   font-weight: bold;
   color: #ff6a00;
-  margin: 10px 0;
+  margin-bottom: 8px;
 }
 
-/* ปุ่ม */
-button {
-  margin: 14px;
-  padding: 12px 0;
+/* ปุ่มตะกร้า */
+.cart-btn {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 40px;
+  height: 40px;
   border: none;
-  border-radius: 12px;
+  border-radius: 50%;
   background: #ff6a00;
   color: white;
-  font-size: 16px; /* 🔥 ใหญ่ขึ้น */
-  font-weight: bold;
+  font-size: 18px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   transition: 0.2s;
 }
 
-button:active {
-  transform: scale(0.96);
+.cart-btn:active {
+  transform: scale(0.9);
   background: #e65c00;
 }
 </style>
@@ -127,7 +135,9 @@ async function loadProducts() {
           <h3>${item.name}</h3>
           <div class="price">${price} บาท</div>
         </div>
-        <button onclick="alert('เพิ่มแล้ว')">เพิ่ม</button>
+        <button class="cart-btn" onclick="alert('เพิ่มแล้ว')">
+          🛒
+        </button>
       `;
 
       container.appendChild(box);
