@@ -15,52 +15,68 @@ body {
 h2 {
   text-align: center;
   margin-bottom: 20px;
+  font-size: 22px;
 }
 
-/* 🔥 3 คอลัมน์ */
+/* 3 คอลัมน์ */
 #menu {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
 }
 
-/* 🔥 การ์ดแนวตั้ง */
+/* การ์ดสินค้า */
 .card {
   background: white;
-  border-radius: 16px;
-  padding: 14px 10px;
-  min-height: 140px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  text-align: center;
+  min-height: 170px;
   transition: 0.2s;
 }
 
 .card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+}
+
+/* แถบสีเขียวด้านบน */
+.card-top {
+  height: 8px;
+  background: linear-gradient(90deg, #2e7d32, #43a047);
+}
+
+/* เนื้อหา */
+.card-content {
+  padding: 12px;
+  text-align: center;
+  flex-grow: 1;
 }
 
 .card h3 {
-  font-size: 15px;
-  margin: 5px 0;
+  font-size: 17px;
+  margin: 8px 0;
+  font-weight: bold;
 }
 
 .price {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: bold;
   color: #ff6a00;
-  margin: 6px 0;
+  margin: 8px 0;
 }
 
+/* ปุ่ม */
 button {
-  padding: 8px 0;
+  margin: 10px;
+  padding: 10px 0;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #ff6a00;
   color: white;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: bold;
   cursor: pointer;
 }
@@ -99,8 +115,11 @@ async function loadProducts() {
       const price = Number(item.price || 0);
 
       box.innerHTML = `
-        <h3>${item.name}</h3>
-        <div class="price">${price} บาท</div>
+        <div class="card-top"></div>
+        <div class="card-content">
+          <h3>${item.name}</h3>
+          <div class="price">${price} บาท</div>
+        </div>
         <button onclick="alert('เพิ่มแล้ว')">เพิ่ม</button>
       `;
 
