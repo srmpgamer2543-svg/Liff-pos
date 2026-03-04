@@ -18,7 +18,9 @@ async function loadProducts() {
   container.innerHTML = "";
 
   data.items.forEach(item => {
-    const price = item.variants?.[0]?.price || 0;
+    const price = item.variants && item.variants.length > 0
+  ? item.variants[0].price / 100
+  : 0;
 
     const div = document.createElement("div");
     div.style.border = "1px solid orange";
