@@ -1,21 +1,24 @@
 <script>
 async function loadProducts() {
+  const container = document.getElementById("menu");
+  container.innerHTML = "กำลังโหลด...";
+
   try {
     const res = await fetch("/api/products");
     const data = await res.json();
 
-    const container = document.getElementById("menu");
     container.innerHTML = "";
+
+    if (!data.items || data.items.length === 0) {
+      container.innerHTML = "ไม่มีสินค้า";
+      return;
+    }
 
     data.items.forEach(item => {
       let price = 0;
 
       if (item.variants && item.variants.length > 0) {
-        if (item.variants[0].price) {
-          price = item.variants[0].price / 100;
-        }
-      } else if (item.price) {
-        price = item.price / 100;
+        price = item.variants[0].price / 100;
       }
 
       const div = document.createElement("div");
@@ -35,9 +38,9 @@ async function loadProducts() {
       container.appendChild(div);
     });
 
-  } catch (err) {
-    document.getElementById("menu").innerHTML = "โหลดสินค้าไม่สำเร็จ";
-    console.error(err);
+  } catch (error) {
+    container.innerHTML = "เกิดข้อผิดพลาดในการโหลดสินค้า";
+    console.error(error);
   }
 }
 
