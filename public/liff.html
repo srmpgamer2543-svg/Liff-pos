@@ -53,6 +53,7 @@ h2 {
   background: linear-gradient(90deg, #1b5e20, #43a047);
 }
 
+/* ปุ่มสินค้า */
 .cart-btn {
   position: absolute;
   top: 18px;
@@ -69,8 +70,14 @@ h2 {
   align-items: center;
   justify-content: center;
   box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+  transition: 0.15s;
 }
 
+.cart-btn:active {
+  transform: scale(0.85);
+}
+
+/* ราคา */
 .price {
   font-size: 34px;
   font-weight: bold;
@@ -85,22 +92,50 @@ h2 {
   margin-top: 8px;
 }
 
-/* ปุ่มเปิดตะกร้า */
+/* ปุ่มเปิดตะกร้าใหญ่ */
 .cart-open-btn {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 16px 22px;
-  font-size: 20px;
-  border: none;
-  border-radius: 40px;
+  bottom: 25px;
+  right: 25px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
   background: #ff6a00;
   color: white;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+  font-size: 48px;
+  border: none;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* modal ตะกร้า */
+/* badge */
+.cart-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: red;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: bold;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  animation: bounce 0.3s ease;
+}
+
+@keyframes bounce {
+  0% { transform: scale(0.5); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* modal */
 #cartModal {
   display: none;
   position: fixed;
@@ -109,10 +144,32 @@ h2 {
   right: 0;
   background: white;
   color: black;
-  padding: 25px;
-  max-height: 65%;
+  padding: 30px;
+  height: 80%;
   overflow-y: auto;
-  border-radius: 25px 25px 0 0;
+  border-radius: 30px 30px 0 0;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* check animation */
+.checkmark {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 28px;
+  color: #00c853;
+  animation: pop 0.6s ease forwards;
+}
+
+@keyframes pop {
+  0% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1); }
 }
 </style>
 </head>
@@ -122,7 +179,11 @@ h2 {
 <h2>เมนูสินค้า</h2>
 <div id="menu">กำลังโหลด...</div>
 
-<button class="cart-open-btn" onclick="toggleCart()">🛍 ตะกร้า</button>
+<button class="cart-open-btn" onclick="toggleCart()">
+  🛍
+  <div id="cartCount" class="cart-count">0</div>
+</button>
+
 <div id="cartModal"></div>
 
 <script>
@@ -138,13 +199,7 @@ async function loadProducts() {
 
     container.innerHTML = "";
 
-    if (!data || data.length === 0) {
-      container.innerHTML = "<span style='color:white;font-size:24px'>ไม่มีข้อมูลสินค้า</span>";
-      return;
-    }
-
     data.forEach(item => {
-
       const box = document.createElement("div");
       box.className = "card";
 
@@ -152,11 +207,11 @@ async function loadProducts() {
 
       box.innerHTML = `
         <button class="cart-btn"
-        onclick='addToCart(${JSON.stringify({
+        onclick="handleAdd(this, ${JSON.stringify({
           id: item.id,
           name: item.name,
           price: price
-        })})'>🛒</button>
+        })})">🛒</button>
 
         <div class="price">${price} บาท</div>
         <div class="name">${item.name}</div>
@@ -166,9 +221,19 @@ async function loadProducts() {
     });
 
   } catch (err) {
-    container.innerHTML = "<span style='color:white;font-size:24px'>โหลดสินค้าไม่สำเร็จ</span>";
-    console.error(err);
+    container.innerHTML = "โหลดสินค้าไม่สำเร็จ";
   }
+}
+
+function handleAdd(button, product) {
+  addToCart(product);
+
+  const check = document.createElement("div");
+  check.className = "checkmark";
+  check.innerHTML = "✓";
+  button.parentElement.appendChild(check);
+
+  setTimeout(() => check.remove(), 600);
 }
 
 function addToCart(product) {
@@ -180,7 +245,23 @@ function addToCart(product) {
     cart.push({ ...product, qty: 1 });
   }
 
+  updateCartCount();
   renderCart();
+}
+
+function updateCartCount() {
+  const badge = document.getElementById("cartCount");
+  const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+
+  if (totalQty > 0) {
+    badge.style.display = "flex";
+    badge.innerText = totalQty;
+    badge.style.animation = "none";
+    void badge.offsetWidth;
+    badge.style.animation = "bounce 0.3s ease";
+  } else {
+    badge.style.display = "none";
+  }
 }
 
 function toggleCart() {
@@ -198,13 +279,13 @@ function renderCart() {
   }
 
   let total = 0;
-  modal.innerHTML = "<h3>รายการสินค้า</h3>";
+  modal.innerHTML = "<h2>รายการสินค้า</h2>";
 
   cart.forEach(item => {
     total += item.price * item.qty;
 
     modal.innerHTML += `
-      <div style="display:flex;justify-content:space-between;margin:10px 0;font-size:18px;">
+      <div style="display:flex;justify-content:space-between;margin:12px 0;font-size:20px;">
         <span>${item.name} x${item.qty}</span>
         <span>${item.price * item.qty} บาท</span>
       </div>
@@ -213,10 +294,10 @@ function renderCart() {
 
   modal.innerHTML += `
     <hr>
-    <h3>รวมทั้งหมด: ${total} บาท</h3>
+    <h2>รวมทั้งหมด: ${total} บาท</h2>
     <button onclick="clearCart()"
-    style="padding:12px 20px;background:red;color:white;
-    border:none;border-radius:25px;font-size:18px;">
+    style="padding:14px 24px;background:red;color:white;
+    border:none;border-radius:30px;font-size:20px;">
     ล้างตะกร้า
     </button>
   `;
@@ -224,6 +305,7 @@ function renderCart() {
 
 function clearCart() {
   cart = [];
+  updateCartCount();
   renderCart();
 }
 
