@@ -7,7 +7,7 @@
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #f5f5f5;
+  background: #f2f2f2;
   margin: 0;
   padding: 15px;
 }
@@ -17,47 +17,50 @@ h2 {
   margin-bottom: 20px;
 }
 
-/* 🔥 ตารางสินค้า */
+/* 🔥 3 คอลัมน์ */
 #menu {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
 }
 
-/* การ์ดสินค้า */
+/* 🔥 การ์ดแนวตั้ง */
 .card {
   background: white;
-  border-radius: 12px;
-  padding: 12px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  border-radius: 16px;
+  padding: 14px 10px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
   text-align: center;
   transition: 0.2s;
 }
 
 .card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 .card h3 {
-  font-size: 14px;
-  margin: 0 0 6px;
+  font-size: 15px;
+  margin: 5px 0;
 }
 
 .price {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: bold;
   color: #ff6a00;
-  margin-bottom: 8px;
+  margin: 6px 0;
 }
 
 button {
-  width: 100%;
-  padding: 6px;
+  padding: 8px 0;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #ff6a00;
   color: white;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
   cursor: pointer;
 }
@@ -98,9 +101,7 @@ async function loadProducts() {
       box.innerHTML = `
         <h3>${item.name}</h3>
         <div class="price">${price} บาท</div>
-        <button onclick="alert('เพิ่มแล้ว')">
-          เพิ่ม
-        </button>
+        <button onclick="alert('เพิ่มแล้ว')">เพิ่ม</button>
       `;
 
       container.appendChild(box);
