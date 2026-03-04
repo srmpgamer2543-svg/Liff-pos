@@ -158,9 +158,11 @@ async function loadProducts() {
     box.className = "card";
     box.onclick = () => addToCart(item);
 
-    const image = item.image 
-      ? item.image 
-      : "https://via.placeholder.com/400x300?text=No+Image";
+    const imageUrl = item.image_url && item.image_url.trim() !== ""
+  ? item.image_url
+  : "https://via.placeholder.com/300x200?text=No+Image";
+
+const image = `<img src="${imageUrl}" />`;
 
     box.innerHTML = `
       <img src="${image}" />
