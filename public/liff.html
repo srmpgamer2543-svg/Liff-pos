@@ -33,57 +33,39 @@ h2 {
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+  position: relative;
+  min-height: 200px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* 🔥 ดันเนื้อหาลงล่าง */
-  min-height: 200px;
-  transition: 0.25s ease;
-  position: relative;
+  justify-content: flex-end;
+  transition: 0.25s;
 }
 
 .card:hover {
   transform: translateY(-6px);
 }
 
-/* แถบเขียวด้านบน */
-.card-top {
+/* แถบเขียว */
+.card::before {
+  content: "";
   position: absolute;
   top: 0;
+  left: 0;
   width: 100%;
   height: 10px;
   background: linear-gradient(90deg, #1b5e20, #43a047);
 }
 
-/* โซนล่าง */
-.card-content {
-  padding: 14px;
-  color: #222;
-}
-
-/* ชื่อสินค้า */
-.card h3 {
-  font-size: 18px;
-  margin: 6px 0;
-  font-weight: bold;
-}
-
-/* ราคา */
-.price {
-  font-size: 20px;
-  font-weight: bold;
-  color: #ff6a00;
-  margin-bottom: 8px;
-}
-
-/* ปุ่มตะกร้า */
+/* ปุ่มตะกร้ามุมขวาบน */
 .cart-btn {
   position: absolute;
-  right: 12px;
-  bottom: 12px;
-  width: 40px;
-  height: 40px;
-  border: none;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
+  border: none;
   background: #ff6a00;
   color: white;
   font-size: 18px;
@@ -98,6 +80,22 @@ h2 {
 .cart-btn:active {
   transform: scale(0.9);
   background: #e65c00;
+}
+
+/* ชื่อเมนู */
+.name {
+  font-size: 20px;
+  font-weight: bold;
+  color: #222;
+  margin-top: 6px;
+}
+
+/* ราคา */
+.price {
+  font-size: 26px;  /* ใหญ่กว่าชื่อ */
+  font-weight: bold;
+  color: #ff6a00;
+  align-self: flex-end; /* ชิดขวา */
 }
 </style>
 </head>
@@ -130,14 +128,9 @@ async function loadProducts() {
       const price = Number(item.price || 0);
 
       box.innerHTML = `
-        <div class="card-top"></div>
-        <div class="card-content">
-          <h3>${item.name}</h3>
-          <div class="price">${price} บาท</div>
-        </div>
-        <button class="cart-btn" onclick="alert('เพิ่มแล้ว')">
-          🛒
-        </button>
+        <button class="cart-btn" onclick="alert('เพิ่มแล้ว')">🛒</button>
+        <div class="price">${price} บาท</div>
+        <div class="name">${item.name}</div>
       `;
 
       container.appendChild(box);
