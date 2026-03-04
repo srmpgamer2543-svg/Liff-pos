@@ -7,81 +7,88 @@
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #f2f2f2;
+  background: #111; /* 🔥 พื้นหลังดำ */
   margin: 0;
-  padding: 15px;
+  padding: 20px;
+  color: white;
 }
 
+/* หัวข้อ */
 h2 {
   text-align: center;
-  margin-bottom: 20px;
-  font-size: 22px;
+  margin-bottom: 25px;
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
 
 /* 3 คอลัมน์ */
 #menu {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  gap: 16px;
 }
 
-/* การ์ดสินค้า */
+/* การ์ด */
 .card {
   background: white;
-  border-radius: 18px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 5px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.6); /* 🔥 ลอยบนพื้นดำ */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 170px;
-  transition: 0.2s;
+  min-height: 190px;
+  transition: 0.25s ease;
 }
 
 .card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
 }
 
-/* แถบสีเขียวด้านบน */
+/* แถบเขียว */
 .card-top {
-  height: 8px;
-  background: linear-gradient(90deg, #2e7d32, #43a047);
+  height: 10px;
+  background: linear-gradient(90deg, #1b5e20, #43a047);
 }
 
 /* เนื้อหา */
 .card-content {
-  padding: 12px;
+  padding: 16px;
   text-align: center;
   flex-grow: 1;
+  color: #222;
 }
 
 .card h3 {
-  font-size: 17px;
-  margin: 8px 0;
+  font-size: 20px; /* 🔥 ใหญ่ขึ้น */
+  margin: 10px 0;
   font-weight: bold;
 }
 
 .price {
-  font-size: 18px;
+  font-size: 22px; /* 🔥 ใหญ่ขึ้น */
   font-weight: bold;
   color: #ff6a00;
-  margin: 8px 0;
+  margin: 10px 0;
 }
 
 /* ปุ่ม */
 button {
-  margin: 10px;
-  padding: 10px 0;
+  margin: 14px;
+  padding: 12px 0;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #ff6a00;
   color: white;
-  font-size: 14px;
+  font-size: 16px; /* 🔥 ใหญ่ขึ้น */
   font-weight: bold;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 button:active {
+  transform: scale(0.96);
   background: #e65c00;
 }
 </style>
@@ -103,7 +110,7 @@ async function loadProducts() {
     container.innerHTML = "";
 
     if (!data || data.length === 0) {
-      container.innerHTML = "ไม่มีข้อมูลสินค้า";
+      container.innerHTML = "<span style='color:white'>ไม่มีข้อมูลสินค้า</span>";
       return;
     }
 
@@ -127,7 +134,7 @@ async function loadProducts() {
     });
 
   } catch (err) {
-    container.innerHTML = "โหลดสินค้าไม่สำเร็จ";
+    container.innerHTML = "<span style='color:white'>โหลดสินค้าไม่สำเร็จ</span>";
     console.error(err);
   }
 }
