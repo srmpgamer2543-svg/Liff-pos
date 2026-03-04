@@ -28,62 +28,45 @@ h2 {
 
 /* CARD */
 .card {
-  background: #1b1b1b;
+  position: relative;
   border-radius: 22px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   transition: 0.2s ease;
+  cursor: pointer;
 }
 
 .card:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
 .card img {
   width: 100%;
-  height: 180px;
+  height: 240px;
   object-fit: cover;
-  background: #222;
+  display: block;
 }
 
-/* CONTENT */
-.card-content {
-  padding: 16px;
-  text-align: center;
+/* BOTTOM OVERLAY */
+.card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 14px;
+  background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0));
 }
 
 .name {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
-  color: #fff;
-  margin-bottom: 8px;
 }
 
 .price {
-  font-size: 19px;
+  font-size: 18px;
   font-weight: bold;
   color: #ff7a00;
-  margin-bottom: 14px;
-}
-
-/* CART ICON BUTTON */
-.cart-btn {
-  width: 65px;
-  height: 65px;
-  border-radius: 50%;
-  border: none;
-  background: #ff7a00;
-  color: white;
-  font-size: 30px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.cart-btn:active {
-  transform: scale(0.85);
+  margin-top: 4px;
 }
 
 /* FLOAT CART BUTTON */
@@ -173,21 +156,17 @@ async function loadProducts() {
 
     const box = document.createElement("div");
     box.className = "card";
+    box.onclick = () => addToCart(item);
 
-    const imageUrl = item.image_url && item.image_url.trim() !== ""
-  ? item.image_url
-  : "https://via.placeholder.com/300x200?text=No+Image";
-
-const image = `<img src="${imageUrl}" />`;
+    const image = item.image 
+      ? item.image 
+      : "https://via.placeholder.com/400x300?text=No+Image";
 
     box.innerHTML = `
-      ${image}
-      <div class="card-content">
+      <img src="${image}" />
+      <div class="card-overlay">
         <div class="name">${item.name}</div>
         <div class="price">${item.price} บาท</div>
-        <button class="cart-btn" onclick='addToCart(${JSON.stringify(item)})'>
-          🛒
-        </button>
       </div>
     `;
 
