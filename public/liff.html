@@ -1,74 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>LIFF POS TEST</title>
+</head>
+<body>
+
+<h2>ทดสอบระบบ</h2>
+<div id="menu">เริ่มต้น...</div>
+
 <script>
-async function loadProducts() {
-  const container = document.getElementById("menu");
+document.getElementById("menu").innerHTML = "JS ทำงานแล้ว ✅";
 
-  if (!container) {
-    console.error("ไม่พบ div id=menu");
-    return;
-  }
-
-  container.innerHTML = "กำลังโหลดข้อมูล...";
-
-  try {
-    // ✅ ใช้ URL เต็ม ป้องกัน path เพี้ยนใน LIFF
-    const res = await fetch("https://liff-pos.vercel.app/api/products");
-
-    if (!res.ok) {
-      throw new Error("HTTP Status " + res.status);
-    }
-
-    const data = await res.json();
-    console.log("API DATA:", data);
-
-    container.innerHTML = "";
-
-    if (!data.items || data.items.length === 0) {
-      container.innerHTML = "ไม่มีข้อมูลสินค้า";
-      return;
-    }
-
-    data.items.forEach(item => {
-
-      const box = document.createElement("div");
-      box.style.border = "1px solid orange";
-      box.style.margin = "10px";
-      box.style.padding = "10px";
-      box.style.borderRadius = "8px";
-
-      let priceHTML = "";
-
-      // ✅ อ่านราคาทุก variant
-      if (item.variants && item.variants.length > 0) {
-
-        item.variants.forEach(variant => {
-          const price = Number(variant.price || 0) / 100;
-
-          priceHTML += `
-            <p>
-              ${variant.variant_name || "ราคา"} :
-              ${price.toFixed(2)} บาท
-            </p>
-          `;
-        });
-
-      } else {
-        priceHTML = "<p>ไม่มีราคา</p>";
-      }
-
-      box.innerHTML = `
-        <h3>${item.item_name || "ไม่มีชื่อสินค้า"}</h3>
-        ${priceHTML}
-        <button onclick="alert('เพิ่มแล้ว')">เพิ่มลงตะกร้า</button>
-      `;
-
-      container.appendChild(box);
-    });
-
-  } catch (err) {
-    console.error("ERROR:", err);
-    container.innerHTML = "โหลดสินค้าไม่สำเร็จ (" + err.message + ")";
-  }
-}
-
-document.addEventListener("DOMContentLoaded", loadProducts);
+fetch("https://liff-pos.vercel.app/api/products")
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("menu").innerHTML =
+      "โหลดสำเร็จ ✅ จำนวนสินค้า: " + data.items.length;
+  })
+  .catch(err => {
+    document.getElementById("menu").innerHTML =
+      "เกิด error ❌ " + err;
+  });
 </script>
+
+</body>
+</html>
