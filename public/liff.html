@@ -151,6 +151,7 @@ async function loadProducts() {
     container.innerHTML = "";
 
     data.forEach(item => {
+
       const box = document.createElement("div");
       box.className = "card";
 
@@ -158,7 +159,7 @@ async function loadProducts() {
 
       const btn = document.createElement("button");
       btn.className = "cart-btn";
-      btn.innerText = "🛒";
+      btn.textContent = "🛒";
 
       btn.addEventListener("click", () => {
         addToCart({
@@ -168,12 +169,17 @@ async function loadProducts() {
         });
       });
 
-      box.appendChild(btn);
+      const priceDiv = document.createElement("div");
+      priceDiv.className = "price";
+      priceDiv.textContent = price + " บาท";
 
-      box.innerHTML += `
-        <div class="price">${price} บาท</div>
-        <div class="name">${item.name}</div>
-      `;
+      const nameDiv = document.createElement("div");
+      nameDiv.className = "name";
+      nameDiv.textContent = item.name;
+
+      box.appendChild(btn);
+      box.appendChild(priceDiv);
+      box.appendChild(nameDiv);
 
       container.appendChild(box);
     });
@@ -202,7 +208,7 @@ function updateCartCount() {
 
   if (totalQty > 0) {
     badge.style.display = "flex";
-    badge.innerText = totalQty;
+    badge.textContent = totalQty;
   } else {
     badge.style.display = "none";
   }
@@ -210,7 +216,13 @@ function updateCartCount() {
 
 function toggleCart() {
   const modal = document.getElementById("cartModal");
-  modal.style.display = modal.style.display === "none" ? "block" : "none";
+
+  if (modal.style.display === "block") {
+    modal.style.display = "none";
+  } else {
+    modal.style.display = "block";
+  }
+
   renderCart();
 }
 
@@ -228,12 +240,16 @@ function renderCart() {
   cart.forEach(item => {
     total += item.price * item.qty;
 
-    modal.innerHTML += `
-      <div style="display:flex;justify-content:space-between;margin:12px 0;font-size:20px;">
-        <span>${item.name} x${item.qty}</span>
-        <span>${item.price * item.qty} บาท</span>
-      </div>
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.justifyContent = "space-between";
+    row.style.margin = "12px 0";
+    row.style.fontSize = "20px";
+    row.innerHTML = `
+      <span>${item.name} x${item.qty}</span>
+      <span>${item.price * item.qty} บาท</span>
     `;
+    modal.appendChild(row);
   });
 
   modal.innerHTML += `
