@@ -1,38 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>Menu</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<meta charset="utf-8" />
+<title>Menu</title>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
 </head>
+
 <body style="font-family:sans-serif;text-align:center;padding:20px;">
-  <h2 style="color:#ff6f00;">กำลังโหลดเมนู...</h2>
 
-  <script>
-    async function main() {
-      await liff.init({ liffId: "2009308319-2r1OXrGI" });
+<h2 style="color:#ff6f00;">กำลังโหลดเมนู...</h2>
 
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
+<script>
 
-      const profile = await liff.getProfile();
+async function main(){
 
-      await fetch("/api/menu", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          userId: profile.userId
-        })
-      });
+  await liff.init({
+    liffId:"2009308319-2r10XrGI"
+  });
 
-      document.body.innerHTML = "<h2 style='color:#ff6f00;'>เปิดเมนูในแชท LINE ได้เลย</h2>";
-    }
+  if(!liff.isLoggedIn()){
+    liff.login();
+    return;
+  }
 
-    main();
-  </script>
+  const profile = await liff.getProfile();
+
+  await fetch("/api/menu",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      userId:profile.userId
+    })
+  });
+
+  document.body.innerHTML =
+  "<h2 style='color:#ff6f00;'>เปิดเมนูในแชท LINE ได้เลย</h2>";
+
+}
+
+main();
+
+</script>
+
 </body>
 </html>
