@@ -15,8 +15,8 @@ body {
 
 h2 {
   text-align: center;
-  margin-bottom: 25px;
-  font-size: 26px;
+  margin-bottom: 30px;
+  font-size: 34px; /* ใหญ่ขึ้น */
   font-weight: bold;
 }
 
@@ -24,26 +24,25 @@ h2 {
 #menu {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 20px;
 }
 
 /* การ์ด */
 .card {
   background: white;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+  border-radius: 22px;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.7);
   position: relative;
-  min-height: 200px;
-  padding: 16px;
+  min-height: 240px; /* สูงขึ้น */
+  padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  transition: 0.25s;
+  transition: 0.3s;
 }
 
 .card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-8px);
 }
 
 /* แถบเขียว */
@@ -53,49 +52,49 @@ h2 {
   top: 0;
   left: 0;
   width: 100%;
-  height: 10px;
+  height: 12px;
   background: linear-gradient(90deg, #1b5e20, #43a047);
 }
 
-/* ปุ่มตะกร้ามุมขวาบน */
+/* ปุ่มตะกร้าใหญ่ 3 เท่า */
 .cart-btn {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 38px;
-  height: 38px;
+  top: 18px;
+  right: 18px;
+  width: 90px;   /* ใหญ่ขึ้น */
+  height: 90px;  /* ใหญ่ขึ้น */
   border-radius: 50%;
   border: none;
   background: #ff6a00;
   color: white;
-  font-size: 18px;
+  font-size: 42px; /* ไอคอนใหญ่ */
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
   transition: 0.2s;
 }
 
 .cart-btn:active {
-  transform: scale(0.9);
+  transform: scale(0.92);
   background: #e65c00;
-}
-
-/* ชื่อเมนู */
-.name {
-  font-size: 20px;
-  font-weight: bold;
-  color: #222;
-  margin-top: 6px;
 }
 
 /* ราคา */
 .price {
-  font-size: 26px;  /* ใหญ่กว่าชื่อ */
+  font-size: 34px; /* ใหญ่สุด */
   font-weight: bold;
   color: #ff6a00;
-  align-self: flex-end; /* ชิดขวา */
+  align-self: flex-end;
+}
+
+/* ชื่อเมนู */
+.name {
+  font-size: 26px; /* ใหญ่ขึ้น */
+  font-weight: bold;
+  color: #222;
+  margin-top: 8px;
 }
 </style>
 </head>
@@ -116,7 +115,7 @@ async function loadProducts() {
     container.innerHTML = "";
 
     if (!data || data.length === 0) {
-      container.innerHTML = "<span style='color:white'>ไม่มีข้อมูลสินค้า</span>";
+      container.innerHTML = "<span style='color:white;font-size:24px'>ไม่มีข้อมูลสินค้า</span>";
       return;
     }
 
@@ -137,7 +136,7 @@ async function loadProducts() {
     });
 
   } catch (err) {
-    container.innerHTML = "<span style='color:white'>โหลดสินค้าไม่สำเร็จ</span>";
+    container.innerHTML = "<span style='color:white;font-size:24px'>โหลดสินค้าไม่สำเร็จ</span>";
     console.error(err);
   }
 }
