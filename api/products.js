@@ -34,8 +34,14 @@ export default async function handler(req, res) {
       else if (item.images?.length) imageUrl = item.images[0].url;
 
 
-      // 🔥 เชื่อม modifier ตาม Loyverse
-      const itemModifiers = (item.modifier_list_ids || [])
+      // 🔥 หา modifier ของสินค้า
+      const modifierIds =
+        item.modifier_list_ids ||
+        item.modifier_lists ||
+        [];
+
+
+      const itemModifiers = modifierIds
         .map(id => modifierLists.find(m => m.id === id))
         .filter(Boolean);
 
@@ -46,9 +52,7 @@ export default async function handler(req, res) {
         name: item.item_name,
         price: variant?.default_price || variant?.price || 0,
         image_url: imageUrl,
-
         modifiers: itemModifiers
-
       };
 
     });
