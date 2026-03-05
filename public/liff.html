@@ -177,7 +177,13 @@ if(!m.options || m.options.length===0) return
 
 html+=`<h4>${m.name}</h4>`
 
-const inputType = m.type === "multi" ? "checkbox" : "radio"
+/* 🔥 SECTION ใหม่ */
+let inputType="radio"
+
+if(m.name && m.name.includes("ท้อปปิ้ง")){
+inputType="checkbox"
+}
+/* 🔥 END SECTION */
 
 m.options.forEach(o=>{
 
@@ -264,9 +270,7 @@ document.getElementById("cartModal").classList.add("active")
 }
 
 function closeCart(){
-
 document.getElementById("cartModal").classList.remove("active")
-
 }
 
 function changeQty(id,delta){
