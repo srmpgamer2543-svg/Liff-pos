@@ -3,17 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <title>Menu</title>
-
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
 </head>
 
 <body style="font-family:sans-serif;text-align:center;padding:20px;">
-
 <h2 style="color:#ff6f00;">กำลังโหลดเมนู...</h2>
 
 <script>
-
 async function main(){
 
   await liff.init({
@@ -25,13 +21,12 @@ async function main(){
     return;
   }
 
-  // โหลดหน้าเมนูจริง
+  // ไปหน้าเมนู
   window.location.href = "/liff.html";
 
 }
 
 main();
-
 </script>
 
 </body>
