@@ -127,7 +127,6 @@ let currentProduct=null
 async function init(){
 
 await liff.init({liffId:"2009308319-2r1OXrGI"})
-
 loadProducts()
 
 }
@@ -163,7 +162,7 @@ menu.appendChild(div)
 
 function openModifier(product){
 
-if(!product.modifiers || product.modifiers.length==0){
+if(!product.modifiers || product.modifiers.length===0){
 addToCart(product,[],0,[])
 return
 }
@@ -174,11 +173,15 @@ let html=`<h3>${product.name}</h3>`
 
 product.modifiers.forEach(m=>{
 
+if(!m.options || m.options.length===0) return
+
 html+=`<h4>${m.name}</h4>`
 
 const inputType = m.type === "multi" ? "checkbox" : "radio"
 
 m.options.forEach(o=>{
+
+const price = Number(o.price) || 0
 
 html+=`
 <label style="display:block;margin-bottom:6px">
@@ -187,8 +190,8 @@ type="${inputType}"
 name="mod_${m.id}"
 value="${o.id}"
 data-name="${o.name}"
-data-price="${o.price}">
-${o.name} (+${o.price})
+data-price="${price}">
+${o.name} ${price>0?`(+${price})`:""}
 </label>
 `
 
@@ -213,8 +216,10 @@ let modifiers=[]
 
 checked.forEach(c=>{
 
+const price = Number(c.dataset.price) || 0
+
 names.push(c.dataset.name)
-extra+=Number(c.dataset.price)
+extra+=price
 
 modifiers.push({
 option_id:c.value
@@ -242,7 +247,7 @@ cart.push({
 id:Date.now(),
 product_id:product.id,
 name:name,
-price:product.price+extra,
+price:Number(product.price)+extra,
 qty:1,
 modifiers:modifier_ids
 })
@@ -254,7 +259,6 @@ renderCart()
 function openCart(){
 
 renderCart()
-
 document.getElementById("cartModal").classList.add("active")
 
 }
@@ -272,9 +276,7 @@ const item=cart.find(i=>i.id==id)
 item.qty+=delta
 
 if(item.qty<=0){
-
 cart=cart.filter(i=>i.id!=id)
-
 }
 
 renderCart()
@@ -285,7 +287,7 @@ function renderCart(){
 
 const c=document.getElementById("cartContent")
 
-if(cart.length==0){
+if(cart.length===0){
 
 c.innerHTML="<h3>ตะกร้าว่าง</h3>"
 return
@@ -317,7 +319,6 @@ ${i.qty}
 })
 
 html+=`<hr><h3>รวม ${total} บาท</h3>`
-
 html+=`<button class="addbtn" onclick="submitOrder()">สั่งซื้อ</button>`
 
 c.innerHTML=html
@@ -326,7 +327,7 @@ c.innerHTML=html
 
 async function submitOrder(){
 
-if(cart.length==0){
+if(cart.length===0){
 alert("ไม่มีสินค้า")
 return
 }
