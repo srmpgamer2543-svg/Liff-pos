@@ -1,59 +1,51 @@
-export default async function handler(req, res) {
+import axios from "axios"
 
-  const headers = {
-    Authorization: `Bearer ${process.env.LOYVERSE_TOKEN}`,
-    "Content-Type": "application/json",
-  };
+export default async function handler(req, res) {
 
   try {
 
-    // ดึงสินค้า
-    const itemsRes = await fetch(
+    const token = process.env.LOYVERSE_TOKEN
+
+    const itemRes = await axios.get(
       "https://api.loyverse.com/v1.0/items",
-      { headers }
-    );
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
 
-    const itemsData = await itemsRes.json();
-
-
-    // ดึง modifier
-    const modifierRes = await fetch(
+    const modifierRes = await axios.get(
       "https://liff-pos.vercel.app/api/modifiers"
-    );
+    )
 
-    const modifierLists = await modifierRes.json();
+    const modifiers = modifierRes.data
 
+    const items = itemRes.data.items
 
-    const products = itemsData.items.map(item => {
-
-      const variant = item.variants?.[0];
-
-      let imageUrl = "";
-
-      if (item.image_url) imageUrl = item.image_url;
-      else if (item.images?.length) imageUrl = item.images[0].url;
+    const products = items.map(item => {
 
       return {
-        id: item.id,
-        variant_id: variant?.variant_id,
+        id: item.item_id,
+        variant_id: item.variants?.[0]?.variant_id,
         name: item.item_name,
-        price: variant?.default_price || variant?.price || 0,
-        image_url: imageUrl,
+        price: item.variants?.[0]?.price,
+        image_url: item.image_url || "",
+        category: item.category_name || "อื่นๆ",
+        modifiers: modifiers
+      }
 
-        // ใส่ modifier ให้สินค้า
-        modifiers: modifierLists
+    })
 
-      };
+    res.status(200).json(products)
 
-    });
+  } catch (err) {
 
-    res.status(200).json(products);
-
-  } catch (error) {
+    console.error(err)
 
     res.status(500).json({
-      error: error.message
-    });
+      error: "Failed to load products"
+    })
 
   }
 
