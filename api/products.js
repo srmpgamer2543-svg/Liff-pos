@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     });
 
     // -----------------------------
-    // modifiers
+    // ดึง modifiers ทั้งหมด
     // -----------------------------
     let modifiers = [];
 
@@ -58,6 +58,11 @@ export default async function handler(req, res) {
         Number(item.price) ||
         0;
 
+      // modifier ของเมนูนี้เท่านั้น
+      const itemModifiers = modifiers.filter(m =>
+        item.modifier_ids?.includes(m.id)
+      );
+
       return {
         id: item.id,
         variant_id: variant.id || "",
@@ -65,7 +70,7 @@ export default async function handler(req, res) {
         price: price,
         image_url: item.image_url || "",
         category: categoryMap[item.category_id] || "อื่นๆ",
-        modifiers: modifiers
+        modifiers: itemModifiers
       };
 
     });
