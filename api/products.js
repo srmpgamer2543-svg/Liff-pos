@@ -27,7 +27,6 @@ export default async function handler(req, res) {
 
     const categories = catRes.data.categories || [];
 
-    // สร้าง map category
     const categoryMap = {};
     categories.forEach(c => {
       categoryMap[c.id] = c.name;
@@ -54,9 +53,9 @@ export default async function handler(req, res) {
 
       return {
         id: item.id,
-        variant_id: variant.variant_id || "",
+        variant_id: variant.id || "",   // แก้จาก variant_id → id
         name: item.item_name || "",
-        price: variant.price || 0,
+        price: Number(variant.price || 0), // แปลงเป็น number
         image_url: item.image_url || "",
         category: categoryMap[item.category_id] || "อื่นๆ",
         modifiers: modifiers
@@ -64,8 +63,6 @@ export default async function handler(req, res) {
 
     });
 
-    // -----------------------------
-    // response
     // -----------------------------
     res.status(200).json(products);
 
