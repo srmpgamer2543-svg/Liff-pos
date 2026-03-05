@@ -5,16 +5,27 @@ export default async function handler(req, res) {
 
     const token = process.env.LOYVERSE_TOKEN;
 
-    // ดึง items
+    // ดึงสินค้า
     const itemRes = await axios.get("https://api.loyverse.com/v1.0/items", {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     const items = itemRes.data.items;
 
-    // ดึง modifier groups จาก API เรา
+    // ดึงหมวดหมู่
+    const catRes = await axios.get("https://api.loyverse.com/v1.0/categories", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const categories = catRes.data.categories;
+
+    // ทำ map category
+    const categoryMap = {};
+    categories.forEach(c => {
+      categoryMap[c.id] = c.name;
+    });
+
+    // modifiers
     const modRes = await axios.get("https://liff-pos.vercel.app/api/modifiers");
     const modifiers = modRes.data;
 
@@ -28,7 +39,7 @@ export default async function handler(req, res) {
         name: item.item_name,
         price: variant?.price,
         image_url: item.image_url || "",
-        category: item.category_id || "อื่นๆ",
+        category: categoryMap[item.category_id] || "อื่นๆ",
         modifiers: modifiers
       };
 
