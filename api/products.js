@@ -1,36 +1,31 @@
 export default async function handler(req, res) {
   try {
 
+    const headers = {
+      Authorization: `Bearer ${process.env.LOYVERSE_TOKEN}`,
+      "Content-Type": "application/json",
+    };
+
     // ดึงสินค้า
     const itemsResponse = await fetch(
       "https://api.loyverse.com/v1.0/items",
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.LOYVERSE_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      }
+      { headers }
     );
 
     const itemsData = await itemsResponse.json();
 
-    // ดึง modifier list ทั้งหมด
+    // ดึง modifier lists
     const modifierResponse = await fetch(
       "https://api.loyverse.com/v1.0/modifier_lists",
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.LOYVERSE_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      }
+      { headers }
     );
 
     const modifierData = await modifierResponse.json();
-
     const modifierLists = modifierData.modifier_lists || [];
 
-    const products = itemsData.items.map(item => {
+    const products = (itemsData.items || []).map(item => {
 
+      // รูปสินค้า
       let imageUrl = "";
 
       if (item.image_url) {
@@ -39,24 +34,31 @@ export default async function handler(req, res) {
         imageUrl = item.images[0].url;
       }
 
-      // หา modifier ของสินค้านี้
-      const itemModifiers = (item.modifier_list_ids || []).map(modId => {
+      // หา modifier ของสินค้า
+      const itemModifiers = (item.modifier_list_ids || [])
+        .map(modId => {
 
-        const modifierList = modifierLists.find(m => m.id === modId);
+          const modifierList = modifierLists.find(m => m.id === modId);
+          if (!modifierList) return null;
 
-        if (!modifierList) return null;
+          // รองรับทั้ง modifiers และ modifier_ids
+          const options =
+            modifierList.modifiers ||
+            modifierList.modifier_ids ||
+            [];
 
-        return {
-          id: modifierList.id,
-          name: modifierList.name,
-          options: modifierList.modifiers.map(opt => ({
-            id: opt.id,
-            name: opt.name,
-            price: opt.price || 0
-          }))
-        };
+          return {
+            id: modifierList.id,
+            name: modifierList.name,
+            options: options.map(opt => ({
+              id: opt.id,
+              name: opt.name,
+              price: opt.price || 0
+            }))
+          };
 
-      }).filter(Boolean);
+        })
+        .filter(Boolean);
 
       return {
         id: item.id,
