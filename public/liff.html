@@ -100,7 +100,7 @@ justify-content:space-between;
 }
 
 .name{
-font-size:24px;
+font-size:240px;
 font-weight:800;
 line-height:1.2;
 }
@@ -108,7 +108,7 @@ line-height:1.2;
 .price{
 color:#06c755;
 font-weight:bold;
-font-size:22px;
+font-size:220px;
 margin-top:8px;
 }
 
@@ -158,8 +158,6 @@ font-size:22px;
 margin-top:20px;
 margin-bottom:12px;
 }
-
-/* modifier grid 2 column */
 
 .modifier-grid{
 display:grid;
@@ -248,6 +246,24 @@ return a.name.localeCompare(b.name)
 
 }
 
+function sortModifiers(mods){
+
+return mods.sort((a,b)=>{
+
+let order = ["เย็น","ปั่น","หวาน","ท้อปปิ้ง"]
+
+let ai = order.findIndex(o=>a.name.includes(o))
+let bi = order.findIndex(o=>b.name.includes(o))
+
+if(ai==-1) ai=99
+if(bi==-1) bi=99
+
+return ai-bi
+
+})
+
+}
+
 async function init(){
 
 await liff.init({liffId:"2009308319-2r1OXrGI"})
@@ -317,11 +333,13 @@ function openProduct(id){
 let p=products.find(x=>x.id==id)
 currentProduct=p
 
+let mods=sortModifiers([...p.modifiers])
+
 let html=`<div class="modal-content" onclick="event.stopPropagation()">`
 
 html+=`<h3>${p.name}</h3>`
 
-p.modifiers.forEach(m=>{
+mods.forEach(m=>{
 
 html+=`<h4>${m.name}</h4>`
 html+=`<div class="modifier-grid">`
@@ -367,15 +385,17 @@ modal.classList.remove('show')
 
 function validateRequired(){
 
+let iceGroup=document.querySelector("input[name][value]")
+
 let groups=document.querySelectorAll("h4")
 
 for(let g of groups){
 
 let name=g.innerText
 
-if(name.includes("หวาน") || name.includes("เย็น") || name.includes("ปั่น")){
+if(name.includes("เย็น") || name.includes("ปั่น")){
 
-let inputs=g.parentElement.querySelectorAll(`input[name]`)
+let inputs=g.parentElement.querySelectorAll("input[type=radio]")
 
 let checked=false
 
@@ -384,7 +404,7 @@ if(i.checked) checked=true
 })
 
 if(!checked){
-alert("กรุณาเลือก "+name)
+alert("กรุณาเลือก เย็น หรือ ปั่น")
 return false
 }
 
