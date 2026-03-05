@@ -36,10 +36,12 @@ border-bottom:1px solid #eee;
 .category button{
 border:none;
 background:#eee;
-padding:10px 18px;
+padding:12px 20px;
 border-radius:20px;
 white-space:nowrap;
 font-size:18px;
+color:black;
+font-weight:600;
 }
 
 .menu{
@@ -79,18 +81,18 @@ bottom:10px;
 right:10px;
 background:#06c755;
 color:white;
-width:44px;
-height:44px;
+width:48px;
+height:48px;
 border-radius:50%;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:28px;
+font-size:30px;
 font-weight:bold;
 }
 
 .card-body{
-padding:14px;
+padding:16px;
 flex-grow:1;
 display:flex;
 flex-direction:column;
@@ -98,15 +100,15 @@ justify-content:space-between;
 }
 
 .name{
-font-size:20px;
-font-weight:700;
+font-size:24px;
+font-weight:800;
 line-height:1.2;
 }
 
 .price{
 color:#06c755;
 font-weight:bold;
-font-size:20px;
+font-size:22px;
 margin-top:8px;
 }
 
@@ -116,10 +118,10 @@ bottom:20px;
 right:20px;
 background:#06c755;
 color:white;
-padding:16px 22px;
+padding:18px 26px;
 border-radius:30px;
 box-shadow:0 3px 10px rgba(0,0,0,0.2);
-font-size:18px;
+font-size:20px;
 }
 
 .modal{
@@ -147,40 +149,47 @@ overflow:auto;
 }
 
 .modal-content h3{
-font-size:24px;
+font-size:26px;
 margin-bottom:16px;
 }
 
 .modal-content h4{
-font-size:20px;
-margin-top:18px;
-margin-bottom:10px;
+font-size:22px;
+margin-top:20px;
+margin-bottom:12px;
+}
+
+/* modifier grid 2 column */
+
+.modifier-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
 }
 
 .option{
 display:flex;
 align-items:center;
 gap:12px;
-padding:14px;
-margin-bottom:8px;
-border-radius:12px;
+padding:16px;
+border-radius:14px;
 background:#f5f5f5;
-font-size:18px;
+font-size:20px;
 }
 
 .option input{
-transform:scale(1.6);
+transform:scale(1.8);
 }
 
 button{
-font-size:20px;
-padding:14px;
+font-size:22px;
+padding:16px;
 border:none;
 background:#06c755;
 color:white;
-border-radius:12px;
+border-radius:14px;
 width:100%;
-margin-top:16px;
+margin-top:20px;
 }
 
 </style>
@@ -315,6 +324,7 @@ html+=`<h3>${p.name}</h3>`
 p.modifiers.forEach(m=>{
 
 html+=`<h4>${m.name}</h4>`
+html+=`<div class="modifier-grid">`
 
 if(m.name.includes('ท้อปปิ้ง')){
 
@@ -337,6 +347,8 @@ ${o.name}
 })
 
 }
+
+html+=`</div>`
 
 })
 
