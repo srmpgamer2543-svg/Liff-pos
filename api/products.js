@@ -14,37 +14,42 @@ export default async function handler(req, res) {
 
     const itemsData = await itemsResponse.json();
 
-    // ดึง modifier list
+    // ดึง modifier ทั้งหมด
     const modifierResponse = await fetch(
       "https://api.loyverse.com/v1.0/modifier_lists",
       { headers }
     );
 
     const modifierData = await modifierResponse.json();
-
     const modifierLists = modifierData.modifier_lists || [];
 
-    const products = (itemsData.items || []).map(item => {
+    const products = itemsData.items.map(item => {
+
+      const variant = item.variants?.[0];
 
       let imageUrl = "";
-
       if (item.image_url) {
         imageUrl = item.image_url;
-      } else if (item.images && item.images.length > 0) {
+      } else if (item.images?.length) {
         imageUrl = item.images[0].url;
       }
 
-      // หา modifier ของสินค้า
-      const itemModifiers = (item.modifier_list_ids || []).map(id => {
+      // 🔥 ดึง modifier จาก item + variant
+      const modifierIds = [
+        ...(item.modifier_list_ids || []),
+        ...(variant?.modifier_list_ids || [])
+      ];
 
-        const list = modifierLists.find(m => m.id === id);
+      const itemModifiers = modifierIds.map(modId => {
 
-        if (!list) return null;
+        const modifierList = modifierLists.find(m => m.id === modId);
+
+        if (!modifierList) return null;
 
         return {
-          id: list.id,
-          name: list.name,
-          options: (list.modifiers || []).map(opt => ({
+          id: modifierList.id,
+          name: modifierList.name,
+          options: modifierList.modifiers.map(opt => ({
             id: opt.id,
             name: opt.name,
             price: opt.price || 0
@@ -55,9 +60,9 @@ export default async function handler(req, res) {
 
       return {
         id: item.id,
+        variant_id: variant?.variant_id,
         name: item.item_name,
-        price: item.variants?.[0]?.default_price || 0,
-        variant_id: item.variants?.[0]?.variant_id,
+        price: variant?.default_price || variant?.price || 0,
         image_url: imageUrl,
         modifiers: itemModifiers
       };
