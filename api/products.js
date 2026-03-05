@@ -1,17 +1,28 @@
 export default async function handler(req, res) {
   try {
 
+    const headers = {
+      Authorization: `Bearer ${process.env.LOYVERSE_TOKEN}`,
+      "Content-Type": "application/json",
+    };
+
+    // ดึงสินค้า
     const itemsResponse = await fetch(
       "https://api.loyverse.com/v1.0/items",
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.LOYVERSE_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      }
+      { headers }
     );
 
     const itemsData = await itemsResponse.json();
+
+    // ดึง modifier list
+    const modifierResponse = await fetch(
+      "https://api.loyverse.com/v1.0/modifier_lists",
+      { headers }
+    );
+
+    const modifierData = await modifierResponse.json();
+
+    const modifierLists = modifierData.modifier_lists || [];
 
     const products = (itemsData.items || []).map(item => {
 
@@ -23,24 +34,30 @@ export default async function handler(req, res) {
         imageUrl = item.images[0].url;
       }
 
-      // ดึง modifier จาก item.modifier_lists
-      const itemModifiers = (item.modifier_lists || []).map(list => ({
-        id: list.id,
-        name: list.name,
-        options: (list.modifiers || []).map(opt => ({
-          id: opt.id,
-          name: opt.name,
-          price: opt.price || 0
-        }))
-      }));
+      // หา modifier ของสินค้า
+      const itemModifiers = (item.modifier_list_ids || []).map(id => {
+
+        const list = modifierLists.find(m => m.id === id);
+
+        if (!list) return null;
+
+        return {
+          id: list.id,
+          name: list.name,
+          options: (list.modifiers || []).map(opt => ({
+            id: opt.id,
+            name: opt.name,
+            price: opt.price || 0
+          }))
+        };
+
+      }).filter(Boolean);
 
       return {
         id: item.id,
         name: item.item_name,
-        price:
-          item.variants?.[0]?.default_price ||
-          item.variants?.[0]?.price ||
-          0,
+        price: item.variants?.[0]?.default_price || 0,
+        variant_id: item.variants?.[0]?.variant_id,
         image_url: imageUrl,
         modifiers: itemModifiers
       };
