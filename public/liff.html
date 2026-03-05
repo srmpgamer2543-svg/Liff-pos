@@ -176,16 +176,20 @@ product.modifiers.forEach(m=>{
 
 html+=`<h4>${m.name}</h4>`
 
+const inputType = m.type === "multi" ? "checkbox" : "radio"
+
 m.options.forEach(o=>{
 
 html+=`
-<label>
-<input type="radio" name="mod_${m.id}"
+<label style="display:block;margin-bottom:6px">
+<input 
+type="${inputType}"
+name="mod_${m.id}"
 value="${o.id}"
 data-name="${o.name}"
 data-price="${o.price}">
 ${o.name} (+${o.price})
-</label><br>
+</label>
 `
 
 })
