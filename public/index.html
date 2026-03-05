@@ -17,7 +17,7 @@
 async function main(){
 
   await liff.init({
-    liffId:"2009308319-2r10XrGI"
+    liffId:"2009308319-2r1OXrGI"
   });
 
   if(!liff.isLoggedIn()){
@@ -27,7 +27,7 @@ async function main(){
 
   const profile = await liff.getProfile();
 
-  await fetch("/api/menu",{
+  await fetch("/api/products",{
     method:"POST",
     headers:{
       "Content-Type":"application/json"
