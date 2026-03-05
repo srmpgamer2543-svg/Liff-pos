@@ -25,20 +25,8 @@ async function main(){
     return;
   }
 
-  const profile = await liff.getProfile();
-
-  await fetch("/api/products",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      userId:profile.userId
-    })
-  });
-
-  document.body.innerHTML =
-  "<h2 style='color:#ff6f00;'>เปิดเมนูในแชท LINE ได้เลย</h2>";
+  // โหลดหน้าเมนูจริง
+  window.location.href = "/liff.html";
 
 }
 
