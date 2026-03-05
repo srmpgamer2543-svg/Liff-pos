@@ -5,39 +5,58 @@ export default async function handler(req, res) {
 
     const token = process.env.LOYVERSE_TOKEN;
 
+    // -----------------------------
     // ดึงสินค้า
+    // -----------------------------
     const itemRes = await axios.get("https://api.loyverse.com/v1.0/items", {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     });
 
-    const items = itemRes.data.items;
+    const items = itemRes.data.items || [];
 
+    // -----------------------------
     // ดึงหมวดหมู่
+    // -----------------------------
     const catRes = await axios.get("https://api.loyverse.com/v1.0/categories", {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     });
 
-    const categories = catRes.data.categories;
+    const categories = catRes.data.categories || [];
 
-    // ทำ map category
+    // สร้าง map category
     const categoryMap = {};
     categories.forEach(c => {
       categoryMap[c.id] = c.name;
     });
 
-    // modifiers
-    const modRes = await axios.get("https://liff-pos.vercel.app/api/modifiers");
-    const modifiers = modRes.data;
+    // -----------------------------
+    // ดึง modifiers
+    // -----------------------------
+    let modifiers = [];
 
+    try {
+      const modRes = await axios.get("https://liff-pos.vercel.app/api/modifiers");
+      modifiers = modRes.data || [];
+    } catch (e) {
+      console.log("โหลด modifiers ไม่สำเร็จ ใช้ค่าว่างแทน");
+    }
+
+    // -----------------------------
+    // map products
+    // -----------------------------
     const products = items.map(item => {
 
-      const variant = item.variants?.[0];
+      const variant = item.variants?.[0] || {};
 
       return {
         id: item.id,
-        variant_id: variant?.variant_id,
-        name: item.item_name,
-        price: variant?.price,
+        variant_id: variant.variant_id || "",
+        name: item.item_name || "",
+        price: variant.price || 0,
         image_url: item.image_url || "",
         category: categoryMap[item.category_id] || "อื่นๆ",
         modifiers: modifiers
@@ -45,11 +64,14 @@ export default async function handler(req, res) {
 
     });
 
+    // -----------------------------
+    // response
+    // -----------------------------
     res.status(200).json(products);
 
   } catch (err) {
 
-    console.error(err);
+    console.error("PRODUCT API ERROR:", err);
 
     res.status(500).json({
       error: "โหลดสินค้าไม่สำเร็จ"
