@@ -3,110 +3,87 @@
 <head>
 <meta charset="utf-8">
 <title>Menu</title>
-
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
 
 body{
-  margin:0;
-  font-family:sans-serif;
-  background:#f5f5f5;
+font-family:sans-serif;
+margin:0;
+background:#f5f5f5;
 }
 
 .header{
-  background:white;
-  padding:14px;
-  font-size:20px;
-  font-weight:bold;
-  border-bottom:1px solid #eee;
+background:#06c755;
+color:white;
+padding:14px;
+font-size:18px;
+display:flex;
+justify-content:space-between;
 }
 
-.menu-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-  padding:14px;
+.category{
+display:flex;
+overflow:auto;
+background:white;
+padding:8px;
+gap:8px;
+}
+
+.category button{
+border:none;
+background:#eee;
+padding:6px 12px;
+border-radius:20px;
+}
+
+.menu{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+padding:10px;
 }
 
 .card{
-  background:white;
-  border-radius:14px;
-  overflow:hidden;
-  box-shadow:0 2px 6px rgba(0,0,0,0.08);
-  position:relative;
+background:white;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
 .card img{
-  width:100%;
-  height:140px;
-  object-fit:cover;
+width:100%;
+height:120px;
+object-fit:cover;
 }
 
-.badge{
-  position:absolute;
-  top:8px;
-  left:8px;
-  background:#ff4d4f;
-  color:white;
-  font-size:12px;
-  padding:4px 8px;
-  border-radius:20px;
-}
-
-.info{
-  padding:10px;
-}
-
-.name{
-  font-size:15px;
-  font-weight:600;
-  min-height:38px;
-}
-
-.price-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-top:6px;
-}
-
-.price{
-  font-size:16px;
-  font-weight:bold;
-}
-
-.add-btn{
-  background:#1DB446;
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  color:white;
-  font-size:22px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-}
-
-.cart-bar{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:white;
-  border-top:1px solid #ddd;
-  padding:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+.card-body{
+padding:8px;
 }
 
 .cart-btn{
-  background:#1DB446;
-  color:white;
-  padding:10px 18px;
-  border-radius:30px;
+position:fixed;
+bottom:20px;
+right:20px;
+background:#06c755;
+color:white;
+padding:12px 16px;
+border-radius:30px;
+}
+
+.modal{
+position:fixed;
+bottom:-100%;
+left:0;
+right:0;
+background:white;
+border-radius:20px 20px 0 0;
+padding:20px;
+transition:0.3s;
+}
+
+.modal.show{
+bottom:0;
 }
 
 </style>
@@ -115,144 +92,165 @@ body{
 <body>
 
 <div class="header">
-เมนูร้าน
+<span>Menu</span>
+<span onclick="openCart()">🛒</span>
 </div>
 
-<div id="menu" class="menu-grid"></div>
+<div class="category" id="category"></div>
 
-<div class="cart-bar">
-<div id="cartTotal">0 บาท</div>
-<div class="cart-btn" onclick="openCart()">ดูตะกร้า</div>
+<div class="menu" id="menu"></div>
+
+<div class="cart-btn" onclick="openCart()">
+Cart (<span id="cartCount">0</span>)
 </div>
+
+<div id="modal" class="modal"></div>
 
 <script>
 
 let products=[]
 let cart=[]
+let currentProduct=null
 
-async function main(){
+async function init(){
 
-await liff.init({
-liffId:"2009308319-2r1OXrGI"
+await liff.init({liffId:"2009308319-2r1OXrGI"})
+
+let res=await fetch('/api/products')
+products=await res.json()
+
+renderCategory()
+renderMenu(products)
+
+}
+
+function renderCategory(){
+
+let cats=[...new Set(products.map(p=>p.category))]
+
+let html='<button onclick="renderMenu(products)">All</button>'
+
+cats.forEach(c=>{
+html+=`<button onclick="filterCat('${c}')">${c}</button>`
 })
 
-loadProducts()
+document.getElementById('category').innerHTML=html
 
 }
 
-async function loadProducts(){
-
-const res = await fetch("/api/products")
-products = await res.json()
-
-products = sortProducts(products)
-
-renderMenu()
-
+function filterCat(c){
+renderMenu(products.filter(p=>p.category==c))
 }
 
-function sortProducts(items){
+function renderMenu(items){
 
-return items.sort((a,b)=>{
+let html=''
 
-const ca = parseInt(a.category) || 999
-const cb = parseInt(b.category) || 999
+items.forEach(p=>{
 
-if(ca !== cb) return ca - cb
+html+=`
+<div class="card" onclick="openProduct('${p.id}')">
 
-return a.name.localeCompare(b.name)
+<img src="${p.image_url || ''}">
 
-})
+<div class="card-body">
 
-}
+<b>${p.name}</b><br>
 
-function renderMenu(){
-
-const menu = document.getElementById("menu")
-
-menu.innerHTML=""
-
-products.forEach((p,i)=>{
-
-const img = p.image_url || "https://placehold.co/400x300?text=Menu"
-
-menu.innerHTML +=`
-
-<div class="card">
-
-<div class="badge">ขายดี</div>
-
-<img src="${img}">
-
-<div class="info">
-
-<div class="name">
-${p.name}
-</div>
-
-<div class="price-row">
-
-<div class="price">
-฿${p.price}
-</div>
-
-<div class="add-btn" onclick="addToCart('${p.variant_id}')">
-+
-</div>
+${p.price} ฿
 
 </div>
-
 </div>
-
-</div>
-
 `
 
 })
 
-}
-
-function addToCart(variant_id){
-
-const product = products.find(p=>p.variant_id===variant_id)
-
-cart.push({
-variant_id:variant_id,
-name:product.name,
-price:product.price,
-qty:1
-})
-
-updateCart()
+document.getElementById('menu').innerHTML=html
 
 }
 
-function updateCart(){
+function openProduct(id){
 
-let total=0
+let p=products.find(x=>x.id==id)
+currentProduct=p
 
-cart.forEach(i=>{
-total+=i.price*i.qty
+let html=`<h3>${p.name}</h3>`
+
+p.modifiers.forEach(m=>{
+
+html+=`<h4>${m.name}</h4>`
+
+if(m.name.includes('ท้อปปิ้ง')){
+
+m.options.forEach(o=>{
+html+=`
+<label>
+<input type="checkbox" value="${o.id}">
+${o.name}
+</label><br>`
 })
 
-document.getElementById("cartTotal").innerText =
-cart.length+" รายการ • ฿"+total
+}else{
+
+m.options.forEach(o=>{
+html+=`
+<label>
+<input type="radio" name="${m.id}" value="${o.id}">
+${o.name}
+</label><br>`
+})
+
+}
+
+})
+
+html+=`<br><button onclick="addCart()">เพิ่มลงตะกร้า</button>`
+
+let modal=document.getElementById('modal')
+modal.innerHTML=html
+modal.classList.add('show')
+
+}
+
+function addCart(){
+
+cart.push(currentProduct)
+
+document.getElementById('cartCount').innerText=cart.length
+
+document.getElementById('modal').classList.remove('show')
 
 }
 
 function openCart(){
 
-let text="รายการอาหาร\n\n"
+let html='<h3>Cart</h3>'
 
-cart.forEach(i=>{
-text+=i.name+" x"+i.qty+"\n"
+cart.forEach(c=>{
+html+=`${c.name}<br>`
 })
 
-alert(text)
+html+='<button onclick="sendOrder()">Order</button>'
+
+let modal=document.getElementById('modal')
+modal.innerHTML=html
+modal.classList.add('show')
 
 }
 
-main()
+async function sendOrder(){
+
+await fetch('/api/order',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify(cart)
+})
+
+alert('Order sent')
+
+}
+
+init()
 
 </script>
 
