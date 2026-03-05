@@ -1,52 +1,48 @@
-import axios from "axios"
+import axios from "axios";
 
 export default async function handler(req, res) {
-
   try {
 
-    const token = process.env.LOYVERSE_TOKEN
+    const token = process.env.LOYVERSE_TOKEN;
 
-    const itemRes = await axios.get(
-      "https://api.loyverse.com/v1.0/items",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+    // ดึง items
+    const itemRes = await axios.get("https://api.loyverse.com/v1.0/items", {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    )
+    });
 
-    const modifierRes = await axios.get(
-      "https://liff-pos.vercel.app/api/modifiers"
-    )
+    const items = itemRes.data.items;
 
-    const modifiers = modifierRes.data
-
-    const items = itemRes.data.items
+    // ดึง modifier groups จาก API เรา
+    const modRes = await axios.get("https://liff-pos.vercel.app/api/modifiers");
+    const modifiers = modRes.data;
 
     const products = items.map(item => {
 
+      const variant = item.variants?.[0];
+
       return {
-        id: item.item_id,
-        variant_id: item.variants?.[0]?.variant_id,
+        id: item.id,
+        variant_id: variant?.variant_id,
         name: item.item_name,
-        price: item.variants?.[0]?.price,
+        price: variant?.price,
         image_url: item.image_url || "",
-        category: item.category_name || "อื่นๆ",
+        category: item.category_id || "อื่นๆ",
         modifiers: modifiers
-      }
+      };
 
-    })
+    });
 
-    res.status(200).json(products)
+    res.status(200).json(products);
 
   } catch (err) {
 
-    console.error(err)
+    console.error(err);
 
     res.status(500).json({
-      error: "Failed to load products"
-    })
+      error: "โหลดสินค้าไม่สำเร็จ"
+    });
 
   }
-
 }
