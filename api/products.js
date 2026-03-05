@@ -16,10 +16,10 @@ export default async function handler(req, res) {
     const itemsData = await itemsRes.json();
 
 
-    // 🔥 ดึง modifier จาก API เรา
+    // ดึง modifier จาก API เรา
     const modifierRes = await fetch(
-  "https://liff-pos.vercel.app/api/modifiers"
-);
+      "https://liff-pos.vercel.app/api/modifiers"
+    );
 
     const modifierLists = await modifierRes.json();
 
@@ -34,6 +34,12 @@ export default async function handler(req, res) {
       else if (item.images?.length) imageUrl = item.images[0].url;
 
 
+      // 🔥 เชื่อม modifier ตาม Loyverse
+      const itemModifiers = (item.modifier_list_ids || [])
+        .map(id => modifierLists.find(m => m.id === id))
+        .filter(Boolean);
+
+
       return {
         id: item.id,
         variant_id: variant?.variant_id,
@@ -41,8 +47,7 @@ export default async function handler(req, res) {
         price: variant?.default_price || variant?.price || 0,
         image_url: imageUrl,
 
-        // 🔥 ใส่ modifier ทั้งหมดไปก่อน
-        modifiers: modifierLists
+        modifiers: itemModifiers
 
       };
 
