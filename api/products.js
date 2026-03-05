@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     });
 
     // -----------------------------
-    // ดึง modifiers
+    // modifiers
     // -----------------------------
     let modifiers = [];
 
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       const modRes = await axios.get("https://liff-pos.vercel.app/api/modifiers");
       modifiers = modRes.data || [];
     } catch (e) {
-      console.log("โหลด modifiers ไม่สำเร็จ ใช้ค่าว่างแทน");
+      console.log("โหลด modifiers ไม่สำเร็จ");
     }
 
     // -----------------------------
@@ -51,11 +51,18 @@ export default async function handler(req, res) {
 
       const variant = item.variants?.[0] || {};
 
+      // หา price ที่ถูกต้อง
+      const price =
+        Number(variant.price) ||
+        Number(variant.default_price) ||
+        Number(item.price) ||
+        0;
+
       return {
         id: item.id,
-        variant_id: variant.id || "",   // แก้จาก variant_id → id
+        variant_id: variant.id || "",
         name: item.item_name || "",
-        price: Number(variant.price || 0), // แปลงเป็น number
+        price: price,
         image_url: item.image_url || "",
         category: categoryMap[item.category_id] || "อื่นๆ",
         modifiers: modifiers
@@ -63,7 +70,6 @@ export default async function handler(req, res) {
 
     });
 
-    // -----------------------------
     res.status(200).json(products);
 
   } catch (err) {
