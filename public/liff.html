@@ -1,101 +1,100 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>LIFF POS</title>
+<meta charset="utf-8" />
+<title>Menu</title>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
 
 body{
-font-family:Arial;
-background:#000;
-color:white;
+font-family:sans-serif;
 margin:0;
+background:#fafafa;
+}
+
+.header{
 padding:15px;
-}
-
-h2{
+font-size:20px;
+font-weight:bold;
+color:#ff6f00;
 text-align:center;
+background:white;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
-#menu{
+.category-bar{
+display:flex;
+overflow-x:auto;
+gap:10px;
+padding:10px;
+background:white;
+border-bottom:1px solid #eee;
+}
+
+.category-btn{
+padding:8px 14px;
+border-radius:20px;
+background:#eee;
+font-size:14px;
+white-space:nowrap;
+cursor:pointer;
+}
+
+.category-btn.active{
+background:#ff6f00;
+color:white;
+}
+
+.menu-grid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
-gap:15px;
+gap:12px;
+padding:12px;
 }
 
 .card{
-border-radius:18px;
+background:white;
+border-radius:12px;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
 overflow:hidden;
-background:#111;
+cursor:pointer;
 }
 
 .card img{
 width:100%;
-height:200px;
+height:120px;
 object-fit:cover;
 }
 
-.name{
-font-size:16px;
-padding:8px;
+.card-body{
+padding:10px;
 }
 
-.price{
-color:orange;
-padding:0 8px 8px;
+.card-title{
+font-size:14px;
+font-weight:bold;
+margin-bottom:5px;
 }
 
-#modifierModal,#cartModal{
-position:fixed;
-bottom:-100%;
-left:0;
-right:0;
-background:white;
-color:black;
-height:70%;
-padding:20px;
-border-radius:25px 25px 0 0;
-transition:0.3s;
-overflow:auto;
+.card-price{
+font-size:13px;
+color:#777;
 }
 
-.active{
-bottom:0 !important;
-}
-
-button{
-padding:12px;
-border:none;
-border-radius:10px;
-font-size:16px;
-}
-
-.addbtn{
-background:orange;
-color:white;
-width:100%;
-margin-top:10px;
-}
-
-.cartbtn{
+.cart-btn{
 position:fixed;
 bottom:20px;
 right:20px;
-background:orange;
-width:70px;
-height:70px;
-border-radius:50%;
-font-size:30px;
+background:#ff6f00;
 color:white;
-}
-
-.qty{
-display:flex;
-gap:10px;
-align-items:center;
+border:none;
+padding:14px 18px;
+border-radius:30px;
+font-size:16px;
+box-shadow:0 4px 12px rgba(0,0,0,0.2);
+cursor:pointer;
 }
 
 </style>
@@ -104,263 +103,179 @@ align-items:center;
 
 <body>
 
-<h2>เมนูสินค้า</h2>
-
-<div id="menu"></div>
-
-<button class="cartbtn" onclick="openCart()">🛒</button>
-
-<div id="modifierModal">
-<div id="modifierContent"></div>
+<div class="header">
+เมนูร้าน
 </div>
 
-<div id="cartModal">
-<div id="cartContent"></div>
-</div>
+<div id="categories" class="category-bar"></div>
+
+<div id="menu" class="menu-grid"></div>
+
+<button class="cart-btn" onclick="openCart()">
+🛒 ตะกร้า (<span id="cartCount">0</span>)
+</button>
 
 <script>
 
-let cart=[]
 let products=[]
-let currentProduct=null
+let cart=[]
+let activeCategory="all"
 
-async function init(){
+function cleanCategoryName(cat){
+return cat.replace(/^\d+_/, "")
+}
 
-await liff.init({liffId:"2009308319-2r1OXrGI"})
+async function main(){
+
+await liff.init({
+liffId:"2009308319-2r1OXrGI"
+})
+
+if(!liff.isLoggedIn()){
+liff.login()
+return
+}
+
 loadProducts()
 
 }
 
 async function loadProducts(){
 
-const res=await fetch("/api/products")
-products=await res.json()
+const res = await fetch("/api/products")
+products = await res.json()
+
+renderCategories()
+renderMenu()
+
+}
+
+function renderCategories(){
+
+let cats = new Set()
+
+products.forEach(p=>{
+cats.add(p.category)
+})
+
+const container = document.getElementById("categories")
+
+container.innerHTML=""
+
+const allBtn=document.createElement("div")
+allBtn.className="category-btn active"
+allBtn.innerText="ทั้งหมด"
+allBtn.onclick=()=>{
+activeCategory="all"
+updateCategoryUI()
+renderMenu()
+}
+
+container.appendChild(allBtn)
+
+cats.forEach(cat=>{
+
+const btn=document.createElement("div")
+btn.className="category-btn"
+btn.innerText=cleanCategoryName(cat)
+
+btn.onclick=()=>{
+activeCategory=cat
+updateCategoryUI()
+renderMenu()
+}
+
+container.appendChild(btn)
+
+})
+
+}
+
+function updateCategoryUI(){
+
+document.querySelectorAll(".category-btn").forEach(b=>{
+b.classList.remove("active")
+})
+
+event.target.classList.add("active")
+
+}
+
+function renderMenu(){
 
 const menu=document.getElementById("menu")
 menu.innerHTML=""
 
-products.forEach(p=>{
+let filtered=products
 
-const image=p.image_url || "https://via.placeholder.com/400"
+if(activeCategory!="all"){
+filtered=products.filter(p=>p.category===activeCategory)
+}
 
-const div=document.createElement("div")
-div.className="card"
+filtered.forEach(p=>{
 
-div.innerHTML=`
-<img src="${image}">
-<div class="name">${p.name}</div>
-<div class="price">${p.price} บาท</div>
+const card=document.createElement("div")
+card.className="card"
+
+let img="https://via.placeholder.com/300x200?text=Menu"
+
+if(p.image_url){
+img=p.image_url
+}
+
+card.innerHTML=`
+
+<img src="${img}">
+
+<div class="card-body">
+<div class="card-title">${p.name}</div>
+<div class="card-price">฿ ${p.price}</div>
+</div>
+
 `
 
-div.onclick=()=>openModifier(p)
+card.onclick=()=>{
+addToCart(p)
+}
 
-menu.appendChild(div)
+menu.appendChild(card)
 
 })
 
 }
 
-function openModifier(product){
-
-if(!product.modifiers || product.modifiers.length===0){
-addToCart(product,[],0,[])
-return
-}
-
-currentProduct=product
-
-let html=`<h3>${product.name}</h3>`
-
-product.modifiers.forEach(m=>{
-
-if(!m.options || m.options.length===0) return
-
-html+=`<h4>${m.name}</h4>`
-
-/* 🔥 SECTION ใหม่ */
-let inputType="radio"
-
-if(m.name && m.name.includes("ท้อปปิ้ง")){
-inputType="checkbox"
-}
-/* 🔥 END SECTION */
-
-m.options.forEach(o=>{
-
-const price = Number(o.price) || 0
-
-html+=`
-<label style="display:block;margin-bottom:6px">
-<input 
-type="${inputType}"
-name="mod_${m.id}"
-value="${o.id}"
-data-name="${o.name}"
-data-price="${price}">
-${o.name} ${price>0?`(+${price})`:""}
-</label>
-`
-
-})
-
-})
-
-html+=`<button class="addbtn" onclick="confirmModifier()">เพิ่มลงตะกร้า</button>`
-
-document.getElementById("modifierContent").innerHTML=html
-document.getElementById("modifierModal").classList.add("active")
-
-}
-
-function confirmModifier(){
-
-const checked=document.querySelectorAll("#modifierContent input:checked")
-
-let names=[]
-let extra=0
-let modifiers=[]
-
-checked.forEach(c=>{
-
-const price = Number(c.dataset.price) || 0
-
-names.push(c.dataset.name)
-extra+=price
-
-modifiers.push({
-option_id:c.value
-})
-
-})
-
-addToCart(currentProduct,names,extra,modifiers)
-
-closeModifier()
-
-}
-
-function closeModifier(){
-document.getElementById("modifierModal").classList.remove("active")
-}
-
-function addToCart(product,mods,extra,modifier_ids){
-
-const name=mods.length
-?product.name+" ("+mods.join(", ")+")"
-:product.name
+function addToCart(product){
 
 cart.push({
-id:Date.now(),
-product_id:product.id,
-name:name,
-price:Number(product.price)+extra,
-qty:1,
-modifiers:modifier_ids
+variant_id:product.variant_id,
+name:product.name,
+price:product.price,
+quantity:1
 })
 
-renderCart()
+updateCart()
+
+}
+
+function updateCart(){
+
+document.getElementById("cartCount").innerText=cart.length
 
 }
 
 function openCart(){
 
-renderCart()
-document.getElementById("cartModal").classList.add("active")
-
-}
-
-function closeCart(){
-document.getElementById("cartModal").classList.remove("active")
-}
-
-function changeQty(id,delta){
-
-const item=cart.find(i=>i.id==id)
-
-item.qty+=delta
-
-if(item.qty<=0){
-cart=cart.filter(i=>i.id!=id)
-}
-
-renderCart()
-
-}
-
-function renderCart(){
-
-const c=document.getElementById("cartContent")
-
-if(cart.length===0){
-
-c.innerHTML="<h3>ตะกร้าว่าง</h3>"
-return
-
-}
-
-let total=0
-
-let html="<h3>ตะกร้า</h3>"
+let text="รายการในตะกร้า\n\n"
 
 cart.forEach(i=>{
-
-total+=i.price*i.qty
-
-html+=`
-<div style="display:flex;justify-content:space-between;margin:10px 0">
-<div>
-${i.name}
-<div class="qty">
-<button onclick="changeQty('${i.id}',-1)">-</button>
-${i.qty}
-<button onclick="changeQty('${i.id}',1)">+</button>
-</div>
-</div>
-<div>${i.price*i.qty}</div>
-</div>
-`
-
+text+=`${i.name} x${i.quantity}\n`
 })
 
-html+=`<hr><h3>รวม ${total} บาท</h3>`
-html+=`<button class="addbtn" onclick="submitOrder()">สั่งซื้อ</button>`
-
-c.innerHTML=html
+alert(text)
 
 }
 
-async function submitOrder(){
-
-if(cart.length===0){
-alert("ไม่มีสินค้า")
-return
-}
-
-const items=cart.map(i=>({
-
-variant_id:i.product_id,
-quantity:i.qty,
-modifier_options:i.modifiers
-
-}))
-
-await fetch("/api/order",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({items})
-})
-
-alert("สั่งซื้อสำเร็จ")
-
-cart=[]
-renderCart()
-closeCart()
-
-}
-
-init()
+main()
 
 </script>
 
