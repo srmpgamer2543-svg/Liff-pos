@@ -18,8 +18,8 @@ export default async function handler(req, res) {
 
     // 🔥 ดึง modifier จาก API เรา
     const modifierRes = await fetch(
-      `${process.env.VERCEL_URL ? "https://" + process.env.VERCEL_URL : ""}/api/modifiers`
-    );
+  "https://liff-pos.vercel.app/api/modifiers"
+);
 
     const modifierLists = await modifierRes.json();
 
