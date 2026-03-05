@@ -91,16 +91,12 @@ font-size:26px;
 font-weight:bold;
 }
 
-/* layout การ์ด */
-
 .card-body{
 padding:14px;
 flex:1;
 display:flex;
 flex-direction:column;
 }
-
-/* ชื่อเมนู */
 
 .name{
 font-size:18px;
@@ -113,8 +109,6 @@ display:-webkit-box;
 -webkit-box-orient:vertical;
 overflow:hidden;
 }
-
-/* ราคา */
 
 .price{
 color:#06c755;
@@ -228,27 +222,36 @@ let cart=[]
 let currentProduct=null
 
 function cleanCategory(name){
+if(!name) return "อื่นๆ"
 return name.replace(/^\d+_/,'')
 }
 
 function sortCategory(a,b){
+
+if(!a) a="999_อื่นๆ"
+if(!b) b="999_อื่นๆ"
+
 let na=parseInt(a.split('_')[0])
 let nb=parseInt(b.split('_')[0])
+
 if(isNaN(na)) na=999
 if(isNaN(nb)) nb=999
+
 return na-nb
 }
 
 function sortProducts(list){
 return list.sort((a,b)=>{
-let ca=parseInt(a.category.split('_')[0])
-let cb=parseInt(b.category.split('_')[0])
+
+let ca = a.category ? parseInt(a.category.split('_')[0]) : 999
+let cb = b.category ? parseInt(b.category.split('_')[0]) : 999
 
 if(isNaN(ca)) ca=999
 if(isNaN(cb)) cb=999
 
 if(ca!==cb) return ca-cb
-return a.name.localeCompare(b.name)
+return (a.name || "").localeCompare(b.name || "")
+
 })
 }
 
@@ -272,21 +275,35 @@ return ai-bi
 
 async function init(){
 
+try{
+
 await liff.init({liffId:"2009308319-2r1OXrGI"})
 
 let res=await fetch('/api/products')
 products=await res.json()
+
+products=products.map(p=>{
+if(!p.category) p.category="999_อื่นๆ"
+return p
+})
 
 products=sortProducts(products)
 
 renderCategory()
 renderMenu(products)
 
+}catch(e){
+
+console.error(e)
+alert("โหลดเมนูไม่สำเร็จ")
+
+}
+
 }
 
 function renderCategory(){
 
-let cats=[...new Set(products.map(p=>p.category))]
+let cats=[...new Set(products.map(p=>p.category).filter(Boolean))]
 cats.sort(sortCategory)
 
 let html='<button onclick="renderMenu(products)">All</button>'
@@ -341,43 +358,43 @@ currentProduct=p
 
 let mods=sortModifiers([...p.modifiers])
 
-let html=\`<div class="modal-content" onclick="event.stopPropagation()">\`
+let html=`<div class="modal-content" onclick="event.stopPropagation()">`
 
-html+=\`<h3>\${p.name}</h3>\`
+html+=`<h3>${p.name}</h3>`
 
 mods.forEach(m=>{
 
-html+=\`<h4>\${m.name}</h4>\`
-html+=\`<div class="modifier-grid">\`
+html+=`<h4>${m.name}</h4>`
+html+=`<div class="modifier-grid">`
 
 if(m.name.includes('ท้อปปิ้ง')){
 
 m.options.forEach(o=>{
-html+=\`
+html+=`
 <label class="option">
-<input type="checkbox" value="\${o.id}">
-\${o.name}
-</label>\`
+<input type="checkbox" value="${o.id}">
+${o.name}
+</label>`
 })
 
 }else{
 
 m.options.forEach(o=>{
-html+=\`
+html+=`
 <label class="option">
-<input type="radio" name="\${m.id}" value="\${o.id}">
-\${o.name}
-</label>\`
+<input type="radio" name="${m.id}" value="${o.id}">
+${o.name}
+</label>`
 })
 
 }
 
-html+=\`</div>\`
+html+=`</div>`
 
 })
 
-html+=\`<button onclick="addCart()">เพิ่มลงตะกร้า</button>\`
-html+=\`</div>\`
+html+=`<button onclick="addCart()">เพิ่มลงตะกร้า</button>`
+html+=`</div>`
 
 let modal=document.getElementById('modal')
 modal.innerHTML=html
@@ -443,12 +460,12 @@ document.getElementById('modal').classList.remove('show')
 
 function openCart(){
 
-let html=\`<div class="modal-content" onclick="event.stopPropagation()">\`
+let html=`<div class="modal-content" onclick="event.stopPropagation()">`
 
 html+='<h3>Cart</h3>'
 
 cart.forEach(c=>{
-html+=\`\${c.name}<br>\`
+html+=`${c.name}<br>`
 })
 
 html+='<button onclick="sendOrder()">Order</button>'
