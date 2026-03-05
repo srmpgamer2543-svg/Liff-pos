@@ -81,35 +81,42 @@ bottom:10px;
 right:10px;
 background:#06c755;
 color:white;
-width:48px;
-height:48px;
+width:44px;
+height:44px;
 border-radius:50%;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:30px;
+font-size:26px;
 font-weight:bold;
 }
 
+/* แก้ layout ส่วนล่าง */
 .card-body{
-padding:16px;
-flex-grow:1;
+padding:14px;
+height:90px;
 display:flex;
 flex-direction:column;
 justify-content:space-between;
 }
 
+/* ชื่อเมนู */
 .name{
-font-size:22px;
-font-weight:800;
+font-size:17px;
+font-weight:700;
 line-height:1.3;
+
+display:-webkit-box;
+-webkit-line-clamp:2;
+-webkit-box-orient:vertical;
+overflow:hidden;
 }
 
+/* ราคา */
 .price{
 color:#06c755;
 font-weight:bold;
-font-size:20px;
-margin-top:6px;
+font-size:18px;
 }
 
 .cart-btn{
@@ -330,43 +337,43 @@ currentProduct=p
 
 let mods=sortModifiers([...p.modifiers])
 
-let html=`<div class="modal-content" onclick="event.stopPropagation()">`
+let html=\`<div class="modal-content" onclick="event.stopPropagation()">\`
 
-html+=`<h3>${p.name}</h3>`
+html+=\`<h3>\${p.name}</h3>\`
 
 mods.forEach(m=>{
 
-html+=`<h4>${m.name}</h4>`
-html+=`<div class="modifier-grid">`
+html+=\`<h4>\${m.name}</h4>\`
+html+=\`<div class="modifier-grid">\`
 
 if(m.name.includes('ท้อปปิ้ง')){
 
 m.options.forEach(o=>{
-html+=`
+html+=\`
 <label class="option">
-<input type="checkbox" value="${o.id}">
-${o.name}
-</label>`
+<input type="checkbox" value="\${o.id}">
+\${o.name}
+</label>\`
 })
 
 }else{
 
 m.options.forEach(o=>{
-html+=`
+html+=\`
 <label class="option">
-<input type="radio" name="${m.id}" value="${o.id}">
-${o.name}
-</label>`
+<input type="radio" name="\${m.id}" value="\${o.id}">
+\${o.name}
+</label>\`
 })
 
 }
 
-html+=`</div>`
+html+=\`</div>\`
 
 })
 
-html+=`<button onclick="addCart()">เพิ่มลงตะกร้า</button>`
-html+=`</div>`
+html+=\`<button onclick="addCart()">เพิ่มลงตะกร้า</button>\`
+html+=\`</div>\`
 
 let modal=document.getElementById('modal')
 modal.innerHTML=html
@@ -432,12 +439,12 @@ document.getElementById('modal').classList.remove('show')
 
 function openCart(){
 
-let html=`<div class="modal-content" onclick="event.stopPropagation()">`
+let html=\`<div class="modal-content" onclick="event.stopPropagation()">\`
 
 html+='<h3>Cart</h3>'
 
 cart.forEach(c=>{
-html+=`${c.name}<br>`
+html+=\`\${c.name}<br>\`
 })
 
 html+='<button onclick="sendOrder()">Order</button>'
