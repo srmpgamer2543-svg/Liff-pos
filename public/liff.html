@@ -144,24 +144,26 @@ align-items:flex-end;
 display:flex;
 }
 
-/* ===== แก้ตรงนี้ ===== */
-
 .modal-content{
 background:white;
 width:100%;
 border-radius:24px 24px 0 0;
 padding:28px;
-
 height:50vh;
 max-height:50vh;
-
 overflow-y:auto;
 -webkit-overflow-scrolling:touch;
 }
 
-/* ===================== */
+/* ===== ปรับ UI MODIFIER ===== */
 
-/* ชื่อเมนูใน modal */
+.modifier-group{
+margin-bottom:26px;
+padding-bottom:20px;
+border-bottom:1px solid #eee;
+}
+
+/* =========================== */
 
 .modal-content h3{
 font-size:52px;
@@ -169,16 +171,12 @@ margin-bottom:24px;
 font-weight:700;
 }
 
-/* หัวข้อ modifier */
-
 .modal-content h4{
 font-size:42px;
-margin-top:28px;
+margin-top:10px;
 margin-bottom:16px;
 font-weight:600;
 }
-
-/* grid modifier */
 
 .modifier-grid{
 display:grid;
@@ -186,25 +184,27 @@ grid-template-columns:1fr;
 gap:16px;
 }
 
-/* option modifier */
-
 .option{
 display:flex;
 align-items:center;
 gap:18px;
 padding:22px;
 border-radius:16px;
-background:#f5f5f5;
+background:white;
 font-size:34px;
+border:1px solid #eee;
 }
 
-/* radio / checkbox */
+/* highlight ตอนเลือก */
+
+.option:has(input:checked){
+border:2px solid #06c755;
+background:#f0fff4;
+}
 
 .option input{
 transform:scale(2.2);
 }
-
-/* ปุ่ม */
 
 button{
 font-size:40px;
@@ -386,6 +386,7 @@ html+=`<h3>${p.name}</h3>`
 
 mods.forEach(m=>{
 
+html+=`<div class="modifier-group">`
 html+=`<h4>${m.name}</h4>`
 html+=`<div class="modifier-grid">`
 
@@ -411,6 +412,7 @@ ${o.name}
 
 }
 
+html+=`</div>`
 html+=`</div>`
 
 })
