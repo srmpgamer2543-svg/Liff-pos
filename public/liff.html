@@ -150,6 +150,8 @@ products=await res.json()
 
 preparePrice()
 
+sortProducts()
+
 renderCategories()
 
 renderProducts()
@@ -162,6 +164,23 @@ products.forEach(p=>{
 if(!p.price){
 p.price=p.variants?.[0]?.price||0
 }
+})
+
+}
+
+function sortProducts(){
+
+products.sort((a,b)=>{
+
+const ca=parseInt(a.category.split("_")[0])||0
+const cb=parseInt(b.category.split("_")[0])||0
+
+if(ca!==cb){
+return ca-cb
+}
+
+return a.name.localeCompare(b.name)
+
 })
 
 }
