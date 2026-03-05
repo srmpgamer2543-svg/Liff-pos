@@ -58,10 +58,16 @@ export default async function handler(req, res) {
         Number(item.price) ||
         0;
 
+      // -----------------------------
       // modifier ของเมนูนี้เท่านั้น
-      const itemModifiers = modifiers.filter(m =>
-        item.modifier_ids?.includes(m.id)
-      );
+      // -----------------------------
+      let itemModifiers = [];
+
+      if (Array.isArray(item.modifier_ids) && item.modifier_ids.length > 0) {
+        itemModifiers = modifiers.filter(m =>
+          item.modifier_ids.includes(m.id)
+        );
+      }
 
       return {
         id: item.id,
