@@ -9,29 +9,23 @@ export default function Home() {
     });
   }, []);
 
-  const orderCoffee = async () => {
-    await fetch("/api/sendOrder", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        menu: "กาแฟเย็น",
-        price: 50
-      })
+  const sendOrder = async () => {
+    await fetch("/api/webhook", {
+      method: "POST"
     });
 
     alert("ส่งออเดอร์แล้ว");
   };
 
   return (
-    <div style={{padding:20,fontFamily:"sans-serif"}}>
-      <h1>เมนูร้าน</h1>
+    <div style={{padding:30,fontFamily:"sans-serif"}}>
+
+      <h2>สั่งเครื่องดื่ม</h2>
 
       <button
-        onClick={orderCoffee}
+        onClick={sendOrder}
         style={{
-          fontSize:20,
+          fontSize:22,
           padding:20,
           width:"100%",
           marginTop:20
