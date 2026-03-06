@@ -1,15 +1,25 @@
-import {cart} from "./state.js"
+export async function getProducts(){
 
-export async function sendOrder(){
+let res = await fetch('/api/products')
 
-await fetch('/api/order',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify(cart)
-})
+if(!res.ok){
+throw new Error("โหลดสินค้าไม่สำเร็จ")
+}
 
-alert("Order sent")
+return await res.json()
 
 }
 
-window.sendOrder=sendOrder
+
+
+export async function sendOrder(cart){
+
+await fetch('/api/order',{
+method:'POST',
+headers:{
+'Content-Type':'application/json'
+},
+body:JSON.stringify(cart)
+})
+
+}
