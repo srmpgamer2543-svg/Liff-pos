@@ -1,66 +1,67 @@
 import {state} from "./state.js"
+import {cleanCategory,sortCategory,sortProducts} from "./utils.js"
+import {openProduct} from "./modal.js"
 
 export function renderCategory(){
 
-let box = document.getElementById("category")
+let cats=[...new Set(state.products.map(p=>p.category).filter(Boolean))]
 
-let cats = [...new Set(state.products.map(p=>p.category))]
+cats.sort(sortCategory)
 
-box.innerHTML=""
+let html='<button id="allBtn">All</button>'
 
 cats.forEach(c=>{
+html+=`<button data-cat="${c}">${cleanCategory(c)}</button>`
+})
 
-let btn = document.createElement("button")
+document.getElementById('category').innerHTML=html
 
-btn.innerText = c.replace(/^[0-9]+_/,"")
-
-btn.onclick=()=>{
-
-state.category=c
-
-renderMenu()
-
+document.getElementById("allBtn").onclick=()=>{
+renderMenu(state.products)
 }
 
-box.appendChild(btn)
-
+document.querySelectorAll("[data-cat]").forEach(btn=>{
+btn.onclick=()=>{
+let c=btn.dataset.cat
+let list=state.products.filter(p=>p.category==c)
+renderMenu(sortProducts(list))
+}
 })
 
 }
 
-export function renderMenu(){
+export function renderMenu(items){
 
-let menu = document.getElementById("menu")
+let html=''
 
-let list = state.products
+items.forEach(p=>{
 
-if(state.category){
-list = list.filter(p=>p.category===state.category)
-}
+html+=`
 
-menu.innerHTML=""
+<div class="card" data-id="${p.id}">
 
-list.forEach(p=>{
-
-let card = document.createElement("div")
-card.className="card"
-
-card.innerHTML=`
-
-<img src="${p.image_url||''}">
+<div class="card-img">
+<img src="${p.image_url || ''}">
+<div class="add-btn">+</div>
+</div>
 
 <div class="card-body">
-
-<div>${p.name}</div>
-
+<div class="name">${p.name}</div>
 <div class="price">${p.price} ฿</div>
+</div>
 
 </div>
 
 `
 
-menu.appendChild(card)
+})
 
+document.getElementById('menu').innerHTML=html
+
+document.querySelectorAll(".card").forEach(c=>{
+c.onclick=()=>{
+openProduct(c.dataset.id)
+}
 })
 
 }
