@@ -1,8 +1,0 @@
-{
-  "name": "liff-pos",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "@line/liff": "^2.24.0"
-  }
-}
