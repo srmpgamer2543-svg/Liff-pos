@@ -12,6 +12,8 @@ font-family:sans-serif;
 margin:0;
 background:#f5f5f5;
 font-size:30px;
+
+scroll-behavior:smooth;
 }
 
 /* HEADER */
@@ -32,14 +34,11 @@ display:flex;
 align-items:center;
 justify-content:center;
 
-transition:
-height .55s cubic-bezier(.25,.8,.25,1),
-opacity .35s ease,
-transform .55s cubic-bezier(.25,.8,.25,1);
+transition:all .5s cubic-bezier(.25,.8,.25,1);
 
 overflow:hidden;
 
-will-change:height, transform, opacity;
+scroll-snap-align:start;
 }
 
 .logo-area img{
@@ -116,6 +115,8 @@ display:grid;
 grid-template-columns:1fr 1fr;
 gap:14px;
 padding:14px;
+
+scroll-snap-align:start;
 }
 
 .card{
@@ -664,26 +665,37 @@ alert('Order sent')
 
 }
 
+let snapLock=false
+
 window.addEventListener("scroll",()=>{
 
-let logo=document.getElementById("logoArea")
-let logoImg=logo.querySelector("img")
+if(snapLock) return
 
-if(window.scrollY>80){
+let y=window.scrollY
+let logo=document.getElementById("logoArea")
+
+if(y>60 && y<140){
+
+snapLock=true
+
+window.scrollTo({
+top:140,
+behavior:"smooth"
+})
 
 logo.style.height="0"
 logo.style.opacity="0"
-logo.style.transform="translateY(-20px)"
 
-logoImg.style.transform="scale(.9)"
+setTimeout(()=>{
+snapLock=false
+},400)
 
-}else{
+}
+
+if(y<60){
 
 logo.style.height="20vh"
 logo.style.opacity="1"
-logo.style.transform="translateY(0)"
-
-logoImg.style.transform="scale(1)"
 
 }
 
