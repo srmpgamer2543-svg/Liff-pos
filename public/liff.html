@@ -103,7 +103,6 @@ font-size:45px;
 font-weight:700;
 line-height:1.35;
 flex:1;
-
 display:-webkit-box;
 -webkit-line-clamp:2;
 -webkit-box-orient:vertical;
@@ -155,15 +154,13 @@ overflow-y:auto;
 -webkit-overflow-scrolling:touch;
 }
 
-/* ===== ปรับ UI MODIFIER ===== */
+/* ===== MODIFIER UI PRO ===== */
 
 .modifier-group{
 margin-bottom:26px;
 padding-bottom:20px;
 border-bottom:1px solid #eee;
 }
-
-/* =========================== */
 
 .modal-content h3{
 font-size:52px;
@@ -186,24 +183,79 @@ gap:16px;
 
 .option{
 display:flex;
+justify-content:space-between;
 align-items:center;
-gap:18px;
 padding:22px;
 border-radius:16px;
 background:white;
 font-size:34px;
 border:1px solid #eee;
+transition:.2s;
 }
 
-/* highlight ตอนเลือก */
+.option-left{
+display:flex;
+align-items:center;
+gap:18px;
+}
+
+.option-right{
+color:#06c755;
+font-weight:700;
+font-size:30px;
+}
+
+.selector{
+width:28px;
+height:28px;
+border-radius:50%;
+border:2px solid #bbb;
+display:flex;
+align-items:center;
+justify-content:center;
+transition:.2s;
+}
+
+.selector::after{
+content:'';
+width:14px;
+height:14px;
+border-radius:50%;
+background:#06c755;
+transform:scale(0);
+transition:.2s;
+}
+
+.option input{
+display:none;
+}
 
 .option:has(input:checked){
 border:2px solid #06c755;
 background:#f0fff4;
+transform:scale(1.02);
 }
 
-.option input{
-transform:scale(2.2);
+.option:has(input:checked) .selector{
+border-color:#06c755;
+}
+
+.option:has(input:checked) .selector::after{
+transform:scale(1);
+}
+
+.option:active{
+transform:scale(.97);
+}
+
+/* ===== TOTAL PRICE ===== */
+
+.total-price{
+font-size:44px;
+font-weight:700;
+margin-top:20px;
+color:#06c755;
+text-align:right;
 }
 
 button{
@@ -214,7 +266,7 @@ background:#06c755;
 color:white;
 border-radius:16px;
 width:100%;
-margin-top:30px;
+margin-top:20px;
 }
 
 </style>
@@ -395,8 +447,15 @@ if(m.name.includes('ท้อปปิ้ง')){
 m.options.forEach(o=>{
 html+=`
 <label class="option">
-<input type="checkbox" value="${o.id}">
-${o.name}
+
+<div class="option-left">
+<div class="selector"></div>
+<input type="checkbox" value="${o.id}" data-price="${o.price}" onchange="updateTotal()">
+<span>${o.name}</span>
+</div>
+
+<div class="option-right">${o.price>0?`+${o.price}`:''}</div>
+
 </label>`
 })
 
@@ -405,8 +464,15 @@ ${o.name}
 m.options.forEach(o=>{
 html+=`
 <label class="option">
-<input type="radio" name="${m.id}" value="${o.id}">
-${o.name}
+
+<div class="option-left">
+<div class="selector"></div>
+<input type="radio" name="${m.id}" value="${o.id}" data-price="${o.price}" onchange="updateTotal()">
+<span>${o.name}</span>
+</div>
+
+<div class="option-right">${o.price>0?`+${o.price}`:''}</div>
+
 </label>`
 })
 
@@ -417,7 +483,8 @@ html+=`</div>`
 
 })
 
-html+=`<button onclick="addCart()">เพิ่มลงตะกร้า</button>`
+html+=`<div class="total-price">Total : <span id="totalPrice">${p.price}</span> ฿</div>`
+html+=`<button onclick="addCart()">ส่งออเดอร์</button>`
 html+=`</div>`
 
 let modal=document.getElementById('modal')
@@ -427,6 +494,19 @@ modal.classList.add('show')
 modal.onclick=function(){
 modal.classList.remove('show')
 }
+
+}
+
+function updateTotal(){
+
+let base=currentProduct.price
+let extra=0
+
+document.querySelectorAll(".option input:checked").forEach(i=>{
+extra+=parseFloat(i.dataset.price||0)
+})
+
+document.getElementById("totalPrice").innerText=base+extra
 
 }
 
