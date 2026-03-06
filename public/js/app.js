@@ -1,9 +1,11 @@
 import {state} from "./state.js"
 import {getProducts} from "./api.js"
 import {sortProducts} from "./utils.js"
-import {renderMenu} from "./menu.js"
+import {renderCategory,renderMenu} from "./menu.js"
 
 async function init(){
+
+console.log("APP START")
 
 try{
 
@@ -11,16 +13,24 @@ await liff.init({
 liffId:"2009308319-2r1OXrGI"
 })
 
-if(!liff.isLoggedIn()){
-liff.login()
-return
-}
+console.log("LIFF READY")
 
 let data = await getProducts()
 
+console.log("API READY",data.length)
+
+data = data.map(p=>{
+if(!p.category) p.category="999_อื่นๆ"
+return p
+})
+
 state.products = sortProducts(data)
 
+renderCategory()
+
 renderMenu()
+
+console.log("RENDER DONE")
 
 }catch(e){
 
