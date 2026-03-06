@@ -1,67 +1,30 @@
-import {state} from "./state.js"
-import {cleanCategory,sortCategory,sortProducts} from "./utils.js"
-import {openProduct} from "./modal.js"
-
-export function renderCategory(){
-
-let cats=[...new Set(state.products.map(p=>p.category).filter(Boolean))]
-
-cats.sort(sortCategory)
-
-let html='<button id="allBtn">All</button>'
-
-cats.forEach(c=>{
-html+=`<button data-cat="${c}">${cleanCategory(c)}</button>`
-})
-
-document.getElementById('category').innerHTML=html
-
-document.getElementById("allBtn").onclick=()=>{
-renderMenu(state.products)
-}
-
-document.querySelectorAll("[data-cat]").forEach(btn=>{
-btn.onclick=()=>{
-let c=btn.dataset.cat
-let list=state.products.filter(p=>p.category==c)
-renderMenu(sortProducts(list))
-}
-})
-
-}
+import {addToCart} from "./cart.js"
 
 export function renderMenu(items){
 
-let html=''
+const menu=document.getElementById("menu")
 
-items.forEach(p=>{
+menu.innerHTML=""
 
-html+=`
+items
+.filter(i=>!window.currentCategory || i.category_id===window.currentCategory)
+.forEach(i=>{
 
-<div class="card" data-id="${p.id}">
+const card=document.createElement("div")
 
-<div class="card-img">
-<img src="${p.image_url || ''}">
-<div class="add-btn">+</div>
-</div>
+card.className="menu-card"
 
-<div class="card-body">
-<div class="name">${p.name}</div>
-<div class="price">${p.price} ฿</div>
-</div>
+card.innerHTML=`
 
-</div>
+<div class="name">${i.item_name}</div>
+<div class="price">${i.price} ฿</div>
 
 `
 
-})
+card.onclick=()=>addToCart(i)
 
-document.getElementById('menu').innerHTML=html
+menu.appendChild(card)
 
-document.querySelectorAll(".card").forEach(c=>{
-c.onclick=()=>{
-openProduct(c.dataset.id)
-}
 })
 
 }
