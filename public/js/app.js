@@ -1,35 +1,18 @@
-import {state} from "./state.js"
-import {getProducts} from "./api.js"
-import {sortProducts} from "./utils.js"
-import {renderCategory,renderMenu} from "./menu.js"
+import { loadMenu } from "./menu.js"
 
-async function init(){
-
-try{
+async function start(){
 
 await liff.init({
 liffId:"2009308319-2r1OXrGI"
 })
 
-let data = await getProducts()
+if(!liff.isLoggedIn()){
+liff.login()
+return
+}
 
-data = data.map(p=>{
-if(!p.category) p.category="999_อื่นๆ"
-return p
-})
-
-state.products = sortProducts(data)
-
-renderCategory()
-renderMenu(state.products)
-
-}catch(e){
-
-console.error(e)
-alert("โหลดเมนูไม่สำเร็จ")
+loadMenu()
 
 }
 
-}
-
-init()
+start()
