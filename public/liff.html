@@ -874,8 +874,32 @@ modal.onclick=function(){
 modal.classList.remove('show')
 }
 
-  }
+}
 
+function increaseQty(i){
+cart[i].qty=(cart[i].qty||1)+1
+openCart()
+}
+
+function decreaseQty(i){
+
+if(cart[i].qty>1){
+cart[i].qty--
+}else{
+cart.splice(i,1)
+}
+
+openCart()
+}
+
+function removeItem(i){
+cart.splice(i,1)
+openCart()
+}
+
+function closeModal(){
+document.getElementById('modal').classList.remove('show')
+}
 async function sendOrder(){
 
 await fetch('/api/order',{
