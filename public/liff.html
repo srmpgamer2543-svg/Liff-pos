@@ -727,6 +727,137 @@ background:#06c755;
 color:white;
 border:none;
 border-radius:16px;
+function openCart(){
+
+let html=`<div class="modal-content" onclick="event.stopPropagation()">`
+
+html+=`
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+<h3 style="font-size:36px;margin:0">Cart</h3>
+<div style="font-size:36px;cursor:pointer" onclick="closeModal()">✕</div>
+</div>
+`
+
+let total=0
+
+cart.forEach((c,i)=>{
+
+let basePrice=c.price
+let modifierPrice=0
+let modifierText=""
+
+if(c.modifiers && c.modifiers.length){
+
+modifierText=c.modifiers.map(m=>{
+
+modifierPrice+=m.price || 0
+
+return `${m.name}${m.price?` (+${m.price})`:''}`
+
+}).join(', ')
+
+}
+
+let itemPrice=basePrice+modifierPrice
+
+if(!c.qty){c.qty=1}
+
+let lineTotal=itemPrice*c.qty
+
+total+=lineTotal
+
+html+=`
+
+<div style="padding:16px 0;border-bottom:1px solid #eee">
+
+<div style="display:flex;justify-content:space-between;align-items:center">
+
+<div>
+
+<div style="font-size:32px;font-weight:700">
+${c.name}
+</div>
+
+${modifierText?`
+
+<div style="font-size:24px;color:#777;margin-top:4px">
+${modifierText}
+</div>
+
+`:``}
+
+</div>
+
+<div style="font-size:30px;color:#06c755;font-weight:700">
+${lineTotal} ฿
+</div>
+
+</div>
+
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+
+<div style="display:flex;gap:10px">
+
+<button onclick="decreaseQty(${i})" style="
+width:50px;
+height:50px;
+font-size:28px;
+border-radius:10px;
+border:1px solid #ddd;
+background:white;
+">-</button>
+
+<div style="font-size:28px;width:40px;text-align:center">
+${c.qty}
+</div>
+
+<button onclick="increaseQty(${i})" style="
+width:50px;
+height:50px;
+font-size:28px;
+border-radius:10px;
+border:1px solid #ddd;
+background:white;
+">+</button>
+
+</div>
+
+<button onclick="removeItem(${i})" style="
+font-size:24px;
+background:#ff4444;
+color:white;
+border:none;
+border-radius:10px;
+padding:6px 12px
+">
+ลบ
+</button>
+
+</div>
+
+</div>
+
+`
+
+})
+
+html+=`
+
+<div style="margin-top:20px;font-size:38px;font-weight:bold;display:flex;justify-content:space-between">
+<div>รวม</div>
+<div>${total} ฿</div>
+</div>
+
+<button onclick="sendOrder()" style="
+margin-top:20px;
+width:100%;
+padding:18px;
+font-size:32px;
+background:#06c755;
+color:white;
+border:none;
+border-radius:14px;
 font-weight:700;
 ">
 Order
@@ -743,7 +874,7 @@ modal.onclick=function(){
 modal.classList.remove('show')
 }
 
-}
+  }
 
 async function sendOrder(){
 
