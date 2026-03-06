@@ -1,16 +1,29 @@
-export async function getProducts(){
+import {config} from "./config.js"
 
-let res = await fetch('/api/products')
-return await res.json()
+export async function getCategories(){
+
+const res = await fetch(`${config.api}/categories`,{
+headers:{
+Authorization:`Bearer ${config.token}`
+}
+})
+
+const data = await res.json()
+
+return data.categories
 
 }
 
-export async function sendOrder(cart){
+export async function getItems(){
 
-await fetch('/api/order',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify(cart)
+const res = await fetch(`${config.api}/items`,{
+headers:{
+Authorization:`Bearer ${config.token}`
+}
 })
+
+const data = await res.json()
+
+return data.items
 
 }
