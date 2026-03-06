@@ -14,15 +14,49 @@ background:#f5f5f5;
 font-size:30px;
 }
 
+/* HEADER */
+
 .header{
-background:#06c755;
-color:white;
-padding:18px;
-font-size:40px;
+position:sticky;
+top:0;
+z-index:999;
+background:white;
+box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+.logo-area{
+height:160px;
+display:flex;
+align-items:center;
+justify-content:center;
+transition:.35s;
+overflow:hidden;
+}
+
+.logo-area img{
+height:120px;
+}
+
+.shop-bar{
 display:flex;
 justify-content:space-between;
 align-items:center;
+padding:16px 20px;
+border-top:1px solid #eee;
 }
+
+.shop-title{
+font-size:36px;
+font-weight:800;
+color:#5a2d0c;
+}
+
+.cart-icon{
+font-size:44px;
+cursor:pointer;
+}
+
+/* CATEGORY */
 
 .category{
 display:flex;
@@ -43,6 +77,8 @@ font-size:30px;
 color:black;
 font-weight:600;
 }
+
+/* MENU */
 
 .menu{
 display:grid;
@@ -103,6 +139,7 @@ font-size:45px;
 font-weight:700;
 line-height:1.35;
 flex:1;
+
 display:-webkit-box;
 -webkit-line-clamp:2;
 -webkit-box-orient:vertical;
@@ -116,17 +153,32 @@ font-size:50px;
 margin-top:auto;
 }
 
-.cart-btn{
+/* FLOATING CART */
+
+.floating-cart{
+
 position:fixed;
 bottom:20px;
+left:20px;
 right:20px;
+
 background:#06c755;
 color:white;
-padding:18px 26px;
+
+padding:20px;
 border-radius:30px;
-box-shadow:0 3px 10px rgba(0,0,0,0.2);
-font-size:20px;
+
+box-shadow:0 6px 20px rgba(0,0,0,0.25);
+
+display:none;
+
+font-size:34px;
+font-weight:bold;
+text-align:center;
+
 }
+
+/* MODAL */
 
 .modal{
 position:fixed;
@@ -153,8 +205,6 @@ max-height:50vh;
 overflow-y:auto;
 -webkit-overflow-scrolling:touch;
 }
-
-/* ===== MODIFIER UI PRO ===== */
 
 .modifier-group{
 margin-bottom:26px;
@@ -183,79 +233,22 @@ gap:16px;
 
 .option{
 display:flex;
-justify-content:space-between;
 align-items:center;
+gap:18px;
 padding:22px;
 border-radius:16px;
 background:white;
 font-size:34px;
 border:1px solid #eee;
-transition:.2s;
-}
-
-.option-left{
-display:flex;
-align-items:center;
-gap:18px;
-}
-
-.option-right{
-color:#06c755;
-font-weight:700;
-font-size:30px;
-}
-
-.selector{
-width:28px;
-height:28px;
-border-radius:50%;
-border:2px solid #bbb;
-display:flex;
-align-items:center;
-justify-content:center;
-transition:.2s;
-}
-
-.selector::after{
-content:'';
-width:14px;
-height:14px;
-border-radius:50%;
-background:#06c755;
-transform:scale(0);
-transition:.2s;
-}
-
-.option input{
-display:none;
 }
 
 .option:has(input:checked){
 border:2px solid #06c755;
 background:#f0fff4;
-transform:scale(1.02);
 }
 
-.option:has(input:checked) .selector{
-border-color:#06c755;
-}
-
-.option:has(input:checked) .selector::after{
-transform:scale(1);
-}
-
-.option:active{
-transform:scale(.97);
-}
-
-/* ===== TOTAL PRICE ===== */
-
-.total-price{
-font-size:44px;
-font-weight:700;
-margin-top:20px;
-color:#06c755;
-text-align:right;
+.option input{
+transform:scale(2.2);
 }
 
 button{
@@ -266,7 +259,7 @@ background:#06c755;
 color:white;
 border-radius:16px;
 width:100%;
-margin-top:20px;
+margin-top:30px;
 }
 
 </style>
@@ -275,16 +268,31 @@ margin-top:20px;
 <body>
 
 <div class="header">
-<span>Menu</span>
-<span onclick="openCart()">🛒</span>
+
+<div class="logo-area" id="logoArea">
+<img src="logo.png">
+</div>
+
+<div class="shop-bar">
+
+<div class="shop-title">
+มีนม.ขนมปัง🍞
+</div>
+
+<div class="cart-icon" onclick="openCart()">
+🧺
+</div>
+
+</div>
+
 </div>
 
 <div class="category" id="category"></div>
 
 <div class="menu" id="menu"></div>
 
-<div class="cart-btn" onclick="openCart()">
-Cart (<span id="cartCount">0</span>)
+<div class="floating-cart" id="floatingCart" onclick="openCart()">
+ดูตะกร้า • <span id="floatingTotal">0</span> บาท
 </div>
 
 <div id="modal" class="modal"></div>
@@ -447,15 +455,8 @@ if(m.name.includes('ท้อปปิ้ง')){
 m.options.forEach(o=>{
 html+=`
 <label class="option">
-
-<div class="option-left">
-<div class="selector"></div>
-<input type="checkbox" value="${o.id}" data-price="${o.price}" onchange="updateTotal()">
-<span>${o.name}</span>
-</div>
-
-<div class="option-right">${o.price>0?`+${o.price}`:''}</div>
-
+<input type="checkbox" value="${o.id}">
+${o.name}
 </label>`
 })
 
@@ -464,15 +465,8 @@ html+=`
 m.options.forEach(o=>{
 html+=`
 <label class="option">
-
-<div class="option-left">
-<div class="selector"></div>
-<input type="radio" name="${m.id}" value="${o.id}" data-price="${o.price}" onchange="updateTotal()">
-<span>${o.name}</span>
-</div>
-
-<div class="option-right">${o.price>0?`+${o.price}`:''}</div>
-
+<input type="radio" name="${m.id}" value="${o.id}">
+${o.name}
 </label>`
 })
 
@@ -483,8 +477,7 @@ html+=`</div>`
 
 })
 
-html+=`<div class="total-price">Total : <span id="totalPrice">${p.price}</span> ฿</div>`
-html+=`<button onclick="addCart()">ส่งออเดอร์</button>`
+html+=`<button onclick="addCart()">เพิ่มลงตะกร้า</button>`
 html+=`</div>`
 
 let modal=document.getElementById('modal')
@@ -494,19 +487,6 @@ modal.classList.add('show')
 modal.onclick=function(){
 modal.classList.remove('show')
 }
-
-}
-
-function updateTotal(){
-
-let base=currentProduct.price
-let extra=0
-
-document.querySelectorAll(".option input:checked").forEach(i=>{
-extra+=parseFloat(i.dataset.price||0)
-})
-
-document.getElementById("totalPrice").innerText=base+extra
 
 }
 
@@ -556,7 +536,11 @@ if(!validateRequired()) return
 
 cart.push(currentProduct)
 
-document.getElementById('cartCount').innerText=cart.length
+let total=0
+cart.forEach(i=> total+=i.price)
+
+document.getElementById('floatingTotal').innerText=total
+document.getElementById('floatingCart').style.display="block"
 
 document.getElementById('modal').classList.remove('show')
 
@@ -596,6 +580,18 @@ body:JSON.stringify(cart)
 alert('Order sent')
 
 }
+
+window.addEventListener("scroll",()=>{
+
+let logo=document.getElementById("logoArea")
+
+if(window.scrollY>80){
+logo.style.height="0px"
+}else{
+logo.style.height="160px"
+}
+
+})
 
 init()
 
