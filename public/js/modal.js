@@ -1,11 +1,11 @@
-import {products,currentProduct,cart} from "./state.js"
+import {state} from "./state.js"
 import {sortModifiers} from "./utils.js"
 import {updateFloating} from "./cart.js"
 
 export function openProduct(id){
 
-let p=products.find(x=>x.id==id)
-currentProduct=p
+let p=state.products.find(x=>x.id==id)
+state.currentProduct=p
 
 let mods=sortModifiers([...p.modifiers])
 
@@ -74,13 +74,13 @@ extra+=price
 })
 
 let item={
-name:currentProduct.name,
-price:currentProduct.price,
+name:state.currentProduct.name,
+price:state.currentProduct.price,
 modifiers:modifiers,
 qty:1
 }
 
-cart.push(item)
+state.cart.push(item)
 
 updateFloating()
 
