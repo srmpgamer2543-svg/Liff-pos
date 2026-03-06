@@ -19,31 +19,29 @@ el.innerHTML = html
 
 }
 
-export function renderMenu(list){
+export function renderMenu(products){
 
-let el = document.getElementById("menu")
+const menu = document.getElementById("menu")
 
-let html = ""
+menu.innerHTML=""
 
-list.forEach(p=>{
+products.forEach(p=>{
 
-html+=`
+const card = document.createElement("div")
+card.className="menu-card"
 
-<div class="card" onclick="openModal('${p.id}')">
-
-<img src="${p.image_url||''}">
-
-<div class="name">${p.name}</div>
-
-<div class="price">${p.price} ฿</div>
-
+card.innerHTML = `
+<img src="${p.image_url || ''}">
+<div class="menu-info">
+<div class="menu-name">${p.name}</div>
+<div class="menu-price">${p.price} ฿</div>
 </div>
-
+<button class="add-btn">+</button>
 `
 
-})
+menu.appendChild(card)
 
-el.innerHTML = html
+})
 
 }
 
