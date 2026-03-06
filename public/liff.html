@@ -638,12 +638,40 @@ let html=`<div class="modal-content" onclick="event.stopPropagation()">`
 
 html+='<h3>Cart</h3>'
 
-cart.forEach(c=>{
-html+=`${c.name}<br>`
+let total=0
+
+cart.forEach((c,i)=>{
+
+total+=c.price
+
+html+=`
+
+<div style="padding:10px 0;border-bottom:1px solid #eee">
+
+<div style="font-size:36px;font-weight:700">
+${c.name}
+</div>
+
+<div style="font-size:32px;color:#06c755">
+${c.price} ฿
+</div>
+
+</div>
+
+`
+
 })
 
-html+='<button onclick="sendOrder()">Order</button>'
-html+='</div>'
+html+=`
+
+<div style="margin-top:20px;font-size:40px;font-weight:bold">
+รวม ${total} ฿
+</div>
+
+<button onclick="sendOrder()">Order</button>
+
+</div>
+`
 
 let modal=document.getElementById('modal')
 modal.innerHTML=html
