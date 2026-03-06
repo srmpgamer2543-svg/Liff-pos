@@ -574,6 +574,52 @@ modal.classList.remove('show')
 
 function validateRequired(){
 
+let needIce=false
+let needSweet=false
+
+let iceSelected=false
+let sweetSelected=false
+
+document.querySelectorAll(".modifier-group").forEach(group=>{
+
+let name = group.querySelector("h4").innerText
+
+let radios = group.querySelectorAll("input[type=radio]")
+
+let checked=false
+radios.forEach(i=>{
+if(i.checked) checked=true
+})
+
+/* ตรวจว่าเมนูนี้มี modifier นี้ไหม */
+
+if(name.includes("เย็น") || name.includes("ปั่น")){
+needIce=true
+if(checked) iceSelected=true
+}
+
+if(name.includes("หวาน")){
+needSweet=true
+if(checked) sweetSelected=true
+}
+
+})
+
+/* เช็คเฉพาะที่มีจริง */
+
+if(needIce && !iceSelected){
+alert("กรุณาเลือก เย็น หรือ ปั่น")
+return false
+}
+
+if(needSweet && !sweetSelected){
+alert("กรุณาเลือกระดับความหวาน")
+return false
+}
+
+return true
+}
+
 let iceSelected=false
 let sweetSelected=false
 
