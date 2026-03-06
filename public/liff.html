@@ -666,13 +666,13 @@ alert('Order sent')
 }
 
 let snapLock=false
+let logo=document.getElementById("logoArea")
 
 window.addEventListener("scroll",()=>{
 
 if(snapLock) return
 
 let y=window.scrollY
-let logo=document.getElementById("logoArea")
 
 if(y>60 && y<140){
 
