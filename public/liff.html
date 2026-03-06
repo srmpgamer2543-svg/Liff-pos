@@ -12,7 +12,6 @@ font-family:sans-serif;
 margin:0;
 background:#f5f5f5;
 font-size:30px;
-
 scroll-behavior:smooth;
 }
 
@@ -26,16 +25,12 @@ background:white;
 box-shadow:0 3px 10px rgba(0,0,0,0.08);
 }
 
-/* โลโก้ */
-
 .logo-area{
 height:20vh;
 display:flex;
 align-items:center;
 justify-content:center;
-
 transition:height .25s ease, opacity .25s ease;
-
 overflow:hidden;
 }
 
@@ -44,12 +39,7 @@ width:100%;
 height:100%;
 object-fit:contain;
 padding:10px;
-box-sizing:border-box;
-
-transition:transform .55s cubic-bezier(.25,.8,.25,1);
 }
-
-/* แถบชื่อร้าน */
 
 .shop-bar{
 display:flex;
@@ -72,14 +62,7 @@ color:#5a2d0c;
 .cart-icon{
 font-size:48px;
 cursor:pointer;
-transition:transform .2s ease;
 }
-
-.cart-icon:active{
-transform:scale(.9);
-}
-
-/* CATEGORY */
 
 .category{
 display:flex;
@@ -97,24 +80,14 @@ padding:12px 20px;
 border-radius:20px;
 white-space:nowrap;
 font-size:30px;
-color:black;
 font-weight:600;
-transition:all .2s;
 }
-
-.category button:active{
-transform:scale(.95);
-}
-
-/* MENU */
 
 .menu{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:14px;
 padding:14px;
-
-scroll-snap-align:start;
 }
 
 .card{
@@ -126,19 +99,12 @@ display:flex;
 flex-direction:column;
 aspect-ratio:3/4;
 cursor:pointer;
-transition:transform .25s ease, box-shadow .25s ease;
-}
-
-.card:active{
-transform:scale(.96);
-box-shadow:0 2px 6px rgba(0,0,0,0.15);
 }
 
 .card-img{
 position:relative;
 width:100%;
 aspect-ratio:1/1;
-overflow:hidden;
 }
 
 .card-img img{
@@ -160,12 +126,6 @@ display:flex;
 align-items:center;
 justify-content:center;
 font-size:30px;
-font-weight:bold;
-transition:transform .2s ease;
-}
-
-.add-btn:active{
-transform:scale(.85);
 }
 
 .card-body{
@@ -176,56 +136,31 @@ flex-direction:column;
 }
 
 .name{
-font-size:45px;
+font-size:40px;
 font-weight:700;
-line-height:1.35;
-flex:1;
-
-display:-webkit-box;
--webkit-line-clamp:2;
--webkit-box-orient:vertical;
-overflow:hidden;
 }
 
 .price{
 color:#06c755;
 font-weight:bold;
-font-size:50px;
+font-size:42px;
 margin-top:auto;
 }
 
-/* FLOATING CART */
-
 .floating-cart{
-
 position:fixed;
 bottom:20px;
 left:20px;
 right:20px;
-
 background:#06c755;
 color:white;
-
 padding:20px;
 border-radius:30px;
-
-box-shadow:0 6px 20px rgba(0,0,0,0.25);
-
 display:none;
-
 font-size:34px;
 font-weight:bold;
 text-align:center;
-
-animation:cartPop .35s cubic-bezier(.22,1,.36,1);
 }
-
-@keyframes cartPop{
-from{transform:scale(.9);opacity:0}
-to{transform:scale(1);opacity:1}
-}
-
-/* MODAL */
 
 .modal{
 position:fixed;
@@ -240,12 +175,6 @@ align-items:flex-end;
 
 .modal.show{
 display:flex;
-animation:fadeIn .25s ease;
-}
-
-@keyframes fadeIn{
-from{opacity:0}
-to{opacity:1}
 }
 
 .modal-content{
@@ -253,44 +182,9 @@ background:white;
 width:100%;
 border-radius:24px 24px 0 0;
 padding:28px;
-height:50vh;
-max-height:50vh;
-overflow-y:auto;
--webkit-overflow-scrolling:touch;
-transform:translateY(60px);
-animation:slideUp .35s cubic-bezier(.22,1,.36,1) forwards;
+max-height:70vh;
+overflow:auto;
 }
-
-@keyframes slideUp{
-to{transform:translateY(0)}
-}
-
-.modifier-group{
-margin-bottom:26px;
-padding-bottom:20px;
-border-bottom:1px solid #eee;
-}
-
-.modal-content h3{
-font-size:52px;
-margin-bottom:24px;
-font-weight:700;
-}
-
-.modal-content h4{
-font-size:42px;
-margin-top:10px;
-margin-bottom:16px;
-font-weight:600;
-}
-
-.modifier-grid{
-display:grid;
-grid-template-columns:1fr;
-gap:16px;
-}
-
-/* OPTION STYLE ใหม่ */
 
 .option{
 display:flex;
@@ -299,49 +193,23 @@ gap:18px;
 padding:22px;
 border-radius:18px;
 background:#fafafa;
-font-size:34px;
-border:2px solid transparent;
-transition:all .2s cubic-bezier(.22,1,.36,1);
-position:relative;
+font-size:30px;
+margin-bottom:10px;
 }
 
 .option input{
-display:none;
-}
-
-.option:active{
-transform:scale(.97);
-}
-
-.option:has(input:checked){
-border:2px solid #06c755;
-background:#eafff2;
-box-shadow:0 3px 10px rgba(6,199,85,.25);
-}
-
-.option:has(input:checked)::after{
-content:"✓";
-position:absolute;
-right:20px;
-font-size:34px;
-color:#06c755;
-font-weight:bold;
+margin-right:10px;
 }
 
 button{
-font-size:40px;
-padding:24px;
+font-size:34px;
+padding:18px;
 border:none;
 background:#06c755;
 color:white;
 border-radius:16px;
 width:100%;
-margin-top:30px;
-transition:transform .2s ease;
-}
-
-button:active{
-transform:scale(.96);
+margin-top:20px;
 }
 
 </style>
@@ -370,7 +238,6 @@ transform:scale(.96);
 </div>
 
 <div class="category" id="category"></div>
-
 <div class="menu" id="menu"></div>
 
 <div class="floating-cart" id="floatingCart" onclick="openCart()">
@@ -391,42 +258,28 @@ return name.replace(/^\d+_/,'')
 }
 
 function sortCategory(a,b){
-
-if(!a) a="999_อื่นๆ"
-if(!b) b="999_อื่นๆ"
-
-let na=parseInt(a.split('_')[0])
-let nb=parseInt(b.split('_')[0])
-
-if(isNaN(na)) na=999
-if(isNaN(nb)) nb=999
-
+let na=parseInt(a.split('_')[0])||999
+let nb=parseInt(b.split('_')[0])||999
 return na-nb
 }
 
 function sortProducts(list){
 return list.sort((a,b)=>{
-
-let ca = a.category ? parseInt(a.category.split('_')[0]) : 999
-let cb = b.category ? parseInt(b.category.split('_')[0]) : 999
-
-if(isNaN(ca)) ca=999
-if(isNaN(cb)) cb=999
-
+let ca=parseInt(a.category?.split('_')[0])||999
+let cb=parseInt(b.category?.split('_')[0])||999
 if(ca!==cb) return ca-cb
-return (a.name || "").localeCompare(b.name || "")
-
+return a.name.localeCompare(b.name)
 })
 }
 
 function sortModifiers(mods){
 
+let order=["เย็น","ปั่น","หวาน","ท้อปปิ้ง"]
+
 return mods.sort((a,b)=>{
 
-let order = ["เย็น","ปั่น","หวาน","ท้อปปิ้ง"]
-
-let ai = order.findIndex(o=>a.name.includes(o))
-let bi = order.findIndex(o=>b.name.includes(o))
+let ai=order.findIndex(o=>a.name.includes(o))
+let bi=order.findIndex(o=>b.name.includes(o))
 
 if(ai==-1) ai=99
 if(bi==-1) bi=99
@@ -447,7 +300,7 @@ let res=await fetch('/api/products')
 products=await res.json()
 
 products=products.map(p=>{
-if(!p.category) p.category="999_อื่นๆ"
+if(!p.category)p.category="999_อื่นๆ"
 return p
 })
 
@@ -458,7 +311,6 @@ renderMenu(products)
 
 }catch(e){
 
-console.error(e)
 alert("โหลดเมนูไม่สำเร็จ")
 
 }
@@ -467,7 +319,7 @@ alert("โหลดเมนูไม่สำเร็จ")
 
 function renderCategory(){
 
-let cats=[...new Set(products.map(p=>p.category).filter(Boolean))]
+let cats=[...new Set(products.map(p=>p.category))]
 cats.sort(sortCategory)
 
 let html='<button onclick="renderMenu(products)">All</button>'
@@ -482,7 +334,7 @@ document.getElementById('category').innerHTML=html
 
 function filterCat(c){
 let list=products.filter(p=>p.category==c)
-renderMenu(sortProducts(list))
+renderMenu(list)
 }
 
 function renderMenu(items){
@@ -492,11 +344,10 @@ let html=''
 items.forEach(p=>{
 
 html+=`
-
 <div class="card" onclick="openProduct('${p.id}')">
 
 <div class="card-img">
-<img src="${p.image_url || ''}">
+<img src="${p.image_url||''}">
 <div class="add-btn">+</div>
 </div>
 
@@ -506,7 +357,6 @@ html+=`
 </div>
 
 </div>
-
 `
 
 })
@@ -523,39 +373,35 @@ currentProduct=p
 let mods=sortModifiers([...p.modifiers])
 
 let html=`<div class="modal-content" onclick="event.stopPropagation()">`
-
 html+=`<h3>${p.name}</h3>`
 
 mods.forEach(m=>{
 
-html+=`<div class="modifier-group">`
 html+=`<h4>${m.name}</h4>`
-html+=`<div class="modifier-grid">`
+
+m.options.forEach(o=>{
 
 if(m.name.includes('ท้อปปิ้ง')){
 
-m.options.forEach(o=>{
 html+=`
 <label class="option">
-<input type="checkbox" value="${o.id}">
-${o.name}
-</label>`
-})
+<input type="checkbox" value="${o.id}" data-price="${o.price||0}">
+${o.name} ${o.price?`(+${o.price})`:''}
+</label>
+`
 
 }else{
 
-m.options.forEach(o=>{
 html+=`
 <label class="option">
-<input type="radio" name="${m.id}" value="${o.id}">
-${o.name}
-</label>`
-})
+<input type="radio" name="${m.id}" value="${o.id}" data-price="${o.price||0}">
+${o.name} ${o.price?`(+${o.price})`:''}
+</label>
+`
 
 }
 
-html+=`</div>`
-html+=`</div>`
+})
 
 })
 
@@ -573,374 +419,92 @@ modal.classList.remove('show')
 }
 
 function validateRequired(){
-
-let needIce=false
-let needSweet=false
-
-let iceSelected=false
-let sweetSelected=false
-
-document.querySelectorAll(".modifier-group").forEach(group=>{
-
-let name = group.querySelector("h4").innerText
-
-let radios = group.querySelectorAll("input[type=radio]")
-
-let checked=false
-radios.forEach(i=>{
-if(i.checked) checked=true
-})
-
-if(name.includes("เย็น") || name.includes("ปั่น")){
-needIce=true
-if(checked) iceSelected=true
-}
-
-if(name.includes("หวาน")){
-needSweet=true
-if(checked) sweetSelected=true
-}
-
-})
-
-if(needIce && !iceSelected){
-alert("กรุณาเลือก เย็น หรือ ปั่น")
-return false
-}
-
-if(needSweet && !sweetSelected){
-alert("กรุณาเลือกระดับความหวาน")
-return false
-}
-
 return true
 }
 
 function addCart(){
 
-if(!validateRequired()) return
+let modifiers=[]
+let extra=0
 
-cart.push(currentProduct)
+document.querySelectorAll(".modal-content input:checked").forEach(i=>{
 
-let total=0
-cart.forEach(i=> total+=i.price)
+let price=parseInt(i.dataset.price)||0
 
-document.getElementById('floatingTotal').innerText=total
-document.getElementById('floatingCart').style.display="block"
+modifiers.push({
+name:i.parentElement.innerText.trim(),
+price:price
+})
+
+extra+=price
+
+})
+
+let item={
+name:currentProduct.name,
+price:currentProduct.price,
+modifiers:modifiers,
+qty:1
+}
+
+cart.push(item)
+
+updateFloating()
 
 document.getElementById('modal').classList.remove('show')
 
 }
 
-function openCart(){
-
-let html=`<div class="modal-content" onclick="event.stopPropagation()">`
-
-html+=`
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
-">
-<h3 style="font-size:40px;margin:0">Cart</h3>
-<div onclick="closeModal()" style="
-font-size:36px;
-cursor:pointer;
-">✕</div>
-</div>
-`
+function updateFloating(){
 
 let total=0
 
-cart.forEach((c,i)=>{
-
-total+=c.price
-
-html+=`
-
-<div style="
-padding:14px 0;
-border-bottom:1px solid #eee;
-display:flex;
-justify-content:space-between;
-align-items:center;
-">
-
-<div>
-
-<div style="
-font-size:34px;
-font-weight:700;
-line-height:1.2;
-">
-${c.name}
-</div>
-
-${c.modifiers && c.modifiers.length ? `
-<div style="
-font-size:26px;
-color:#777;
-margin-top:4px;
-">
-${c.modifiers.map(m=>m.name).join(', ')}
-</div>
-` : ``}
-
-</div>
-
-<div style="
-font-size:32px;
-color:#06c755;
-font-weight:700;
-">
-${c.price} ฿
-</div>
-
-</div>
-
-`
-
+cart.forEach(c=>{
+let mod=0
+c.modifiers.forEach(m=>mod+=m.price)
+total+=(c.price+mod)*(c.qty||1)
 })
 
-html+=`
-
-<div style="
-margin-top:24px;
-font-size:40px;
-font-weight:700;
-display:flex;
-justify-content:space-between;
-">
-
-<div>รวม</div>
-<div>${total} ฿</div>
-
-</div>
-
-<button onclick="sendOrder()" style="
-margin-top:24px;
-width:100%;
-padding:18px;
-font-size:34px;
-background:#06c755;
-color:white;
-border:none;
-border-radius:16px;
-function openCart(){
-
-let html=`<div class="modal-content" onclick="event.stopPropagation()">`
-
-html+=`
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-<h3 style="font-size:36px;margin:0">Cart</h3>
-<div style="font-size:36px;cursor:pointer" onclick="closeModal()">✕</div>
-</div>
-`
-
-let total=0
-
-cart.forEach((c,i)=>{
-
-let basePrice=c.price
-let modifierPrice=0
-let modifierText=""
-
-if(c.modifiers && c.modifiers.length){
-
-modifierText=c.modifiers.map(m=>{
-
-modifierPrice+=m.price || 0
-
-return `${m.name}${m.price?` (+${m.price})`:''}`
-
-}).join(', ')
+document.getElementById('floatingTotal').innerText=total
+document.getElementById('floatingCart').style.display="block"
 
 }
-
-let itemPrice=basePrice+modifierPrice
-
-if(!c.qty){c.qty=1}
-
-let lineTotal=itemPrice*c.qty
-
-total+=lineTotal
-
-html+=`
-
-<div style="padding:16px 0;border-bottom:1px solid #eee">
-
-<div style="display:flex;justify-content:space-between;align-items:center">
-
-<div>
-
-<div style="font-size:32px;font-weight:700">
-${c.name}
-</div>
-
-${modifierText?`
-
-<div style="font-size:24px;color:#777;margin-top:4px">
-${modifierText}
-</div>
-
-`:``}
-
-</div>
-
-<div style="font-size:30px;color:#06c755;font-weight:700">
-${lineTotal} ฿
-</div>
-
-</div>
-
-
-<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
-
-<div style="display:flex;gap:10px">
-
-<button onclick="decreaseQty(${i})" style="
-width:50px;
-height:50px;
-font-size:28px;
-border-radius:10px;
-border:1px solid #ddd;
-background:white;
-">-</button>
-
-<div style="font-size:28px;width:40px;text-align:center">
-${c.qty}
-</div>
-
-<button onclick="increaseQty(${i})" style="
-width:50px;
-height:50px;
-font-size:28px;
-border-radius:10px;
-border:1px solid #ddd;
-background:white;
-">+</button>
-
-</div>
-
-<button onclick="removeItem(${i})" style="
-font-size:24px;
-background:#ff4444;
-color:white;
-border:none;
-border-radius:10px;
-padding:6px 12px
-">
-ลบ
-</button>
-
-</div>
-
-</div>
 
 function openCart(){
 
 let html=`<div class="modal-content" onclick="event.stopPropagation()">`
 
-html+=`
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-<h3 style="font-size:36px;margin:0">Cart</h3>
-<div style="font-size:36px;cursor:pointer" onclick="closeModal()">✕</div>
-</div>
-`
+html+=`<h3>Cart</h3>`
 
 let total=0
 
 cart.forEach((c,i)=>{
 
-let basePrice=c.price
-let modifierPrice=0
-let modifierText=""
+let modPrice=0
 
-if(c.modifiers && c.modifiers.length){
-
-modifierText=c.modifiers.map(m=>{
-
-modifierPrice+=m.price || 0
-return `${m.name}${m.price?` (+${m.price})`:''}`
-
+let modText=c.modifiers.map(m=>{
+modPrice+=m.price
+return `${m.name}`
 }).join(', ')
 
-}
-
-let itemPrice=basePrice+modifierPrice
-
-if(!c.qty){c.qty=1}
-
-let lineTotal=itemPrice*c.qty
-total+=lineTotal
+let itemPrice=(c.price+modPrice)*(c.qty||1)
+total+=itemPrice
 
 html+=`
 
-<div style="padding:16px 0;border-bottom:1px solid #eee">
+<div style="border-bottom:1px solid #eee;padding:10px 0">
 
-<div style="display:flex;justify-content:space-between;align-items:center">
+<div style="font-weight:bold">${c.name}</div>
+<div style="font-size:24px;color:#777">${modText}</div>
+<div>${itemPrice} ฿</div>
 
 <div>
 
-<div style="font-size:32px;font-weight:700">
-${c.name}
-</div>
-
-${modifierText?`
-
-<div style="font-size:24px;color:#777;margin-top:4px">
-${modifierText}
-</div>
-
-`:``}
-
-</div>
-
-<div style="font-size:30px;color:#06c755;font-weight:700">
-${lineTotal} ฿
-</div>
-
-</div>
-
-<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
-
-<div style="display:flex;gap:10px">
-
-<button onclick="decreaseQty(${i})" style="
-width:50px;
-height:50px;
-font-size:28px;
-border-radius:10px;
-border:1px solid #ddd;
-background:white;
-">-</button>
-
-<div style="font-size:28px;width:40px;text-align:center">
+<button onclick="decreaseQty(${i})">-</button>
 ${c.qty}
-</div>
+<button onclick="increaseQty(${i})">+</button>
 
-<button onclick="increaseQty(${i})" style="
-width:50px;
-height:50px;
-font-size:28px;
-border-radius:10px;
-border:1px solid #ddd;
-background:white;
-">+</button>
-
-</div>
-
-<button onclick="removeItem(${i})" style="
-font-size:24px;
-background:#ff4444;
-color:white;
-border:none;
-border-radius:10px;
-padding:6px 12px
-">
-ลบ
-</button>
+<button onclick="removeItem(${i})">ลบ</button>
 
 </div>
 
@@ -952,24 +516,11 @@ padding:6px 12px
 
 html+=`
 
-<div style="margin-top:20px;font-size:38px;font-weight:bold;display:flex;justify-content:space-between">
-<div>รวม</div>
-<div>${total} ฿</div>
+<div style="font-size:36px;font-weight:bold">
+รวม ${total} ฿
 </div>
 
-<button onclick="sendOrder()" style="
-margin-top:20px;
-width:100%;
-padding:18px;
-font-size:32px;
-background:#06c755;
-color:white;
-border:none;
-border-radius:14px;
-font-weight:700;
-">
-Order
-</button>
+<button onclick="sendOrder()">Order</button>
 
 </div>
 `
@@ -978,15 +529,12 @@ let modal=document.getElementById('modal')
 modal.innerHTML=html
 modal.classList.add('show')
 
-modal.onclick=function(){
-modal.classList.remove('show')
-}
-
 }
 
 function increaseQty(i){
-cart[i].qty=(cart[i].qty||1)+1
+cart[i].qty++
 openCart()
+updateFloating()
 }
 
 function decreaseQty(i){
@@ -998,16 +546,20 @@ cart.splice(i,1)
 }
 
 openCart()
+updateFloating()
+
 }
 
 function removeItem(i){
 cart.splice(i,1)
 openCart()
+updateFloating()
 }
 
 function closeModal(){
 document.getElementById('modal').classList.remove('show')
 }
+
 async function sendOrder(){
 
 await fetch('/api/order',{
@@ -1016,30 +568,28 @@ headers:{'Content-Type':'application/json'},
 body:JSON.stringify(cart)
 })
 
-alert('Order sent')
+alert("Order sent")
 
 }
 
-const logo = document.getElementById("logoArea")
+const logo=document.getElementById("logoArea")
 
 window.addEventListener("scroll",()=>{
 
-let y = window.scrollY
-let max = 120
+let y=window.scrollY
+let max=120
 
-if(y <= max){
+if(y<=max){
 
-let progress = Math.min(y / max,1)
+let progress=Math.min(y/max,1)
 
-logo.style.height = (20 - progress*20) + "vh"
-logo.style.opacity = 1 - progress
+logo.style.height=(20-progress*20)+"vh"
+logo.style.opacity=1-progress
 
-}
+}else{
 
-if(y > max){
-
-logo.style.height = "0vh"
-logo.style.opacity = "0"
+logo.style.height="0vh"
+logo.style.opacity="0"
 
 }
 
