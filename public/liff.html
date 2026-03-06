@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <title>Menu</title>
 
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" href="/css/style.css">
 
@@ -13,37 +13,22 @@
 
 <body>
 
-<div class="header">
-
-<div class="logo-area" id="logoArea">
+<div id="logo">
 <img src="/logo.png">
 </div>
 
-<div class="shop-bar">
+<div id="category"></div>
 
-<div class="shop-title">
-มีนม.ขนมปัง🍞
+<div id="menu"></div>
+
+<div id="floatingCart" onclick="openCart()">
+🛒 <span id="floatingTotal">0</span> ฿
 </div>
 
-<div class="cart-icon" onclick="openCart()">
-🧺
-</div>
+<div id="modal"></div>
 
-</div>
-
-</div>
-
-<div class="category" id="category"></div>
-
-<div class="menu" id="menu"></div>
-
-<div class="floating-cart" id="floatingCart" onclick="openCart()">
-ดูตะกร้า • <span id="floatingTotal">0</span> บาท
-</div>
-
-<div id="modal" class="modal"></div>
-
-<script src="/js/app.js"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script type="module" src="/js/app.js"></script>
 
 </body>
 </html>
