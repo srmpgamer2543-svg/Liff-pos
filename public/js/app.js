@@ -1,4 +1,4 @@
-import {products} from "./state.js"
+import {state} from "./state.js"
 import {sortProducts} from "./utils.js"
 import {renderCategory,renderMenu} from "./menu.js"
 
@@ -8,22 +8,23 @@ try{
 
 await liff.init({liffId:"2009308319-2r1OXrGI"})
 
-let res=await fetch('/api/products')
-products=await res.json()
+let res = await fetch('/api/products')
+let data = await res.json()
 
-products=products.map(p=>{
+data = data.map(p=>{
 if(!p.category)p.category="999_อื่นๆ"
 return p
 })
 
-products=sortProducts(products)
+state.products = sortProducts(data)
 
 renderCategory()
-renderMenu(products)
+renderMenu(state.products)
 
 }catch(e){
 
 alert("โหลดเมนูไม่สำเร็จ")
+console.error(e)
 
 }
 
