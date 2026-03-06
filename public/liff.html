@@ -24,18 +24,25 @@ background:white;
 box-shadow:0 3px 10px rgba(0,0,0,0.08);
 }
 
+/* โลโก้ */
+
 .logo-area{
-height:160px;
+height:20vh;
 display:flex;
 align-items:center;
 justify-content:center;
-transition:.35s;
+transition:transform .5s cubic-bezier(.22,1,.36,1), opacity .4s;
 overflow:hidden;
+will-change:transform;
 }
 
 .logo-area img{
-height:120px;
+height:18vh;
+max-height:180px;
+object-fit:contain;
 }
+
+/* แถบชื่อร้าน */
 
 .shop-bar{
 display:flex;
@@ -43,6 +50,10 @@ justify-content:space-between;
 align-items:center;
 padding:16px 20px;
 border-top:1px solid #eee;
+background:#f0fff4;
+border:3px solid #06c755;
+border-radius:16px;
+margin:10px;
 }
 
 .shop-title{
@@ -52,8 +63,13 @@ color:#5a2d0c;
 }
 
 .cart-icon{
-font-size:44px;
+font-size:48px;
 cursor:pointer;
+transition:transform .2s ease;
+}
+
+.cart-icon:active{
+transform:scale(.9);
 }
 
 /* CATEGORY */
@@ -76,6 +92,11 @@ white-space:nowrap;
 font-size:30px;
 color:black;
 font-weight:600;
+transition:all .2s;
+}
+
+.category button:active{
+transform:scale(.95);
 }
 
 /* MENU */
@@ -96,6 +117,12 @@ display:flex;
 flex-direction:column;
 aspect-ratio:3/4;
 cursor:pointer;
+transition:transform .25s ease, box-shadow .25s ease;
+}
+
+.card:active{
+transform:scale(.96);
+box-shadow:0 2px 6px rgba(0,0,0,0.15);
 }
 
 .card-img{
@@ -117,14 +144,19 @@ bottom:10px;
 right:10px;
 background:#06c755;
 color:white;
-width:44px;
-height:44px;
+width:50px;
+height:50px;
 border-radius:50%;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:26px;
+font-size:30px;
 font-weight:bold;
+transition:transform .2s ease;
+}
+
+.add-btn:active{
+transform:scale(.85);
 }
 
 .card-body{
@@ -176,6 +208,12 @@ font-size:34px;
 font-weight:bold;
 text-align:center;
 
+animation:cartPop .35s cubic-bezier(.22,1,.36,1);
+}
+
+@keyframes cartPop{
+from{transform:scale(.9);opacity:0}
+to{transform:scale(1);opacity:1}
 }
 
 /* MODAL */
@@ -193,6 +231,12 @@ align-items:flex-end;
 
 .modal.show{
 display:flex;
+animation:fadeIn .25s ease;
+}
+
+@keyframes fadeIn{
+from{opacity:0}
+to{opacity:1}
 }
 
 .modal-content{
@@ -204,6 +248,12 @@ height:50vh;
 max-height:50vh;
 overflow-y:auto;
 -webkit-overflow-scrolling:touch;
+transform:translateY(60px);
+animation:slideUp .35s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+@keyframes slideUp{
+to{transform:translateY(0)}
 }
 
 .modifier-group{
@@ -231,24 +281,42 @@ grid-template-columns:1fr;
 gap:16px;
 }
 
+/* OPTION STYLE ใหม่ */
+
 .option{
 display:flex;
 align-items:center;
 gap:18px;
 padding:22px;
-border-radius:16px;
-background:white;
+border-radius:18px;
+background:#fafafa;
 font-size:34px;
-border:1px solid #eee;
+border:2px solid transparent;
+transition:all .2s cubic-bezier(.22,1,.36,1);
+position:relative;
+}
+
+.option input{
+display:none;
+}
+
+.option:active{
+transform:scale(.97);
 }
 
 .option:has(input:checked){
 border:2px solid #06c755;
-background:#f0fff4;
+background:#eafff2;
+box-shadow:0 3px 10px rgba(6,199,85,.25);
 }
 
-.option input{
-transform:scale(2.2);
+.option:has(input:checked)::after{
+content:"✓";
+position:absolute;
+right:20px;
+font-size:34px;
+color:#06c755;
+font-weight:bold;
 }
 
 button{
@@ -260,6 +328,11 @@ color:white;
 border-radius:16px;
 width:100%;
 margin-top:30px;
+transition:transform .2s ease;
+}
+
+button:active{
+transform:scale(.96);
 }
 
 </style>
@@ -586,9 +659,11 @@ window.addEventListener("scroll",()=>{
 let logo=document.getElementById("logoArea")
 
 if(window.scrollY>80){
-logo.style.height="0px"
+logo.style.transform="translateY(-100%)"
+logo.style.opacity="0"
 }else{
-logo.style.height="160px"
+logo.style.transform="translateY(0)"
+logo.style.opacity="1"
 }
 
 })
