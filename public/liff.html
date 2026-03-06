@@ -591,8 +591,6 @@ radios.forEach(i=>{
 if(i.checked) checked=true
 })
 
-/* ตรวจว่าเมนูนี้มี modifier นี้ไหม */
-
 if(name.includes("เย็น") || name.includes("ปั่น")){
 needIce=true
 if(checked) iceSelected=true
@@ -605,8 +603,6 @@ if(checked) sweetSelected=true
 
 })
 
-/* เช็คเฉพาะที่มีจริง */
-
 if(needIce && !iceSelected){
 alert("กรุณาเลือก เย็น หรือ ปั่น")
 return false
@@ -618,44 +614,6 @@ return false
 }
 
 return true
-}
-
-let iceSelected=false
-let sweetSelected=false
-
-document.querySelectorAll("h4").forEach(g=>{
-
-let name=g.innerText
-let radios=g.nextElementSibling.querySelectorAll("input[type=radio]")
-
-let checked=false
-
-radios.forEach(i=>{
-if(i.checked) checked=true
-})
-
-if(name.includes("เย็น") || name.includes("ปั่น")){
-if(checked) iceSelected=true
-}
-
-if(name.includes("หวาน")){
-if(checked) sweetSelected=true
-}
-
-})
-
-if(!iceSelected){
-alert("กรุณาเลือก เย็น หรือ ปั่น")
-return false
-}
-
-if(!sweetSelected){
-alert("กรุณาเลือกระดับความหวาน")
-return false
-}
-
-return true
-
 }
 
 function addCart(){
