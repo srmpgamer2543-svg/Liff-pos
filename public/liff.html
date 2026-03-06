@@ -636,7 +636,20 @@ function openCart(){
 
 let html=`<div class="modal-content" onclick="event.stopPropagation()">`
 
-html+='<h3>Cart</h3>'
+html+=`
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+">
+<h3 style="font-size:40px;margin:0">Cart</h3>
+<div onclick="closeModal()" style="
+font-size:36px;
+cursor:pointer;
+">✕</div>
+</div>
+`
 
 let total=0
 
@@ -646,13 +659,41 @@ total+=c.price
 
 html+=`
 
-<div style="padding:10px 0;border-bottom:1px solid #eee">
+<div style="
+padding:14px 0;
+border-bottom:1px solid #eee;
+display:flex;
+justify-content:space-between;
+align-items:center;
+">
 
-<div style="font-size:36px;font-weight:700">
+<div>
+
+<div style="
+font-size:34px;
+font-weight:700;
+line-height:1.2;
+">
 ${c.name}
 </div>
 
-<div style="font-size:32px;color:#06c755">
+${c.modifiers && c.modifiers.length ? `
+<div style="
+font-size:26px;
+color:#777;
+margin-top:4px;
+">
+${c.modifiers.map(m=>m.name).join(', ')}
+</div>
+` : ``}
+
+</div>
+
+<div style="
+font-size:32px;
+color:#06c755;
+font-weight:700;
+">
 ${c.price} ฿
 </div>
 
@@ -664,11 +705,32 @@ ${c.price} ฿
 
 html+=`
 
-<div style="margin-top:20px;font-size:40px;font-weight:bold">
-รวม ${total} ฿
+<div style="
+margin-top:24px;
+font-size:40px;
+font-weight:700;
+display:flex;
+justify-content:space-between;
+">
+
+<div>รวม</div>
+<div>${total} ฿</div>
+
 </div>
 
-<button onclick="sendOrder()">Order</button>
+<button onclick="sendOrder()" style="
+margin-top:24px;
+width:100%;
+padding:18px;
+font-size:34px;
+background:#06c755;
+color:white;
+border:none;
+border-radius:16px;
+font-weight:700;
+">
+Order
+</button>
 
 </div>
 `
