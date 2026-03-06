@@ -1,32 +1,23 @@
-export function renderMenu(products){
+export async function loadMenu(){
+
+const res = await fetch("/api/products")
+const items = await res.json()
 
 const menu = document.getElementById("menu")
 
 menu.innerHTML=""
 
-products.forEach(p=>{
+items.forEach(item=>{
 
-const card=document.createElement("div")
-card.className="menu-card"
+const card = document.createElement("div")
+card.className="card"
 
-card.innerHTML=`
-
-<img src="${p.image_url || ''}">
-
-<div class="menu-info">
-
-<div class="menu-name">
-${p.name}
+card.innerHTML = `
+<img src="${item.image_url || ''}">
+<div class="card-body">
+<div>${item.name}</div>
+<div class="price">${item.price} ฿</div>
 </div>
-
-<div class="menu-price">
-${p.price} ฿
-</div>
-
-</div>
-
-<button class="add-btn" onclick="openProduct('${p.id}')">+</button>
-
 `
 
 menu.appendChild(card)
