@@ -1,53 +1,25 @@
-import {state} from "./state.js"
-import {getProducts} from "./api.js"
-import {sortProducts} from "./utils.js"
-import {renderCategory,renderMenu} from "./menu.js"
-import {openCart} from "./cart.js"
+import {getCategories,getItems} from "./api.js"
+import {renderCategories} from "./category.js"
+import {renderMenu} from "./menu.js"
 
-async function init(){
+let items=[]
 
-try{
+async function start(){
 
-await liff.init({
-liffId:"2009308319-2r1OXrGI"
-})
+const categories=await getCategories()
 
-let data = await getProducts()
+items=await getItems()
 
-data = data.map(p=>{
-if(!p.category) p.category="999_อื่นๆ"
-return p
-})
+renderCategories(categories)
 
-state.products = sortProducts(data)
+renderMenu(items)
 
-renderCategory()
-renderMenu(state.products)
+document.addEventListener("categoryChange",()=>{
 
-}catch(e){
-
-console.error(e)
-alert("โหลดเมนูไม่สำเร็จ")
-
-}
-
-}
-
-document.getElementById("cartBtn").onclick=openCart
-document.getElementById("floatingCart").onclick=openCart
-
-window.addEventListener("scroll",()=>{
-
-let logo=document.getElementById("logoArea")
-
-if(window.scrollY>80){
-logo.style.transform="translateY(-100%)"
-logo.style.opacity="0"
-}else{
-logo.style.transform="translateY(0)"
-logo.style.opacity="1"
-}
+renderMenu(items)
 
 })
 
-init()
+}
+
+start()
