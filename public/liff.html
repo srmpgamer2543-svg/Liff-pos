@@ -672,7 +672,7 @@ let max = 120
 
 if(y <= max){
 
-let progress = y / max
+let progress = Math.min(y / max,1)
 
 logo.style.height = (20 - progress*20) + "vh"
 logo.style.opacity = 1 - progress
@@ -681,7 +681,7 @@ logo.style.opacity = 1 - progress
 
 if(y > max){
 
-logo.style.height = "0"
+logo.style.height = "0vh"
 logo.style.opacity = "0"
 
 }
