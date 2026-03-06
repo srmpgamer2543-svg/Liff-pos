@@ -27,12 +27,12 @@ box-shadow:0 3px 10px rgba(0,0,0,0.08);
 /* โลโก้ */
 
 .logo-area{
-height:22vh;
+height:20vh;
 display:flex;
 align-items:center;
 justify-content:center;
+transition:height .45s cubic-bezier(.22,1,.36,1), opacity .35s;
 overflow:hidden;
-transition:all .35s cubic-bezier(.22,1,.36,1);
 }
 
 .logo-area img{
@@ -369,7 +369,7 @@ transform:scale(.96);
 
 <script>
 
-/* --- โค้ดระบบทั้งหมดเหมือนเดิม --- */
+/* --- โค้ดระบบเดิมทั้งหมด --- */
 
 window.addEventListener("scroll",()=>{
 
@@ -377,12 +377,12 @@ let logo=document.getElementById("logoArea")
 
 if(window.scrollY>80){
 
-logo.style.height="0px"
+logo.style.height="0"
 logo.style.opacity="0"
 
 }else{
 
-logo.style.height="22vh"
+logo.style.height="20vh"
 logo.style.opacity="1"
 
 }
