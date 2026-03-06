@@ -1,7 +1,7 @@
 export const state = {
 
 products:[],
-category:"",
-cart:[]
+cart:[],
+currentProduct:null
 
 }
