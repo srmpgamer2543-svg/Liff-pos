@@ -1,22 +1,9 @@
-export default async function handler(req,res){
-
-const r = await fetch(
-"https://api.loyverse.com/v1.0/items",
-{
-headers:{
-Authorization:`Bearer ${process.env.LOYVERSE_API_KEY}`
-}
-}
-);
-
-const data = await r.json();
-
-const menu = data.items.map(i=>({
-id:i.id,
-name:i.item_name,
-price:i.variants[0].price
-}));
-
-res.status(200).json(menu);
-
+export default function handler(req, res) {
+  res.status(200).json({
+    success: true,
+    products: [
+      { id: 1, name: "Coffee", price: 50 },
+      { id: 2, name: "Tea", price: 40 }
+    ]
+  });
 }
