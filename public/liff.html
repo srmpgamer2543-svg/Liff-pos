@@ -31,13 +31,14 @@ height:20vh;
 display:flex;
 align-items:center;
 justify-content:center;
-transition:height .45s cubic-bezier(.22,1,.36,1), opacity .35s;
+transition:transform .5s cubic-bezier(.22,1,.36,1), opacity .4s;
 overflow:hidden;
+will-change:transform;
 }
 
 .logo-area img{
-width:100%;
-height:100%;
+height:18vh;
+max-height:180px;
 object-fit:contain;
 }
 
@@ -280,6 +281,8 @@ grid-template-columns:1fr;
 gap:16px;
 }
 
+/* OPTION STYLE ใหม่ */
+
 .option{
 display:flex;
 align-items:center;
@@ -369,22 +372,298 @@ transform:scale(.96);
 
 <script>
 
-/* --- โค้ดระบบเดิมทั้งหมด --- */
+let products=[]
+let cart=[]
+let currentProduct=null
+
+function cleanCategory(name){
+if(!name) return "อื่นๆ"
+return name.replace(/^\d+_/,'')
+}
+
+function sortCategory(a,b){
+
+if(!a) a="999_อื่นๆ"
+if(!b) b="999_อื่นๆ"
+
+let na=parseInt(a.split('_')[0])
+let nb=parseInt(b.split('_')[0])
+
+if(isNaN(na)) na=999
+if(isNaN(nb)) nb=999
+
+return na-nb
+}
+
+function sortProducts(list){
+return list.sort((a,b)=>{
+
+let ca = a.category ? parseInt(a.category.split('_')[0]) : 999
+let cb = b.category ? parseInt(b.category.split('_')[0]) : 999
+
+if(isNaN(ca)) ca=999
+if(isNaN(cb)) cb=999
+
+if(ca!==cb) return ca-cb
+return (a.name || "").localeCompare(b.name || "")
+
+})
+}
+
+function sortModifiers(mods){
+
+return mods.sort((a,b)=>{
+
+let order = ["เย็น","ปั่น","หวาน","ท้อปปิ้ง"]
+
+let ai = order.findIndex(o=>a.name.includes(o))
+let bi = order.findIndex(o=>b.name.includes(o))
+
+if(ai==-1) ai=99
+if(bi==-1) bi=99
+
+return ai-bi
+
+})
+
+}
+
+async function init(){
+
+try{
+
+await liff.init({liffId:"2009308319-2r1OXrGI"})
+
+let res=await fetch('/api/products')
+products=await res.json()
+
+products=products.map(p=>{
+if(!p.category) p.category="999_อื่นๆ"
+return p
+})
+
+products=sortProducts(products)
+
+renderCategory()
+renderMenu(products)
+
+}catch(e){
+
+console.error(e)
+alert("โหลดเมนูไม่สำเร็จ")
+
+}
+
+}
+
+function renderCategory(){
+
+let cats=[...new Set(products.map(p=>p.category).filter(Boolean))]
+cats.sort(sortCategory)
+
+let html='<button onclick="renderMenu(products)">All</button>'
+
+cats.forEach(c=>{
+html+=`<button onclick="filterCat('${c}')">${cleanCategory(c)}</button>`
+})
+
+document.getElementById('category').innerHTML=html
+
+}
+
+function filterCat(c){
+let list=products.filter(p=>p.category==c)
+renderMenu(sortProducts(list))
+}
+
+function renderMenu(items){
+
+let html=''
+
+items.forEach(p=>{
+
+html+=`
+
+<div class="card" onclick="openProduct('${p.id}')">
+
+<div class="card-img">
+<img src="${p.image_url || ''}">
+<div class="add-btn">+</div>
+</div>
+
+<div class="card-body">
+<div class="name">${p.name}</div>
+<div class="price">${p.price} ฿</div>
+</div>
+
+</div>
+
+`
+
+})
+
+document.getElementById('menu').innerHTML=html
+
+}
+
+function openProduct(id){
+
+let p=products.find(x=>x.id==id)
+currentProduct=p
+
+let mods=sortModifiers([...p.modifiers])
+
+let html=`<div class="modal-content" onclick="event.stopPropagation()">`
+
+html+=`<h3>${p.name}</h3>`
+
+mods.forEach(m=>{
+
+html+=`<div class="modifier-group">`
+html+=`<h4>${m.name}</h4>`
+html+=`<div class="modifier-grid">`
+
+if(m.name.includes('ท้อปปิ้ง')){
+
+m.options.forEach(o=>{
+html+=`
+<label class="option">
+<input type="checkbox" value="${o.id}">
+${o.name}
+</label>`
+})
+
+}else{
+
+m.options.forEach(o=>{
+html+=`
+<label class="option">
+<input type="radio" name="${m.id}" value="${o.id}">
+${o.name}
+</label>`
+})
+
+}
+
+html+=`</div>`
+html+=`</div>`
+
+})
+
+html+=`<button onclick="addCart()">เพิ่มลงตะกร้า</button>`
+html+=`</div>`
+
+let modal=document.getElementById('modal')
+modal.innerHTML=html
+modal.classList.add('show')
+
+modal.onclick=function(){
+modal.classList.remove('show')
+}
+
+}
+
+function validateRequired(){
+
+let iceSelected=false
+let sweetSelected=false
+
+document.querySelectorAll("h4").forEach(g=>{
+
+let name=g.innerText
+let radios=g.nextElementSibling.querySelectorAll("input[type=radio]")
+
+let checked=false
+
+radios.forEach(i=>{
+if(i.checked) checked=true
+})
+
+if(name.includes("เย็น") || name.includes("ปั่น")){
+if(checked) iceSelected=true
+}
+
+if(name.includes("หวาน")){
+if(checked) sweetSelected=true
+}
+
+})
+
+if(!iceSelected){
+alert("กรุณาเลือก เย็น หรือ ปั่น")
+return false
+}
+
+if(!sweetSelected){
+alert("กรุณาเลือกระดับความหวาน")
+return false
+}
+
+return true
+
+}
+
+function addCart(){
+
+if(!validateRequired()) return
+
+cart.push(currentProduct)
+
+let total=0
+cart.forEach(i=> total+=i.price)
+
+document.getElementById('floatingTotal').innerText=total
+document.getElementById('floatingCart').style.display="block"
+
+document.getElementById('modal').classList.remove('show')
+
+}
+
+function openCart(){
+
+let html=`<div class="modal-content" onclick="event.stopPropagation()">`
+
+html+='<h3>Cart</h3>'
+
+cart.forEach(c=>{
+html+=`${c.name}<br>`
+})
+
+html+='<button onclick="sendOrder()">Order</button>'
+html+='</div>'
+
+let modal=document.getElementById('modal')
+modal.innerHTML=html
+modal.classList.add('show')
+
+modal.onclick=function(){
+modal.classList.remove('show')
+}
+
+}
+
+async function sendOrder(){
+
+await fetch('/api/order',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify(cart)
+})
+
+alert('Order sent')
+
+}
 
 window.addEventListener("scroll",()=>{
 
 let logo=document.getElementById("logoArea")
 
 if(window.scrollY>80){
-
-logo.style.height="0"
+logo.style.transform="translateY(-100%)"
 logo.style.opacity="0"
-
 }else{
-
-logo.style.height="20vh"
+logo.style.transform="translateY(0)"
 logo.style.opacity="1"
-
 }
 
 })
