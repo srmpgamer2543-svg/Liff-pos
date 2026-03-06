@@ -1,24 +1,38 @@
-export async function loadMenu(){
+import {state} from "./state.js"
+import {openProduct} from "./modal.js"
 
-const res = await fetch("/api/products")
-const items = await res.json()
+export function renderMenu(){
 
 const menu = document.getElementById("menu")
 
 menu.innerHTML=""
 
-items.forEach(item=>{
+state.products.forEach(p=>{
 
 const card = document.createElement("div")
 card.className="card"
 
-card.innerHTML = `
-<img src="${item.image_url || ''}">
-<div class="card-body">
-<div>${item.name}</div>
-<div class="price">${item.price} ฿</div>
+card.innerHTML=`
+
+<div style="position:relative">
+
+<img src="${p.image_url || ''}">
+
+<div class="add" data-id="${p.id}">+</div>
+
 </div>
+
+<div class="card-body">
+
+<div>${p.name}</div>
+
+<div class="price">${p.price} ฿</div>
+
+</div>
+
 `
+
+card.querySelector(".add").onclick=()=>openProduct(p.id)
 
 menu.appendChild(card)
 
