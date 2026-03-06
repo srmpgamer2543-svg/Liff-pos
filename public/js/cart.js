@@ -1,4 +1,4 @@
-import {cart} from "./state.js"
+import {state} from "./state.js"
 import {sendOrder} from "./api.js"
 
 export function updateFloating(){
