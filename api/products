@@ -1,0 +1,73 @@
+export default async function handler(req,res){
+
+const headers={
+Authorization:`Bearer ${process.env.LOYVERSE_API_KEY}`
+}
+
+const itemsRes = await fetch("https://api.loyverse.com/v1.0/items",{headers})
+const categoriesRes = await fetch("https://api.loyverse.com/v1.0/categories",{headers})
+const modifierListsRes = await fetch("https://api.loyverse.com/v1.0/modifier_lists",{headers})
+const modifiersRes = await fetch("https://api.loyverse.com/v1.0/modifiers",{headers})
+const inventoryRes = await fetch("https://api.loyverse.com/v1.0/inventory",{headers})
+
+const itemsData = await itemsRes.json()
+const categoriesData = await categoriesRes.json()
+const modifierListsData = await modifierListsRes.json()
+const modifiersData = await modifiersRes.json()
+const inventoryData = await inventoryRes.json()
+
+const categories={}
+categoriesData.categories.forEach(c=>{
+categories[c.id]=c.name
+})
+
+const prices={}
+inventoryData.inventory_levels.forEach(i=>{
+prices[i.item_id]=i.price
+})
+
+const modifiers={}
+modifiersData.modifiers.forEach(m=>{
+if(!modifiers[m.modifier_list_id]) modifiers[m.modifier_list_id]=[]
+modifiers[m.modifier_list_id].push({
+id:m.id,
+name:m.name,
+price:m.price
+})
+})
+
+const modifierLists={}
+modifierListsData.modifier_lists.forEach(l=>{
+modifierLists[l.id]={
+id:l.id,
+name:l.name,
+options:modifiers[l.id] || []
+}
+})
+
+const products=itemsData.items.map(item=>{
+
+let itemModifiers=[]
+
+if(item.modifier_list_ids){
+
+item.modifier_list_ids.forEach(id=>{
+if(modifierLists[id]) itemModifiers.push(modifierLists[id])
+})
+
+}
+
+return{
+id:item.id,
+name:item.item_name,
+price:prices[item.id] || item.price || 0,
+image_url:item.image_url,
+category:categories[item.category_id],
+modifiers:itemModifiers
+}
+
+})
+
+res.status(200).json(products)
+
+}
