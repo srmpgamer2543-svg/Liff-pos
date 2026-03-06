@@ -1,204 +1,34 @@
-body{
-font-family:sans-serif;
-margin:0;
-background:#f5f5f5;
-font-size:30px;
-scroll-behavior:smooth;
-}
+<!DOCTYPE html>
+<html>
+<head>
 
-/* HEADER */
+<meta charset="utf-8">
+<title>Menu</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-.header{
-position:sticky;
-top:0;
-z-index:999;
-background:white;
-box-shadow:0 3px 10px rgba(0,0,0,0.08);
-}
+<link rel="stylesheet" href="/css/style.css">
 
-.logo-area{
-height:20vh;
-display:flex;
-align-items:center;
-justify-content:center;
-transition:height .25s ease, opacity .25s ease;
-overflow:hidden;
-}
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-.logo-area img{
-width:100%;
-height:100%;
-object-fit:contain;
-padding:10px;
-}
+</head>
 
-.shop-bar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:16px 20px;
-border-top:1px solid #eee;
-background:#f0fff4;
-border:3px solid #06c755;
-border-radius:16px;
-margin:10px;
-}
+<body>
 
-.shop-title{
-font-size:36px;
-font-weight:800;
-color:#5a2d0c;
-}
+<div id="logo">
+<img src="/logo.png">
+</div>
 
-.cart-icon{
-font-size:48px;
-cursor:pointer;
-}
+<div id="category"></div>
 
-.category{
-display:flex;
-overflow:auto;
-background:white;
-padding:12px;
-gap:10px;
-border-bottom:1px solid #eee;
-}
+<div id="menu"></div>
 
-.category button{
-border:none;
-background:#eee;
-padding:12px 20px;
-border-radius:20px;
-white-space:nowrap;
-font-size:30px;
-font-weight:600;
-}
+<div id="floatingCart" onclick="openCart()">
+🛒 <span id="floatingTotal">0</span> ฿
+</div>
 
-.menu{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:14px;
-padding:14px;
-}
+<div id="modal"></div>
 
-.card{
-background:white;
-border-radius:16px;
-overflow:hidden;
-box-shadow:0 3px 10px rgba(0,0,0,0.08);
-display:flex;
-flex-direction:column;
-aspect-ratio:3/4;
-cursor:pointer;
-}
+<script type="module" src="/js/app.js"></script>
 
-.card-img{
-position:relative;
-width:100%;
-aspect-ratio:1/1;
-}
-
-.card-img img{
-width:100%;
-height:100%;
-object-fit:cover;
-}
-
-.add-btn{
-position:absolute;
-bottom:10px;
-right:10px;
-background:#06c755;
-color:white;
-width:50px;
-height:50px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:30px;
-}
-
-.card-body{
-padding:14px;
-flex:1;
-display:flex;
-flex-direction:column;
-}
-
-.name{
-font-size:40px;
-font-weight:700;
-}
-
-.price{
-color:#06c755;
-font-weight:bold;
-font-size:42px;
-margin-top:auto;
-}
-
-.floating-cart{
-position:fixed;
-bottom:20px;
-left:20px;
-right:20px;
-background:#06c755;
-color:white;
-padding:20px;
-border-radius:30px;
-display:none;
-font-size:34px;
-font-weight:bold;
-text-align:center;
-}
-
-.modal{
-position:fixed;
-top:0;
-left:0;
-right:0;
-bottom:0;
-background:rgba(0,0,0,0.4);
-display:none;
-align-items:flex-end;
-}
-
-.modal.show{
-display:flex;
-}
-
-.modal-content{
-background:white;
-width:100%;
-border-radius:24px 24px 0 0;
-padding:28px;
-max-height:70vh;
-overflow:auto;
-}
-
-.option{
-display:flex;
-align-items:center;
-gap:18px;
-padding:22px;
-border-radius:18px;
-background:#fafafa;
-font-size:30px;
-margin-bottom:10px;
-}
-
-.option input{
-margin-right:10px;
-}
-
-button{
-font-size:34px;
-padding:18px;
-border:none;
-background:#06c755;
-color:white;
-border-radius:16px;
-width:100%;
-margin-top:20px;
-}
+</body>
+</html>
