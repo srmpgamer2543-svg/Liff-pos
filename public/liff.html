@@ -1,12 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Menu</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+<!-- LOGO -->
 <div class="logo">
 <img src="/logo.png">
 </div>
 
-<div class="shop-banner">
-<span>มีนม.ขนมปัง 🍞</span>
-<span>🧺</span>
+
+<!-- CART BAR -->
+<div class="cart-bar" onclick="openCart()">
+มีนม.ขนมปัง 🍞
+<span class="cart-icon">🧺</span>
 </div>
 
+
+<!-- CATEGORY -->
 <div id="categories" class="categories"></div>
 
+
+<!-- MENU -->
 <div id="menu" class="menu-grid"></div>
+
+
+<!-- PRODUCT MODAL -->
+<div id="productModal" class="modal">
+
+<div class="modal-content">
+
+<div id="modalTitle" class="modal-title"></div>
+
+<div id="modalOptions"></div>
+
+<div class="modal-actions">
+<button onclick="addToCart()">เพิ่มลงตะกร้า</button>
+</div>
+
+</div>
+
+</div>
+
+
+<!-- CART MODAL -->
+<div id="cartModal" class="modal">
+
+<div class="modal-content">
+
+<h3>ตะกร้า</h3>
+
+<div id="cartItems"></div>
+
+<button onclick="sendOrder()">สั่งซื้อ</button>
+
+</div>
+
+</div>
+
+
+
+<script type="module" src="/js/app.js"></script>
+
+</body>
+</html>
