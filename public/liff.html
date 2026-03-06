@@ -34,11 +34,9 @@ display:flex;
 align-items:center;
 justify-content:center;
 
-transition:all .5s cubic-bezier(.25,.8,.25,1);
+transition:height .25s ease, opacity .25s ease;
 
 overflow:hidden;
-
-scroll-snap-align:start;
 }
 
 .logo-area img{
@@ -668,34 +666,26 @@ alert('Order sent')
 let snapLock=false
 let logo=document.getElementById("logoArea")
 
+const logo = document.getElementById("logoArea")
+
 window.addEventListener("scroll",()=>{
 
-if(snapLock) return
+let y = window.scrollY
+let max = 120
 
-let y=window.scrollY
+if(y <= max){
 
-if(y>60 && y<140){
+let progress = y / max
 
-snapLock=true
-
-window.scrollTo({
-top:140,
-behavior:"smooth"
-})
-
-logo.style.height="0"
-logo.style.opacity="0"
-
-setTimeout(()=>{
-snapLock=false
-},400)
+logo.style.height = (20 - progress*20) + "vh"
+logo.style.opacity = 1 - progress
 
 }
 
-if(y<60){
+if(y > max){
 
-logo.style.height="20vh"
-logo.style.opacity="1"
+logo.style.height = "0"
+logo.style.opacity = "0"
 
 }
 
