@@ -1,11 +1,14 @@
-export function sortProducts(items){
+export function sortProducts(data){
 
-return items.sort((a,b)=>{
+return data.sort((a,b)=>{
 
-const ca = a.category || ""
-const cb = b.category || ""
+let ca = a.category || ""
+let cb = b.category || ""
 
-return ca.localeCompare(cb)
+let na = parseInt(ca.split("_")[0]) || 999
+let nb = parseInt(cb.split("_")[0]) || 999
+
+return na-nb
 
 })
 
