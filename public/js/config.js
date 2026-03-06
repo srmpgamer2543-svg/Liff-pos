@@ -1,8 +1,8 @@
 export const config = {
 
-storeId:"YOUR_STORE_ID",
+storeId:"9e524237-820a-4f18-b768-279df4300962",
 
-token:"YOUR_LOYVERSE_TOKEN",
+token:"9e524237-820a-4f18-b768-279df4300962",
 
 api:"https://api.loyverse.com/v1.0"
 
