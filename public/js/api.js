@@ -1,24 +1,11 @@
 export async function getProducts(){
 
-let res = await fetch('/api/products')
+const res = await fetch("/api/products")
 
-return res.json()
-
+if(!res.ok){
+throw new Error("โหลดสินค้าไม่ได้")
 }
 
-export async function sendOrder(data){
-
-let res = await fetch('/api/order',{
-
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify(data)
-
-})
-
-return res.json()
+return await res.json()
 
 }
