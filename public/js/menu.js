@@ -1,26 +1,53 @@
 import {state} from "./state.js"
-import {openProduct} from "./modal.js"
+
+export function renderCategory(){
+
+let box = document.getElementById("category")
+
+let cats = [...new Set(state.products.map(p=>p.category))]
+
+box.innerHTML=""
+
+cats.forEach(c=>{
+
+let btn = document.createElement("button")
+
+btn.innerText = c.replace(/^[0-9]+_/,"")
+
+btn.onclick=()=>{
+
+state.category=c
+
+renderMenu()
+
+}
+
+box.appendChild(btn)
+
+})
+
+}
 
 export function renderMenu(){
 
-const menu = document.getElementById("menu")
+let menu = document.getElementById("menu")
+
+let list = state.products
+
+if(state.category){
+list = list.filter(p=>p.category===state.category)
+}
 
 menu.innerHTML=""
 
-state.products.forEach(p=>{
+list.forEach(p=>{
 
-const card = document.createElement("div")
+let card = document.createElement("div")
 card.className="card"
 
 card.innerHTML=`
 
-<div style="position:relative">
-
-<img src="${p.image_url || ''}">
-
-<div class="add" data-id="${p.id}">+</div>
-
-</div>
+<img src="${p.image_url||''}">
 
 <div class="card-body">
 
@@ -31,8 +58,6 @@ card.innerHTML=`
 </div>
 
 `
-
-card.querySelector(".add").onclick = () => openProduct(p)
 
 menu.appendChild(card)
 
