@@ -1,39 +1,46 @@
-import { useEffect } from "react";
-import liff from "@line/liff";
+import { useEffect, useState } from "react"
+import liff from "@line/liff"
 
 export default function Home() {
 
+  const [name,setName] = useState("Loading...")
+  const [userId,setUserId] = useState("")
+
   useEffect(() => {
-    liff.init({
-      liffId: "2009308319-2r10XrGI"
-    });
-  }, []);
 
-  const sendOrder = async () => {
-    await fetch("/api/webhook", {
-      method: "POST"
-    });
+    async function init(){
 
-    alert("ส่งออเดอร์แล้ว");
-  };
+      await liff.init({
+        liffId:"2009308319-2r1OXrGI"
+      })
+
+      if(!liff.isLoggedIn()){
+        liff.login()
+        return
+      }
+
+      const profile = await liff.getProfile()
+
+      setName(profile.displayName)
+      setUserId(profile.userId)
+
+    }
+
+    init()
+
+  },[])
 
   return (
-    <div style={{padding:30,fontFamily:"sans-serif"}}>
 
-      <h2>สั่งเครื่องดื่ม</h2>
+    <div style={{padding:20,fontFamily:"sans-serif"}}>
 
-      <button
-        onClick={sendOrder}
-        style={{
-          fontSize:22,
-          padding:20,
-          width:"100%",
-          marginTop:20
-        }}
-      >
-        กาแฟเย็น 50 บาท
-      </button>
+      <h1>LIFF POS TEST</h1>
+
+      <p>Name: {name}</p>
+      <p>UserID: {userId}</p>
 
     </div>
-  );
+
+  )
+
 }
