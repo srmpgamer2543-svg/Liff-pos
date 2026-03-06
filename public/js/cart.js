@@ -1,33 +1,37 @@
 import {state} from "./state.js"
 
-export function updateFloating(){
+export function addCart(){
 
-let total = 0
+const p = state.currentProduct
 
-state.cart.forEach(c=>{
-total += c.price * c.qty
+let modifiers=[]
+let extra=0
+
+document.querySelectorAll("#modal input:checked")
+.forEach(i=>{
+
+let price = parseInt(i.dataset.price)||0
+
+modifiers.push({
+name:i.value,
+price:price
 })
 
-let el = document.getElementById("floatingCart")
+extra+=price
 
-if(state.cart.length==0){
+})
 
-el.style.display="none"
+state.cart.push({
 
-}else{
+name:p.name,
+price:p.price,
+modifiers:modifiers,
+qty:1
 
-el.style.display="block"
+})
 
-}
+document.getElementById("modal").classList.remove("show")
 
-document.getElementById("floatingTotal").innerText = total
-
-}
-
-export function openCart(){
-
-alert("cart")
+console.log("cart",state.cart)
 
 }
-
-window.openCart=openCart
