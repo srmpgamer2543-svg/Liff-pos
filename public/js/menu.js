@@ -32,7 +32,7 @@ card.innerHTML=`
 
 `
 
-card.querySelector(".add").onclick=()=>openProduct(p.id)
+card.querySelector(".add").onclick = () => openProduct(p)
 
 menu.appendChild(card)
 
