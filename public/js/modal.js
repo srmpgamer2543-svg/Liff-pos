@@ -1,49 +1,66 @@
 import {state} from "./state.js"
+import {sortModifiers} from "./utils.js"
 import {addCart} from "./cart.js"
 
 export function openProduct(id){
 
-const p = state.products.find(x=>x.id==id)
+let p = state.products.find(x=>x.id==id)
 
 state.currentProduct = p
 
-const modal = document.getElementById("modal")
+let mods = sortModifiers([...p.modifiers])
 
-let html = `<h3>${p.name}</h3>`
+let html=`<div class="modal-content">`
 
-if(p.modifiers){
+html+=`<h3>${p.name}</h3>`
 
-p.modifiers.forEach(m=>{
+mods.forEach(m=>{
 
+html+=`<div class="modifier-group">`
 html+=`<h4>${m.name}</h4>`
+html+=`<div class="modifier-grid">`
 
 m.options.forEach(o=>{
 
+if(m.name.includes('ท้อปปิ้ง')){
+
 html+=`
-<label>
-
-<input type="checkbox"
-value="${o.name}"
-data-price="${o.price||0}">
-
+<label class="option">
+<input type="checkbox" value="${o.id}">
 ${o.name}
-${o.price?`(+${o.price})`:''}
+</label>`
 
-</label>
-<br>
-`
+}else{
 
-})
-
-})
+html+=`
+<label class="option">
+<input type="radio" name="${m.id}" value="${o.id}">
+${o.name}
+</label>`
 
 }
 
+})
+
+html+=`</div></div>`
+
+})
+
 html+=`<button id="addCartBtn">เพิ่มลงตะกร้า</button>`
+html+=`</div>`
+
+let modal=document.getElementById("modal")
 
 modal.innerHTML=html
-
 modal.classList.add("show")
+
+modal.onclick=()=>{
+modal.classList.remove("show")
+}
+
+document.querySelector(".modal-content").onclick=(e)=>{
+e.stopPropagation()
+}
 
 document.getElementById("addCartBtn").onclick=addCart
 
