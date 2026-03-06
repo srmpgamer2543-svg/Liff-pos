@@ -1,13 +1,13 @@
-import {products} from "./state.js"
+import {state} from "./state.js"
 import {cleanCategory,sortCategory} from "./utils.js"
 import {openProduct} from "./modal.js"
 
 export function renderCategory(){
 
-let cats=[...new Set(products.map(p=>p.category))]
+let cats=[...new Set(state.products.map(p=>p.category))]
 cats.sort(sortCategory)
 
-let html='<button onclick="renderMenu(products)">All</button>'
+let html='<button onclick="renderMenu(state.products)">All</button>'
 
 cats.forEach(c=>{
 html+=`<button onclick="filterCat('${c}')">${cleanCategory(c)}</button>`
@@ -18,8 +18,10 @@ document.getElementById('category').innerHTML=html
 }
 
 export function filterCat(c){
-let list=products.filter(p=>p.category==c)
+
+let list=state.products.filter(p=>p.category==c)
 renderMenu(list)
+
 }
 
 export function renderMenu(items){
