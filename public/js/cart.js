@@ -5,7 +5,7 @@ export function updateFloating(){
 
 let total=0
 
-cart.forEach(c=>{
+state.cart.forEach(c=>{
 let mod=0
 c.modifiers.forEach(m=>mod+=m.price)
 total+=(c.price+mod)*(c.qty||1)
