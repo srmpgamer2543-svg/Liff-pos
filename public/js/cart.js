@@ -1,37 +1,47 @@
 import {state} from "./state.js"
+import {sendOrder} from "./api.js"
 
 export function addCart(){
 
-const p = state.currentProduct
+state.cart.push(state.currentProduct)
 
-let modifiers=[]
-let extra=0
+let total=0
 
-document.querySelectorAll("#modal input:checked")
-.forEach(i=>{
-
-let price = parseInt(i.dataset.price)||0
-
-modifiers.push({
-name:i.value,
-price:price
+state.cart.forEach(i=>{
+total+=i.price
 })
 
-extra+=price
-
-})
-
-state.cart.push({
-
-name:p.name,
-price:p.price,
-modifiers:modifiers,
-qty:1
-
-})
+document.getElementById("floatingTotal").innerText=total
+document.getElementById("floatingCart").style.display="block"
 
 document.getElementById("modal").classList.remove("show")
 
-console.log("cart",state.cart)
+}
+
+export function openCart(){
+
+let html=`<div class="modal-content">`
+
+html+="<h3>Cart</h3>"
+
+state.cart.forEach(c=>{
+html+=`${c.name}<br>`
+})
+
+html+=`<button id="orderBtn">Order</button>`
+html+=`</div>`
+
+let modal=document.getElementById("modal")
+
+modal.innerHTML=html
+modal.classList.add("show")
+
+document.getElementById("orderBtn").onclick=async()=>{
+
+await sendOrder(state.cart)
+
+alert("Order sent")
+
+}
 
 }
