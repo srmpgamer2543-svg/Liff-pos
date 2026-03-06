@@ -1,92 +1,50 @@
 import {state} from "./state.js"
-import {updateFloating} from "./cart.js"
+import {addCart} from "./cart.js"
 
-export function openModal(id){
+export function openProduct(id){
 
-let p = state.products.find(x=>x.id==id)
+const p = state.products.find(x=>x.id==id)
 
 state.currentProduct = p
 
-let html = `<div class="modal-content">`
+const modal = document.getElementById("modal")
 
-html += `<h3>${p.name}</h3>`
+let html = `<h3>${p.name}</h3>`
 
 if(p.modifiers){
 
-p.modifiers.forEach(g=>{
+p.modifiers.forEach(m=>{
 
-html += `<div class="modifier-group">`
-html += `<h4>${g.name}</h4>`
+html+=`<h4>${m.name}</h4>`
 
-g.options.forEach(o=>{
+m.options.forEach(o=>{
 
-let type = g.name.includes("ท้อป") ? "checkbox" : "radio"
-
-html += `
-
+html+=`
 <label>
 
-<input type="${type}" name="${g.id}" value="${o.id}" data-price="${o.price}">
+<input type="checkbox"
+value="${o.name}"
+data-price="${o.price||0}">
 
-${o.name} (+${o.price})
+${o.name}
+${o.price?`(+${o.price})`:''}
 
 </label>
-
+<br>
 `
 
 })
-
-html += `</div>`
 
 })
 
 }
 
-html += `
-
-<button onclick="addToCart()">เพิ่มลงตะกร้า</button>
-
-</div>
-`
-
-let modal=document.getElementById("modal")
+html+=`<button id="addCartBtn">เพิ่มลงตะกร้า</button>`
 
 modal.innerHTML=html
+
 modal.classList.add("show")
 
-}
-
-export function addToCart(){
-
-let p = state.currentProduct
-
-let selected=[]
-
-document.querySelectorAll("#modal input:checked").forEach(i=>{
-
-selected.push({
-
-id:i.value,
-name:i.parentElement.innerText,
-price:Number(i.dataset.price)
-
-})
-
-})
-
-state.cart.push({
-
-name:p.name,
-price:p.price,
-qty:1,
-modifiers:selected
-
-})
-
-document.getElementById("modal").classList.remove("show")
-
-updateFloating()
+document.getElementById("addCartBtn").onclick=addCart
 
 }
-
-window.addToCart=addToCart
