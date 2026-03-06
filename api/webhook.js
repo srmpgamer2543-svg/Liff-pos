@@ -1,38 +1,19 @@
 export default async function handler(req, res) {
 
-  const accessToken = process.env.LINE_ACCESS_TOKEN
+  const event = req.body.events?.[0]
 
-  const events = req.body.events
-
-  for (const event of events) {
-
-    if (event.type === "message" && event.message.type === "text") {
-
-      const replyToken = event.replyToken
-
-      const message = {
-        replyToken: replyToken,
-        messages: [
-          {
-            type: "text",
-            text: "ระบบ POS พร้อมใช้งานแล้ว"
-          }
-        ]
-      }
-
-      await fetch("https://api.line.me/v2/bot/message/reply", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`
-        },
-        body: JSON.stringify(message)
-      })
-
-    }
-
+  if (!event) {
+    return res.status(200).json({ ok: true })
   }
 
-  res.status(200).end()
+  const source = event.source
+
+  console.log("SOURCE =", source)
+
+  res.status(200).json({
+    groupId: source.groupId,
+    userId: source.userId,
+    type: source.type
+  })
 
 }
