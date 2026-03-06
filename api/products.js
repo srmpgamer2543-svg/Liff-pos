@@ -1,48 +1,78 @@
-export default async function handler(req, res) {
+export default async function handler(req,res){
 
 const token = process.env.LOYVERSE_API_KEY
 
-const response = await fetch(
-"https://api.loyverse.com/v1.0/items",
-{
-headers:{
+const headers = {
 Authorization:`Bearer ${token}`
 }
+
+const [itemsRes,modsRes,catRes] = await Promise.all([
+
+fetch("https://api.loyverse.com/v1.0/items",{headers}),
+fetch("https://api.loyverse.com/v1.0/modifier_groups",{headers}),
+fetch("https://api.loyverse.com/v1.0/categories",{headers})
+
+])
+
+const itemsData = await itemsRes.json()
+const modsData = await modsRes.json()
+const catData = await catRes.json()
+
+const categories = {}
+catData.categories.forEach(c=>{
+categories[c.id]=c.name
 })
 
-const data = await response.json()
+const modifierGroups = {}
+modsData.modifier_groups.forEach(g=>{
+modifierGroups[g.id]=g
+})
 
-const products = data.items.map(item => ({
+const products = itemsData.items.map(item=>{
 
-id: item.id,
+const variant = item.variants?.[0]
 
-name: item.item_name,
+const modifiers = (item.modifier_groups || []).map(gid=>{
 
-description: item.description,
+const g = modifierGroups[gid]
 
-image_url: item.image_url,
+if(!g) return null
 
-category_id: item.category_id,
+return {
 
-sku: item.sku,
+id:g.id,
+name:g.name,
 
-track_stock: item.track_stock,
+options:g.modifiers.map(m=>({
 
-tax_ids: item.tax_ids,
-
-variants: item.variants ? item.variants.map(v => ({
-variant_id: v.id,
-sku: v.sku,
-price: v.price,
-cost: v.cost
-})) : [],
-
-modifier_groups: item.modifier_groups ? item.modifier_groups.map(m => ({
-id: m.id,
-name: m.name
-})) : []
+id:m.id,
+name:m.name,
+price:m.price/100
 
 }))
+
+}
+
+}).filter(Boolean)
+
+return {
+
+id:item.id,
+name:item.item_name,
+
+price: variant ? variant.price/100 : 0,
+
+image_url:item.image_url,
+
+category_id:item.category_id,
+
+category_name: categories[item.category_id] || "อื่นๆ",
+
+modifiers
+
+}
+
+})
 
 res.status(200).json(products)
 
