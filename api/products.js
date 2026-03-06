@@ -1,4 +1,4 @@
-export default async function handler(req, res){
+export default async function handler(req, res) {
 
 const token = process.env.LOYVERSE_API_KEY
 
@@ -12,13 +12,35 @@ Authorization:`Bearer ${token}`
 
 const data = await response.json()
 
-let products = data.items.map(p=>({
+const products = data.items.map(item => ({
 
-id:p.id,
-name:p.item_name,
-price:p.variants[0].price,
-image_url:p.image_url,
-category:p.category_id
+id: item.id,
+
+name: item.item_name,
+
+description: item.description,
+
+image_url: item.image_url,
+
+category_id: item.category_id,
+
+sku: item.sku,
+
+track_stock: item.track_stock,
+
+tax_ids: item.tax_ids,
+
+variants: item.variants ? item.variants.map(v => ({
+variant_id: v.id,
+sku: v.sku,
+price: v.price,
+cost: v.cost
+})) : [],
+
+modifier_groups: item.modifier_groups ? item.modifier_groups.map(m => ({
+id: m.id,
+name: m.name
+})) : []
 
 }))
 
