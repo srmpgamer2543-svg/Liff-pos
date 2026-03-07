@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Menu</title>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<style>
+body{
+font-family:sans-serif;
+padding:20px;
+}
+
+.menu{
+border:1px solid #ddd;
+padding:10px;
+margin-bottom:10px;
+border-radius:10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h2>Menu</h2>
+
+<div id="menu"></div>
+
+<script>
+
+const LIFF_ID = "ใส่ LIFF ID ตรงนี้"
+
+async function start(){
+
+await liff.init({ liffId: LIFF_ID })
+
+loadMenu()
+
+}
+
+async function loadMenu(){
+
+const res = await fetch("/api/menu")
+const data = await res.json()
+
+const el = document.getElementById("menu")
+
+data.forEach(item=>{
+
+el.innerHTML += `
+<div class="menu">
+<h3>${item.name}</h3>
+<p>${item.price} บาท</p>
+<button onclick="order('${item.id}','${item.name}',${item.price})">
+สั่ง
+</button>
+</div>
+`
+
+})
+
+}
+
+function order(id,name,price){
+
+alert("เพิ่ม "+name)
+
+}
+
+start()
+
+</script>
+
+</body>
+</html>
