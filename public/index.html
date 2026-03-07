@@ -1,8 +1,7 @@
-<!DOCTYPE html>
-<html>
 <head>
+
 <meta charset="UTF-8">
-<title>POS</title>
+<title>POS Menu</title>
 
 <style>
 
@@ -12,133 +11,98 @@ background:#f5f5f5;
 margin:0;
 }
 
+/* Header */
+
 .header{
 text-align:center;
-padding:20px;
+padding:25px;
 background:white;
 }
 
-.logo{
-width:150px;
-margin:auto;
+.header h2{
+font-size:32px;
+margin:0;
 }
+
+.logo{
+width:180px;
+margin-top:10px;
+}
+
+/* หมวดหมู่ */
 
 .categories{
 display:flex;
 overflow:auto;
-padding:10px;
-gap:10px;
+padding:15px;
+gap:12px;
 }
 
 .cat{
 background:#eee;
-padding:8px 15px;
-border-radius:20px;
+padding:12px 22px;
+border-radius:25px;
 white-space:nowrap;
 cursor:pointer;
+font-size:20px;
+font-weight:bold;
 }
+
+/* เมนูสินค้า */
 
 .menu{
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:10px;
-padding:10px;
+gap:15px;
+padding:15px;
 }
+
+/* การ์ดสินค้า */
 
 .card{
 background:white;
-border-radius:12px;
-padding:10px;
-box-shadow:0 2px 4px rgba(0,0,0,0.1);
+border-radius:15px;
+padding:12px;
+box-shadow:0 3px 6px rgba(0,0,0,0.12);
 }
 
 .card img{
 width:100%;
-border-radius:10px;
+border-radius:12px;
 }
 
+/* ชื่อเมนู */
+
 .name{
-font-size:18px;
-margin-top:5px;
+font-size:24px;
+margin-top:10px;
+font-weight:bold;
 }
+
+/* ราคา */
 
 .price{
 color:#1db954;
 font-weight:bold;
+font-size:22px;
+margin-top:5px;
 }
+
+/* ปุ่มเพิ่ม */
 
 .add{
 float:right;
 background:#1db954;
 color:white;
 border:none;
-width:30px;
-height:30px;
+width:40px;
+height:40px;
 border-radius:50%;
-font-size:18px;
+font-size:24px;
+font-weight:bold;
+cursor:pointer;
 }
 
 </style>
+
 </head>
-
-<body>
-
-<div class="header">
-<h2>Menu</h2>
-<img class="logo" src="/logo.png">
-</div>
-
-<div class="categories">
-<div class="cat" onclick="loadMenu()">All</div>
-</div>
-
-<div id="menu" class="menu"></div>
-
-<script>
-
-async function loadMenu(){
-
-const res = await fetch("/api/menu")
-const data = await res.json()
-
-const menu = document.getElementById("menu")
-menu.innerHTML=""
-
-data.forEach(item=>{
-
-menu.innerHTML += `
-<div class="card">
-
-<img src="${item.image || ''}">
-
-<div class="name">${item.name}</div>
-
-<div class="price">
-${item.price} ฿
-
-<button class="add"
-onclick="addCart('${item.id}','${item.name}',${item.price})">
-+
-</button>
-
-</div>
-
-</div>
-`
-
-})
-
-}
-
-function addCart(id,name,price){
-
-console.log("เพิ่มสินค้า",name)
-
-}
-
-loadMenu()
-
-</script>
-
-</body>
-</html>
