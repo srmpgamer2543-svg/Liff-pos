@@ -3,10 +3,10 @@ export default async function handler(req, res) {
   try {
 
     const headers = {
-      Authorization: "Bearer " + process.env.LOYVERSE_TOKEN
+      Authorization: `Bearer ${process.env.LOYVERSE_TOKEN}`,
+      "Content-Type": "application/json"
     };
 
-    // โหลด API พร้อมกัน
     const [itemsRes, modifiersRes, categoriesRes] = await Promise.all([
       fetch("https://api.loyverse.com/v1.0/items", { headers }),
       fetch("https://api.loyverse.com/v1.0/modifier_lists", { headers }),
@@ -17,12 +17,16 @@ export default async function handler(req, res) {
     const modifiersData = await modifiersRes.json();
     const categoriesData = await categoriesRes.json();
 
+    const items = itemsData.items || [];
+    const modifierLists = modifiersData.modifier_lists || [];
+    const categories = categoriesData.categories || [];
+
     // -----------------------------
-    // map modifier lists
+    // modifier map
     // -----------------------------
     const modifiersMap = {};
 
-    (modifiersData.modifier_lists || []).forEach(list => {
+    modifierLists.forEach(list => {
 
       modifiersMap[list.id] = {
         id: list.id,
@@ -37,67 +41,81 @@ export default async function handler(req, res) {
     });
 
     // -----------------------------
-    // map categories
+    // category map
     // -----------------------------
     const categoriesMap = {};
 
-    (categoriesData.categories || []).forEach(cat => {
+    categories.forEach(cat => {
       categoriesMap[cat.id] = cat.name;
     });
 
     const menu = [];
 
     // -----------------------------
-    // loop items
+    // items loop
     // -----------------------------
-    (itemsData.items || []).forEach(item => {
+    items.forEach(item => {
 
       const categoryName = categoriesMap[item.category_id] || null;
 
-      // -----------------------------
-      // หา modifier list id
-      // -----------------------------
-      let modifierIds = [];
+      let itemModifierIds = [];
 
-      if (item.modifier_list_ids && item.modifier_list_ids.length > 0) {
+      if (Array.isArray(item.modifier_list_ids)) {
 
-        modifierIds = item.modifier_list_ids.map(m =>
+        itemModifierIds = item.modifier_list_ids.map(m =>
           typeof m === "string" ? m : m.modifier_list_id
         );
 
       }
 
-      if (item.modifier_lists && item.modifier_lists.length > 0) {
+      if (Array.isArray(item.modifier_lists)) {
 
-        modifierIds = item.modifier_lists.map(m => m.id);
+        itemModifierIds = item.modifier_lists.map(m => m.id);
 
       }
 
-      // -----------------------------
-      // map modifier data
-      // -----------------------------
-      const modifierLists = modifierIds
+      const itemModifiers = itemModifierIds
         .map(id => modifiersMap[id])
         .filter(Boolean);
 
       // -----------------------------
-      // loop variants
+      // variants
       // -----------------------------
       (item.variants || []).forEach(variant => {
 
+        // -----------------------------
+        // price auto detect
+        // -----------------------------
         let price = 0;
 
         if (variant.stores && variant.stores.length > 0) {
-          price = Number(variant.stores[0].price);
-        }
-        else if (variant.default_price) {
+
+          price = Number(
+            variant.stores[0].price ||
+            variant.stores[0].default_price ||
+            0
+          );
+
+        } else if (variant.price) {
+
+          price = Number(variant.price);
+
+        } else if (variant.default_price) {
+
           price = Number(variant.default_price);
+
+        } else if (item.default_price) {
+
+          price = Number(item.default_price);
+
         }
 
-        // variant modifier (บางร้านใช้แบบนี้)
+        // -----------------------------
+        // variant modifiers
+        // -----------------------------
         let variantModifierIds = [];
 
-        if (variant.modifier_list_ids && variant.modifier_list_ids.length > 0) {
+        if (Array.isArray(variant.modifier_list_ids)) {
 
           variantModifierIds = variant.modifier_list_ids.map(m =>
             typeof m === "string" ? m : m.modifier_list_id
@@ -110,7 +128,7 @@ export default async function handler(req, res) {
           .filter(Boolean);
 
         const finalModifiers =
-          variantModifiers.length > 0 ? variantModifiers : modifierLists;
+          variantModifiers.length > 0 ? variantModifiers : itemModifiers;
 
         // -----------------------------
         // push menu
@@ -123,15 +141,15 @@ export default async function handler(req, res) {
           name: item.item_name,
           variant_name: variant.option1_value || null,
 
-          description: item.description,
+          description: item.description || "",
 
           category_id: item.category_id,
           category_name: categoryName,
 
-          sku: variant.sku,
-          barcode: variant.barcode,
+          sku: variant.sku || null,
+          barcode: variant.barcode || null,
 
-          image: item.image_url,
+          image: item.image_url || null,
 
           price: price,
 
