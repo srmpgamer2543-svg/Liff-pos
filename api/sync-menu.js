@@ -2,91 +2,57 @@ export default async function handler(req, res) {
 
 try {
 
-const SUPABASE_URL = process.env.SUPABASE_URL
-const SUPABASE_KEY = process.env.SUPABASE_KEY
-const LOYVERSE_API_KEY = process.env.LOYVERSE_API_KEY
-
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  return res.status(500).json({ error: "Supabase ENV missing" })
-}
-
-if (!LOYVERSE_API_KEY) {
-  return res.status(500).json({ error: "Loyverse API KEY missing" })
-}
-
-// ดึง items จาก Loyverse
-const loyverseRes = await fetch("https://api.loyverse.com/v1.0/items", {
-  headers: {
-    Authorization: `Bearer ${LOYVERSE_API_KEY}`
+const response = await fetch(
+ "https://api.loyverse.com/v1.0/items",
+ {
+  headers:{
+   Authorization: "Bearer YOUR_LOYVERSE_API_KEY"
   }
-})
+ }
+)
 
-const loyverseData = await loyverseRes.json()
-const items = loyverseData.items || []
+const data = await response.json()
 
-// =====================
-// DEBUG ดูข้อมูลจริง
-// =====================
-return res.json({
-  debug_first_item: items[0]
-})
+const items = data.items || []
 
-if (items.length === 0) {
-  return res.json({
-    status: "no items from loyverse"
-  })
-}
-
-// แปลงข้อมูลให้ตรงกับ Supabase table
 const menu = items.map(item => {
 
 const variant = item.variants?.[0] || {}
 
 let price = 0
 
-if (variant.price) {
-price = variant.price
+// ใช้ราคาจาก store ก่อน
+if (variant.stores && variant.stores.length > 0) {
+ price = variant.stores[0].price
 }
 
-if (variant.price_money?.amount) {
-price = variant.price_money.amount / 100
+// fallback ราคา default
+if (!price && variant.default_price) {
+ price = variant.default_price
 }
 
 return {
-id: item.id,
-name: item.item_name,
-price: price
+ id: item.id,
+ name: item.item_name,
+ category_id: item.category_id,
+ image: item.image_url || null,
+ price: price,
+ variant_id: variant.variant_id
 }
 
 })
 
-// ส่งเข้า Supabase
-const supabaseRes = await fetch(
-  `${SUPABASE_URL}/rest/v1/menu`,
-  {
-    method: "POST",
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-      "Content-Type": "application/json",
-      Prefer: "resolution=merge-duplicates"
-    },
-    body: JSON.stringify(menu)
-  }
-)
-
-const result = await supabaseRes.text()
-
-return res.json({
-  status: "menu synced",
-  total_items: menu.length,
-  supabase_response: result
+return res.status(200).json({
+ success: true,
+ total: menu.length,
+ menu
 })
 
-} catch (err) {
+} catch (error) {
 
 return res.status(500).json({
-  error: err.message
+ success:false,
+ error:error.message
 })
 
 }
