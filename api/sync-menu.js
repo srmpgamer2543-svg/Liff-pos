@@ -22,7 +22,9 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Loyverse API KEY missing" })
     }
 
-    // ดึง items จาก Loyverse
+    // ===============================
+    // 1. ดึงข้อมูลจาก Loyverse
+    // ===============================
     const loyverseRes = await fetch(
       "https://api.loyverse.com/v1.0/items",
       {
@@ -32,15 +34,36 @@ export default async function handler(req, res) {
       }
     )
 
+    if (!loyverseRes.ok) {
+      return res.status(500).json({
+        error: "Failed to fetch Loyverse",
+        status: loyverseRes.status
+      })
+    }
+
     const loyverseData = await loyverseRes.json()
 
     const items = loyverseData.items || []
 
     if (items.length === 0) {
-      return res.json({ status: "no items from loyverse" })
+      return res.json({
+        status: "no items from loyverse"
+      })
     }
 
-    // แปลงข้อมูล
+    // ===============================
+    // DEBUG: ดูโครงสร้าง item
+    // ===============================
+    const debugItem = items[0]
+
+    const debugVariant =
+      debugItem.variants && debugItem.variants.length
+        ? debugItem.variants[0]
+        : null
+
+    // ===============================
+    // 2. แปลงข้อมูล menu
+    // ===============================
     const menu = []
 
     items.forEach(item => {
@@ -51,12 +74,9 @@ export default async function handler(req, res) {
 
         let price = 0
 
-        // แบบที่ 1 price_money
-        if (variant.price_money && variant.price_money.amount) {
+        if (variant.price_money?.amount) {
           price = variant.price_money.amount / 100
         }
-
-        // แบบที่ 2 price
         else if (variant.price) {
           price = variant.price / 100
         }
@@ -74,7 +94,9 @@ export default async function handler(req, res) {
 
     })
 
-    // ส่งเข้า Supabase
+    // ===============================
+    // 3. ส่งเข้า Supabase
+    // ===============================
     const supabaseRes = await fetch(
       `${SUPABASE_URL}/rest/v1/menu`,
       {
@@ -89,13 +111,27 @@ export default async function handler(req, res) {
       }
     )
 
-    const result = await supabaseRes.text()
+    const supabaseText = await supabaseRes.text()
 
+    // ===============================
+    // 4. ส่ง debug กลับ
+    // ===============================
     return res.json({
+
       status: "menu synced",
-      total_items: menu.length,
-      example: menu[0],
-      supabase_response: result
+
+      total_items_from_loyverse: items.length,
+
+      total_variants_synced: menu.length,
+
+      example_menu_row: menu[0],
+
+      debug_item_structure: debugItem,
+
+      debug_variant_structure: debugVariant,
+
+      supabase_response: supabaseText
+
     })
 
   } catch (err) {
