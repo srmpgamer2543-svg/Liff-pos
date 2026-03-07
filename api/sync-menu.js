@@ -14,59 +14,57 @@ export default async function handler(req, res) {
     const SUPABASE_KEY = process.env.SUPABASE_KEY
     const LOYVERSE_API_KEY = process.env.LOYVERSE_API_KEY
 
-    if (!SUPABASE_URL || !SUPABASE_KEY) {
-      return res.status(500).json({ error: "Supabase ENV missing" })
+    const headers = {
+      Authorization: `Bearer ${LOYVERSE_API_KEY}`
     }
 
-    if (!LOYVERSE_API_KEY) {
-      return res.status(500).json({ error: "Loyverse API KEY missing" })
-    }
-
-    // ===============================
-    // 1. ดึงข้อมูลจาก Loyverse
-    // ===============================
-    const loyverseRes = await fetch(
+    // =========================
+    // 1. items
+    // =========================
+    const itemsRes = await fetch(
       "https://api.loyverse.com/v1.0/items",
-      {
-        headers: {
-          Authorization: `Bearer ${LOYVERSE_API_KEY}`
-        }
-      }
+      { headers }
     )
 
-    if (!loyverseRes.ok) {
-      return res.status(500).json({
-        error: "Failed to fetch Loyverse",
-        status: loyverseRes.status
-      })
-    }
+    const itemsData = await itemsRes.json()
+    const items = itemsData.items || []
 
-    const loyverseData = await loyverseRes.json()
+    // =========================
+    // 2. categories
+    // =========================
+    const catRes = await fetch(
+      "https://api.loyverse.com/v1.0/categories",
+      { headers }
+    )
 
-    const items = loyverseData.items || []
+    const catData = await catRes.json()
+    const categories = catData.categories || []
 
-    if (items.length === 0) {
-      return res.json({
-        status: "no items from loyverse"
-      })
-    }
+    const categoryMap = {}
 
-    // ===============================
-    // DEBUG: ดูโครงสร้าง item
-    // ===============================
-    const debugItem = items[0]
+    categories.forEach(c => {
+      categoryMap[c.id] = c.name
+    })
 
-    const debugVariant =
-      debugItem.variants && debugItem.variants.length
-        ? debugItem.variants[0]
-        : null
+    // =========================
+    // 3. modifiers (topping)
+    // =========================
+    const modRes = await fetch(
+      "https://api.loyverse.com/v1.0/modifier_lists",
+      { headers }
+    )
 
-    // ===============================
-    // 2. แปลงข้อมูล menu
-    // ===============================
+    const modData = await modRes.json()
+    const modifiers = modData.modifier_lists || []
+
+    // =========================
+    // 4. build menu
+    // =========================
     const menu = []
 
     items.forEach(item => {
+
+      const categoryName = categoryMap[item.category_id] || null
 
       if (!item.variants) return
 
@@ -76,7 +74,7 @@ export default async function handler(req, res) {
 
         if (variant.price_money?.amount) {
           price = variant.price_money.amount / 100
-        }
+        } 
         else if (variant.price) {
           price = variant.price / 100
         }
@@ -85,18 +83,19 @@ export default async function handler(req, res) {
           id: variant.variant_id || item.id,
           name: item.item_name,
           price: price,
-          category: item.category_name || null,
+          category: categoryName,
           image: item.image_url || null,
-          sku: variant.sku || null
+          sku: variant.sku || null,
+          modifiers: item.modifier_list_ids || []
         })
 
       })
 
     })
 
-    // ===============================
-    // 3. ส่งเข้า Supabase
-    // ===============================
+    // =========================
+    // 5. save to Supabase
+    // =========================
     const supabaseRes = await fetch(
       `${SUPABASE_URL}/rest/v1/menu`,
       {
@@ -111,27 +110,15 @@ export default async function handler(req, res) {
       }
     )
 
-    const supabaseText = await supabaseRes.text()
+    const result = await supabaseRes.text()
 
-    // ===============================
-    // 4. ส่ง debug กลับ
-    // ===============================
     return res.json({
-
-      status: "menu synced",
-
-      total_items_from_loyverse: items.length,
-
-      total_variants_synced: menu.length,
-
-      example_menu_row: menu[0],
-
-      debug_item_structure: debugItem,
-
-      debug_variant_structure: debugVariant,
-
-      supabase_response: supabaseText
-
+      status: "sync success",
+      items: items.length,
+      menu_rows: menu.length,
+      modifiers: modifiers.length,
+      example: menu[0],
+      supabase: result
     })
 
   } catch (err) {
