@@ -1,20 +1,21 @@
-export default async function handler(req,res){
+import { createClient } from "@supabase/supabase-js"
 
-const SUPABASE_URL = process.env.SUPABASE_URL
-const SUPABASE_KEY = process.env.SUPABASE_KEY
-
-const response = await fetch(
-`${SUPABASE_URL}/rest/v1/menu?select=*`,
-{
-headers:{
-apikey:SUPABASE_KEY,
-Authorization:`Bearer ${SUPABASE_KEY}`
-}
-}
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
 )
 
-const data = await response.json()
+export default async function handler(req, res) {
 
-res.json(data)
+  const { data, error } = await supabase
+    .from("menu")
+    .select("*")
+    .order("name")
+
+  if (error) {
+    return res.status(500).json({ error: error.message })
+  }
+
+  res.status(200).json(data)
 
 }
