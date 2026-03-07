@@ -1,43 +1,95 @@
+let cart = []
+let menuData = []
+
 async function loadMenu(){
 
- const res = await fetch("/api/menu")
+try{
 
- const data = await res.json()
+const res = await fetch("/api/menu")
+menuData = await res.json()
 
- const menuDiv = document.getElementById("menu")
+renderCategories()
+renderMenu(menuData)
 
- data.forEach(item => {
+}catch(e){
 
-   const el = document.createElement("div")
-
-   el.innerHTML = `
-   <h3>${item.name}</h3>
-   <p>${item.price} บาท</p>
-   <button onclick="addCart('${item.id}','${item.name}',${item.price})">
-   เพิ่ม
-   </button>
-   `
-
-   menuDiv.appendChild(el)
-
- })
+console.log("menu load error",e)
 
 }
 
-function addCart(id,name,price){
+}
 
- let cart = JSON.parse(localStorage.getItem("cart")) || []
+function renderMenu(data){
 
- cart.push({
-   id,
-   name,
-   price,
-   qty:1
- })
+const el = document.getElementById("menu")
+el.innerHTML=""
 
- localStorage.setItem("cart",JSON.stringify(cart))
+data.forEach((item,index)=>{
 
- alert("เพิ่มแล้ว")
+el.innerHTML += `
+<div class="item">
+
+<img src="${item.image || 'https://via.placeholder.com/90'}">
+
+<div class="item-info">
+
+<div class="item-name">${item.name}</div>
+
+<div class="item-price">฿${item.price}</div>
+
+<button class="add-btn" onclick="addCart(${index})">+</button>
+
+</div>
+
+</div>
+`
+
+})
+
+}
+
+function renderCategories(){
+
+const cats = [...new Set(menuData.map(i=>i.category_name))]
+
+const el = document.getElementById("categories")
+
+el.innerHTML=""
+
+cats.forEach(cat=>{
+
+el.innerHTML += `
+<div class="cat" onclick="filterCategory('${cat}')">
+${cat}
+</div>
+`
+
+})
+
+}
+
+function filterCategory(cat){
+
+const filtered = menuData.filter(i=>i.category_name===cat)
+
+renderMenu(filtered)
+
+}
+
+function addCart(index){
+
+const item = menuData[index]
+
+cart.push(item)
+
+updateCart()
+
+}
+
+function updateCart(){
+
+document.getElementById("cart").innerText =
+`ดูตะกร้า (${cart.length})`
 
 }
 
