@@ -2,27 +2,35 @@ export default async function handler(req, res) {
 
   try {
 
+    const headers = {
+      Authorization: "Bearer " + process.env.LOYVERSE_TOKEN
+    };
+
     const [itemsRes, modifiersRes, categoriesRes] = await Promise.all([
-      fetch("https://api.loyverse.com/v1.0/items", {
-        headers: { Authorization: "Bearer " + process.env.LOYVERSE_TOKEN }
-      }),
-      fetch("https://api.loyverse.com/v1.0/modifier_lists", {
-        headers: { Authorization: "Bearer " + process.env.LOYVERSE_TOKEN }
-      }),
-      fetch("https://api.loyverse.com/v1.0/categories", {
-        headers: { Authorization: "Bearer " + process.env.LOYVERSE_TOKEN }
-      })
+      fetch("https://api.loyverse.com/v1.0/items", { headers }),
+      fetch("https://api.loyverse.com/v1.0/modifier_lists", { headers }),
+      fetch("https://api.loyverse.com/v1.0/categories", { headers })
     ]);
 
     const itemsData = await itemsRes.json();
     const modifiersData = await modifiersRes.json();
     const categoriesData = await categoriesRes.json();
 
+    // MAP modifier list
     const modifiersMap = {};
     modifiersData.modifier_lists?.forEach(list => {
-      modifiersMap[list.id] = list;
+      modifiersMap[list.id] = {
+        id: list.id,
+        name: list.name,
+        modifiers: list.modifiers?.map(m => ({
+          id: m.id,
+          name: m.name,
+          price: Number(m.price || 0)
+        })) || []
+      };
     });
 
+    // MAP category
     const categoriesMap = {};
     categoriesData.categories?.forEach(cat => {
       categoriesMap[cat.id] = cat.name;
@@ -34,22 +42,24 @@ export default async function handler(req, res) {
 
       const categoryName = categoriesMap[item.category_id] || null;
 
-      const modifierLists = (item.modifier_list_ids || []).map(id => {
-        const list = modifiersMap[id];
+      // หา modifier list id จากหลายตำแหน่ง
+      let modifierIds = [];
 
-        if (!list) return null;
+      if (item.modifier_list_ids) {
+        modifierIds = item.modifier_list_ids;
+      }
 
-        return {
-          id: list.id,
-          name: list.name,
-          modifiers: list.modifiers?.map(m => ({
-            id: m.id,
-            name: m.name,
-            price: Number(m.price || 0)
-          })) || []
-        };
+      if (item.modifier_lists) {
+        modifierIds = item.modifier_lists.map(m => m.id);
+      }
 
-      }).filter(Boolean);
+      if (item.variants && item.variants[0]?.modifier_list_ids) {
+        modifierIds = item.variants[0].modifier_list_ids;
+      }
+
+      const modifierLists = modifierIds
+        .map(id => modifiersMap[id])
+        .filter(Boolean);
 
       if (item.variants && item.variants.length > 0) {
 
