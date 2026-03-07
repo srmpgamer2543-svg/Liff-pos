@@ -4,7 +4,7 @@ const response = await fetch(
  "https://api.loyverse.com/v1.0/items",
  {
   headers:{
-   Authorization:`Bearer ${process.env.LOYVERSE_API_KEY}`
+   Authorization:`Bearer ${34b14f9c227247aaa1cb8af92921bf0b}`
   }
  }
 )
