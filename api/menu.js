@@ -10,30 +10,20 @@ export default async function handler(req, res) {
 
   const menu = data.items.map(item => {
 
-    const variant = item.variants && item.variants.length > 0 
-      ? item.variants[0] 
-      : {};
+    const variant = item.variants?.[0] || {};
+    const store = variant.stores?.[0] || {};
+
+    const price = store.price ?? variant.default_price ?? 0;
 
     return {
       id: item.id,
       name: item.item_name,
-      description: item.description,
-      category_id: item.category_id,
+      price: price,
       image: item.image_url,
-
-      // variant data
-      variant_id: variant.variant_id,
-      sku: variant.sku,
-      price: variant.price,
-      cost: variant.cost,
-
-      // raw data เผื่อใช้
-      variants: item.variants,
-      modifier_lists: item.modifier_lists
+      category: item.category_id
     };
 
   });
 
   res.json(menu);
-
 }
