@@ -33,15 +33,25 @@ export default async function handler(req, res) {
     // แปลงข้อมูลให้ตรงกับ Supabase table
     const menu = items.map(item => {
 
-      const variant = item.variants?.[0] || {}
+  const variant = item.variants?.[0] || {}
 
-      return {
-        id: item.id,
-        name: item.item_name,
-        price: variant.price || 0
-      }
+  let price = 0
 
-    })
+  if (variant.price) {
+    price = variant.price
+  }
+
+  if (variant.price_money?.amount) {
+    price = variant.price_money.amount / 100
+  }
+
+  return {
+    id: item.id,
+    name: item.item_name,
+    price: price
+  }
+
+})
 
     // ส่งเข้า Supabase
     const supabaseRes = await fetch(
