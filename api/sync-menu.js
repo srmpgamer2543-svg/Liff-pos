@@ -1,3 +1,10 @@
+import { createClient } from "@supabase/supabase-js"
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+)
+
 export default async function handler(req, res) {
 
   try {
@@ -6,13 +13,12 @@ export default async function handler(req, res) {
       "https://api.loyverse.com/v1.0/items",
       {
         headers: {
-          Authorization: "Bearer 34b14f9c227247aaa1cb8af92921bf0b"
+          Authorization: `Bearer ${process.env.LOYVERSE_API_KEY}`
         }
       }
     )
 
     const data = await response.json()
-
     const items = data.items || []
 
     const menu = items.map(item => {
@@ -35,10 +41,18 @@ export default async function handler(req, res) {
 
     })
 
+    // INSERT / UPDATE เข้า Supabase
+    const { error } = await supabase
+      .from("menu")
+      .upsert(menu)
+
+    if (error) {
+      throw error
+    }
+
     res.status(200).json({
       success: true,
-      total: menu.length,
-      menu: menu
+      total: menu.length
     })
 
   } catch (error) {
