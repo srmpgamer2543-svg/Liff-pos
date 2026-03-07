@@ -14,30 +14,15 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Loyverse API KEY missing" })
     }
 
-    // ดึงสินค้า
-    const itemsRes = await fetch("https://api.loyverse.com/v1.0/items", {
+    // ดึง items จาก Loyverse
+    const loyverseRes = await fetch("https://api.loyverse.com/v1.0/items", {
       headers: {
         Authorization: `Bearer ${LOYVERSE_API_KEY}`
       }
     })
 
-    const itemsData = await itemsRes.json()
-    const items = itemsData.items || []
-
-    // ดึงหมวดหมู่
-    const catRes = await fetch("https://api.loyverse.com/v1.0/categories", {
-      headers: {
-        Authorization: `Bearer ${LOYVERSE_API_KEY}`
-      }
-    })
-
-    const catData = await catRes.json()
-    const categories = catData.categories || []
-
-    const categoryMap = {}
-    categories.forEach(c => {
-      categoryMap[c.id] = c.name
-    })
+    const loyverseData = await loyverseRes.json()
+    const items = loyverseData.items || []
 
     if (items.length === 0) {
       return res.json({
@@ -45,7 +30,7 @@ export default async function handler(req, res) {
       })
     }
 
-    // แปลงข้อมูล
+    // แปลงข้อมูลให้ตรงกับ Supabase table
     const menu = items.map(item => {
 
       const variant = item.variants?.[0] || {}
@@ -53,17 +38,7 @@ export default async function handler(req, res) {
       return {
         id: item.id,
         name: item.item_name,
-        description: item.description || "",
-        category_id: item.category_id || null,
-        category_name: categoryMap[item.category_id] || null,
-        price: variant.price || 0,
-        sku: variant.sku || "",
-        barcode: variant.barcode || "",
-        image: item.image_url || "",
-        option1: item.option1_name || null,
-        option2: item.option2_name || null,
-        option3: item.option3_name || null,
-        variants: item.variants || []
+        price: variant.price || 0
       }
 
     })
@@ -87,8 +62,8 @@ export default async function handler(req, res) {
 
     return res.json({
       status: "menu synced",
-      items_synced: menu.length,
-      supabase: result
+      total_items: menu.length,
+      supabase_response: result
     })
 
   } catch (err) {
