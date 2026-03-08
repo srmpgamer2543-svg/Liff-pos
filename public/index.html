@@ -14,8 +14,6 @@ background:#f5f5f5;
 margin:0;
 }
 
-/* Header */
-
 .header{
 text-align:center;
 padding:20px;
@@ -23,8 +21,6 @@ background:white;
 font-size:30px;
 font-weight:bold;
 }
-
-/* หมวดหมู่ */
 
 .categories{
 display:flex;
@@ -43,16 +39,22 @@ font-size:20px;
 font-weight:bold;
 }
 
-/* เมนูสินค้า */
-
 .menu{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
 padding:10px;
 }
 
-/* การ์ดสินค้า */
+.category-title{
+font-size:26px;
+font-weight:bold;
+margin-top:20px;
+margin-bottom:10px;
+}
+
+.menu-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
 
 .card{
 background:white;
@@ -66,24 +68,18 @@ width:100%;
 border-radius:12px;
 }
 
-/* ชื่อเมนู */
-
 .name{
-font-size:40px;
+font-size:28px;
 margin-top:8px;
 font-weight:bold;
 }
 
-/* ราคา */
-
 .price{
 color:#1db954;
 font-weight:bold;
-font-size:35px;
+font-size:24px;
 margin-top:5px;
 }
-
-/* ปุ่มเพิ่ม */
 
 .add{
 float:right;
@@ -96,8 +92,6 @@ border-radius:50%;
 font-size:24px;
 cursor:pointer;
 }
-
-/* ปุ่มตะกร้า */
 
 .cart-btn{
 position:fixed;
@@ -113,8 +107,6 @@ font-weight:bold;
 box-shadow:0 4px 8px rgba(0,0,0,0.2);
 }
 
-/* กล่องตะกร้า */
-
 .cart{
 position:fixed;
 bottom:0;
@@ -129,46 +121,6 @@ display:none;
 overflow:auto;
 }
 
-.cart h3{
-margin-top:0;
-font-size:24px;
-}
-
-.cart-item{
-display:flex;
-justify-content:space-between;
-margin-bottom:10px;
-font-size:18px;
-}
-
-.qty{
-display:flex;
-gap:5px;
-}
-
-.qty button{
-width:30px;
-height:30px;
-font-size:18px;
-}
-
-.total{
-font-size:22px;
-font-weight:bold;
-margin-top:10px;
-}
-
-.order{
-background:#1db954;
-color:white;
-border:none;
-width:100%;
-padding:15px;
-font-size:22px;
-border-radius:10px;
-margin-top:10px;
-}
-
 </style>
 
 </head>
@@ -178,8 +130,6 @@ margin-top:10px;
 <div class="header">
 POS MENU
 </div>
-
-<div class="categories" id="categories"></div>
 
 <div class="menu" id="menu"></div>
 
@@ -210,207 +160,127 @@ let cart = []
 
 async function loadMenu(){
 
-const res = await fetch("/api/get-menu")
-menuData = await res.json()
+ const menuRes = await fetch("/api/get-menu")
+ const menu = await menuRes.json()
 
-renderMenu(menuData)
-renderCategories()
+ const catRes = await fetch("/api/get-categories")
+ const categories = await catRes.json()
 
-}
+ const container = document.getElementById("menu")
 
-function renderMenu(data){
+ container.innerHTML = ""
 
-const menuDiv = document.getElementById("menu")
-menuDiv.innerHTML = ""
+ categories.forEach(cat => {
 
-data.forEach(item => {
+  const section = document.createElement("div")
 
-menuDiv.innerHTML += `
-<div class="card">
+  section.innerHTML = `
+   <div class="category-title">${cat.name}</div>
+   <div class="menu-grid" id="cat-${cat.id}"></div>
+  `
 
-<img src="${item.image || 'https://via.placeholder.com/300'}">
+  container.appendChild(section)
 
-<div class="name">
-${item.name}
-</div>
+  const grid = section.querySelector(".menu-grid")
 
-<div class="price">
-${item.price} บาท
-<button class="add" onclick="addToCart('${item.id}')">+</button>
-</div>
+  menu
+   .filter(item => item.category_id === cat.id)
+   .forEach(item => {
 
-</div>
-`
+    grid.innerHTML += `
+     <div class="card">
 
-})
+      <img src="${item.image || 'https://via.placeholder.com/300'}">
 
-}
+      <div class="name">${item.name}</div>
 
-/* แก้หมวดหมู่ */
+      <div class="price">
+       ${item.price} บาท
+       <button class="add" onclick="addToCart('${item.id}')">+</button>
+      </div>
 
-function renderCategories(){
+     </div>
+    `
 
-const catDiv = document.getElementById("categories")
+   })
 
-// กันค่า null
-let cats = [...new Set(
-menuData
-.filter(i => i.category_name)
-.map(i => i.category_name)
-)]
-
-// เรียงตามเลข
-cats.sort((a,b)=>{
-
-let na = parseInt((a || "").split("_")[0]) || 999
-let nb = parseInt((b || "").split("_")[0]) || 999
-
-return na - nb
-
-})
-
-// ปุ่มทั้งหมด
-catDiv.innerHTML = `
-<div class="cat" onclick="renderMenu(menuData)">
-ทั้งหมด
-</div>
-`
-
-cats.forEach(cat => {
-
-let parts = (cat || "").split("_")
-
-let showName =
-parts.length > 1
-? parts.slice(1).join("_")
-: cat
-
-catDiv.innerHTML += `
-<div class="cat" onclick="filterCat('${cat}')">
-${showName}
-</div>
-`
-
-})
-
-}
-
-function filterCat(cat){
-
-const filtered =
-menuData.filter(i => i.category_name === cat)
-
-renderMenu(filtered)
+ })
 
 }
 
 function addToCart(id){
 
-let item =
-menuData.find(i => i.id === id)
+ let item = menuData.find(i => i.id === id)
 
-let found =
-cart.find(i => i.id === id)
+ if(!item){
+  item = {id,name:"สินค้า",price:0}
+ }
 
-if(found){
-found.qty++
-}else{
-cart.push({
-...item,
-qty:1
-})
-}
+ let found = cart.find(i => i.id === id)
 
-updateCart()
+ if(found){
+  found.qty++
+ }else{
+  cart.push({...item,qty:1})
+ }
+
+ updateCart()
 
 }
 
 function updateCart(){
 
-const cartItems =
-document.getElementById("cartItems")
+ const cartItems = document.getElementById("cartItems")
+ const cartCount = document.getElementById("cartCount")
+ const totalPrice = document.getElementById("totalPrice")
 
-const cartCount =
-document.getElementById("cartCount")
+ cartItems.innerHTML=""
 
-const totalPrice =
-document.getElementById("totalPrice")
+ let total=0
+ let count=0
 
-cartItems.innerHTML = ""
+ cart.forEach(item=>{
 
-let total = 0
-let count = 0
+  total+=item.price*item.qty
+  count+=item.qty
 
-cart.forEach(item => {
+  cartItems.innerHTML+=`
+  <div>
 
-total += item.price * item.qty
-count += item.qty
+   ${item.name} x ${item.qty}
 
-cartItems.innerHTML += `
-<div class="cart-item">
+  </div>
+  `
 
-${item.name} x ${item.qty}
+ })
 
-<div class="qty">
-
-<button onclick="changeQty('${item.id}',-1)">-</button>
-<button onclick="changeQty('${item.id}',1)">+</button>
-
-</div>
-
-</div>
-`
-
-})
-
-cartCount.innerText = count
-totalPrice.innerText = total
-
-}
-
-function changeQty(id,amount){
-
-let item =
-cart.find(i => i.id === id)
-
-item.qty += amount
-
-if(item.qty <=0){
-cart = cart.filter(i => i.id !== id)
-}
-
-updateCart()
+ cartCount.innerText=count
+ totalPrice.innerText=total
 
 }
 
 function toggleCart(){
 
-const cartBox =
-document.getElementById("cart")
+ const cartBox=document.getElementById("cart")
 
-cartBox.style.display =
-cartBox.style.display === "block"
-? "none"
-: "block"
+ cartBox.style.display=
+ cartBox.style.display==="block"
+ ?"none"
+ :"block"
 
 }
 
 function checkout(){
 
-if(cart.length === 0){
-alert("ยังไม่มีสินค้า")
-return
-}
+ if(cart.length===0){
+  alert("ยังไม่มีสินค้า")
+  return
+ }
 
-console.log("ORDER",cart)
+ alert("ส่งออเดอร์แล้ว")
 
-alert("ส่งออเดอร์แล้ว")
-
-cart = []
-
-updateCart()
-
-toggleCart()
+ cart=[]
+ updateCart()
 
 }
 
@@ -419,5 +289,4 @@ loadMenu()
 </script>
 
 </body>
-
 </html>
