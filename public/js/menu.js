@@ -84,6 +84,16 @@ container.appendChild(btn)
 
 }
 
+/* หาลำดับหมวดจาก categories */
+
+function getCategoryOrder(categoryName){
+
+const cat = categories.find(c => c.id === categoryName)
+
+return cat ? cat.order : 99
+
+}
+
 /* แสดงเมนู */
 
 function renderMenu(menu){
@@ -95,8 +105,8 @@ container.innerHTML=""
 
 const sorted=[...menu].sort((a,b)=>{
 
-const orderA=parseInt((a.category_name||"").split("_")[0]) || 99
-const orderB=parseInt((b.category_name||"").split("_")[0]) || 99
+const orderA = getCategoryOrder(a.category_name)
+const orderB = getCategoryOrder(b.category_name)
 
 if(orderA!==orderB){
 return orderA-orderB
