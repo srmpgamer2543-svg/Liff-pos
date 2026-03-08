@@ -18,18 +18,10 @@ margin:0;
 
 .header{
 text-align:center;
-padding:25px;
+padding:20px;
 background:white;
-}
-
-.header h2{
-font-size:32px;
-margin:0;
-}
-
-.logo{
-width:180px;
-margin-top:10px;
+font-size:28px;
+font-weight:bold;
 }
 
 /* หมวดหมู่ */
@@ -38,16 +30,16 @@ margin-top:10px;
 display:flex;
 overflow:auto;
 padding:15px;
-gap:12px;
+gap:10px;
 }
 
 .cat{
 background:#eee;
-padding:12px 22px;
-border-radius:25px;
+padding:10px 18px;
+border-radius:20px;
 white-space:nowrap;
 cursor:pointer;
-font-size:20px;
+font-size:18px;
 font-weight:bold;
 }
 
@@ -77,8 +69,8 @@ border-radius:12px;
 /* ชื่อเมนู */
 
 .name{
-font-size:24px;
-margin-top:10px;
+font-size:22px;
+margin-top:8px;
 font-weight:bold;
 }
 
@@ -87,7 +79,7 @@ font-weight:bold;
 .price{
 color:#1db954;
 font-weight:bold;
-font-size:22px;
+font-size:20px;
 margin-top:5px;
 }
 
@@ -98,12 +90,79 @@ float:right;
 background:#1db954;
 color:white;
 border:none;
-width:40px;
-height:40px;
+width:36px;
+height:36px;
 border-radius:50%;
-font-size:24px;
-font-weight:bold;
+font-size:22px;
 cursor:pointer;
+}
+
+/* ปุ่มตะกร้า */
+
+.cart-btn{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#ff9800;
+color:white;
+border:none;
+padding:15px 18px;
+border-radius:30px;
+font-size:18px;
+font-weight:bold;
+box-shadow:0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* กล่องตะกร้า */
+
+.cart{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:white;
+max-height:60%;
+border-top-left-radius:20px;
+border-top-right-radius:20px;
+padding:15px;
+display:none;
+overflow:auto;
+}
+
+.cart h3{
+margin-top:0;
+}
+
+.cart-item{
+display:flex;
+justify-content:space-between;
+margin-bottom:10px;
+}
+
+.qty{
+display:flex;
+gap:5px;
+}
+
+.qty button{
+width:25px;
+}
+
+.total{
+font-size:20px;
+font-weight:bold;
+margin-top:10px;
+}
+
+.order{
+background:#1db954;
+color:white;
+border:none;
+width:100%;
+padding:15px;
+font-size:20px;
+border-radius:10px;
+margin-top:10px;
 }
 
 </style>
@@ -113,22 +172,51 @@ cursor:pointer;
 <body>
 
 <div class="header">
-<h2>POS MENU</h2>
+POS MENU
 </div>
 
 <div class="categories" id="categories"></div>
 
 <div class="menu" id="menu"></div>
 
+<button class="cart-btn" onclick="toggleCart()">
+🛒 ตะกร้า (<span id="cartCount">0</span>)
+</button>
+
+<div class="cart" id="cart">
+
+<h3>ตะกร้าสินค้า</h3>
+
+<div id="cartItems"></div>
+
+<div class="total">
+รวม : <span id="totalPrice">0</span> บาท
+</div>
+
+<button class="order" onclick="checkout()">
+สั่งซื้อ
+</button>
+
+</div>
+
 <script>
+
+let menuData = []
+let cart = []
 
 async function loadMenu(){
 
 const res = await fetch("/api/get-menu")
-const data = await res.json()
+menuData = await res.json()
+
+renderMenu(menuData)
+renderCategories()
+
+}
+
+function renderMenu(data){
 
 const menuDiv = document.getElementById("menu")
-
 menuDiv.innerHTML = ""
 
 data.forEach(item => {
@@ -143,13 +231,147 @@ ${item.name}
 
 <div class="price">
 ${item.price} บาท
-<button class="add">+</button>
+<button class="add" onclick="addToCart('${item.id}')">+</button>
 </div>
 
 </div>
 `
 
 })
+
+}
+
+function renderCategories(){
+
+const catDiv = document.getElementById("categories")
+
+let cats = [...new Set(menuData.map(i => i.category_id))]
+
+catDiv.innerHTML = `<div class="cat" onclick="renderMenu(menuData)">All</div>`
+
+cats.forEach(cat => {
+
+catDiv.innerHTML += `
+<div class="cat" onclick="filterCat('${cat}')">
+${cat}
+</div>
+`
+
+})
+
+}
+
+function filterCat(cat){
+
+const filtered = menuData.filter(i => i.category_id === cat)
+renderMenu(filtered)
+
+}
+
+function addToCart(id){
+
+let item = menuData.find(i => i.id === id)
+
+let found = cart.find(i => i.id === id)
+
+if(found){
+
+found.qty++
+
+}else{
+
+cart.push({
+...item,
+qty:1
+})
+
+}
+
+updateCart()
+
+}
+
+function updateCart(){
+
+const cartItems = document.getElementById("cartItems")
+const cartCount = document.getElementById("cartCount")
+const totalPrice = document.getElementById("totalPrice")
+
+cartItems.innerHTML = ""
+
+let total = 0
+let count = 0
+
+cart.forEach(item => {
+
+total += item.price * item.qty
+count += item.qty
+
+cartItems.innerHTML += `
+<div class="cart-item">
+
+${item.name} x ${item.qty}
+
+<div class="qty">
+
+<button onclick="changeQty('${item.id}',-1)">-</button>
+<button onclick="changeQty('${item.id}',1)">+</button>
+
+</div>
+
+</div>
+`
+
+})
+
+cartCount.innerText = count
+totalPrice.innerText = total
+
+}
+
+function changeQty(id,amount){
+
+let item = cart.find(i => i.id === id)
+
+item.qty += amount
+
+if(item.qty <=0){
+
+cart = cart.filter(i => i.id !== id)
+
+}
+
+updateCart()
+
+}
+
+function toggleCart(){
+
+const cartBox = document.getElementById("cart")
+
+cartBox.style.display =
+cartBox.style.display === "block"
+? "none"
+: "block"
+
+}
+
+function checkout(){
+
+if(cart.length === 0){
+alert("ยังไม่มีสินค้า")
+return
+}
+
+console.log("ORDER",cart)
+
+alert("ส่งออเดอร์แล้ว")
+
+cart = []
+
+updateCart()
+
+toggleCart()
 
 }
 
