@@ -4,6 +4,17 @@ import { addToCart } from "./cart.js"
 let allMenu = []
 let categories = []
 
+/* mapping หมวดจาก loyverse */
+
+const CATEGORY_MAP = {
+"9cecdcb1-bb21-45d2-b6f1-4533e8338651": "01_เมนูชา",
+"93e0c7e4-3886-4e66-81f9-b150dc50c52": "02_เมนูนมสด",
+"743fa003-80ff-43e7-8d0b-e3f10bb09d43": "03_เมนูผลไม้",
+"cd9b8034-ea70-4bb2-b8c6-73b48dfda916": "04_เมนูโซดา",
+"938355b2-ec44-4dd4-bb08-ef7c5affbd5b": "05_เมนูปังเย็น",
+"3f2f494d-b4c6-4f41-be7f-ad2b3b55086d": "06_เมนูขนมปัง"
+}
+
 export async function loadMenu(){
 
 const menu = await getMenu()
@@ -18,27 +29,30 @@ renderMenu(allMenu)
 
 }
 
-/* เตรียมหมวดหมู่จาก category_name */
+
+/* เตรียมหมวด */
 
 function prepareCategories(){
 
 const map = {}
 
-allMenu.forEach(item => {
+allMenu.forEach(item=>{
 
-if(!item.category_name) return
+const name = CATEGORY_MAP[item.category_id]
 
-const parts = item.category_name.split("_")
+if(!name) return
 
-const order = parseInt(parts[0]) || 99
-const name = parts.slice(1).join("_") || item.category_name
+const parts = name.split("_")
 
-if(!map[item.category_name]){
+const order = parseInt(parts[0])
+const thaiName = parts[1]
 
-map[item.category_name] = {
-id: item.category_name,
-name: name,
-order: order
+if(!map[item.category_id]){
+
+map[item.category_id] = {
+id:item.category_id,
+name:thaiName,
+order:order
 }
 
 }
@@ -49,7 +63,8 @@ categories = Object.values(map).sort((a,b)=>a.order-b.order)
 
 }
 
-/* สร้างปุ่มหมวด */
+
+/* ปุ่มหมวด */
 
 function renderCategories(){
 
@@ -60,6 +75,7 @@ container.innerHTML=""
 
 const allBtn=document.createElement("button")
 allBtn.innerText="ทั้งหมด"
+
 allBtn.onclick=()=>renderMenu(allMenu)
 
 container.appendChild(allBtn)
@@ -72,7 +88,7 @@ btn.innerText=cat.name
 
 btn.onclick=()=>{
 
-const filtered = allMenu.filter(i => i.category_name === cat.id)
+const filtered = allMenu.filter(i=>i.category_id===cat.id)
 
 renderMenu(filtered)
 
@@ -84,17 +100,8 @@ container.appendChild(btn)
 
 }
 
-/* หาลำดับหมวดจาก categories */
 
-function getCategoryOrder(categoryName){
-
-const cat = categories.find(c => c.id === categoryName)
-
-return cat ? cat.order : 99
-
-}
-
-/* แสดงเมนู */
+/* เรียงเมนู */
 
 function renderMenu(menu){
 
@@ -105,8 +112,11 @@ container.innerHTML=""
 
 const sorted=[...menu].sort((a,b)=>{
 
-const orderA = getCategoryOrder(a.category_name)
-const orderB = getCategoryOrder(b.category_name)
+const catA = CATEGORY_MAP[a.category_id] || "99"
+const catB = CATEGORY_MAP[b.category_id] || "99"
+
+const orderA=parseInt(catA.split("_")[0])
+const orderB=parseInt(catB.split("_")[0])
 
 if(orderA!==orderB){
 return orderA-orderB
