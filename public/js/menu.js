@@ -4,16 +4,6 @@ import { addToCart } from "./cart.js"
 let allMenu = []
 let categories = []
 
-/* map category_id -> ชื่อหมวด + ลำดับ */
-const CATEGORY_MAP = {
-"9cecdcb1-bb21-45d2-b6f1-4533e8338651": {name:"เมนูชา",order:1},
-"93e0c7e4-3886-4e66-81f9-b150dc50c52": {name:"เมนูนมสด",order:2},
-"743fa003-80ff-43e7-8d0b-e3f10bb09d43": {name:"เมนูผลไม้",order:3},
-"cd9b8034-ea70-4bb2-b8c6-73b48dfda916": {name:"เมนูโซดา",order:4},
-"938355b2-ec44-4dd4-bb08-ef7c5affbd5b": {name:"เมนูปังเย็น",order:5},
-"3f2f494d-b4c6-4f41-be7f-ad2b3b55086d": {name:"เมนูขนมปัง",order:6}
-}
-
 export async function loadMenu(){
 
 const menu = await getMenu()
@@ -28,22 +18,27 @@ renderMenu(allMenu)
 
 }
 
+/* เตรียมหมวดหมู่จาก category_name */
+
 function prepareCategories(){
 
 const map = {}
 
 allMenu.forEach(item => {
 
-const cat = CATEGORY_MAP[item.category_id]
+if(!item.category_name) return
 
-if(!cat) return
+const parts = item.category_name.split("_")
 
-if(!map[item.category_id]){
+const order = parseInt(parts[0]) || 99
+const name = parts.slice(1).join("_") || item.category_name
 
-map[item.category_id] = {
-id:item.category_id,
-name:cat.name,
-order:cat.order
+if(!map[item.category_name]){
+
+map[item.category_name] = {
+id: item.category_name,
+name: name,
+order: order
 }
 
 }
@@ -53,6 +48,8 @@ order:cat.order
 categories = Object.values(map).sort((a,b)=>a.order-b.order)
 
 }
+
+/* สร้างปุ่มหมวด */
 
 function renderCategories(){
 
@@ -75,8 +72,7 @@ btn.innerText=cat.name
 
 btn.onclick=()=>{
 
-const filtered=allMenu
-.filter(i=>i.category_id===cat.id)
+const filtered = allMenu.filter(i => i.category_name === cat.id)
 
 renderMenu(filtered)
 
@@ -88,6 +84,8 @@ container.appendChild(btn)
 
 }
 
+/* แสดงเมนู */
+
 function renderMenu(menu){
 
 const container=document.getElementById("menu")
@@ -97,11 +95,11 @@ container.innerHTML=""
 
 const sorted=[...menu].sort((a,b)=>{
 
-const catA=CATEGORY_MAP[a.category_id]?.order || 99
-const catB=CATEGORY_MAP[b.category_id]?.order || 99
+const orderA=parseInt((a.category_name||"").split("_")[0]) || 99
+const orderB=parseInt((b.category_name||"").split("_")[0]) || 99
 
-if(catA!==catB){
-return catA-catB
+if(orderA!==orderB){
+return orderA-orderB
 }
 
 return a.name.localeCompare(b.name,"th")
