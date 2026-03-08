@@ -1,39 +1,44 @@
-function renderCategories(){
+import { createClient } from "@supabase/supabase-js"
 
-const catDiv = document.getElementById("categories")
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+)
 
-let cats = [...new Set(
-menuData
-.map(i => i.category_name || i.category)
-.filter(Boolean)
-)]
+export default async function handler(req, res) {
 
-cats.sort((a,b)=>{
+  try {
 
-let na = parseInt(a.split("_")[0]) || 999
-let nb = parseInt(b.split("_")[0]) || 999
+    const { data, error } = await supabase
+      .from("menu")
+      .select("*")
+      .order("name", { ascending: true })
 
-return na - nb
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        error: error.message
+      })
+    }
 
-})
+    // ปรับข้อมูลให้ตรงกับหน้า POS
+    const menu = data.map(item => ({
+      id: item.id,
+      name: item.name,
+      price: item.price || 0,
+      image: item.image || "",
+      category_name: item.category_name || item.category || "00_อื่นๆ"
+    }))
 
-catDiv.innerHTML = `
-<div class="cat" onclick="renderMenu(menuData)">
-ทั้งหมด
-</div>
-`
+    return res.status(200).json(menu)
 
-cats.forEach(cat => {
+  } catch (err) {
 
-let parts = cat.split("_")
-let showName = parts.length > 1 ? parts.slice(1).join("_") : cat
+    return res.status(500).json({
+      success: false,
+      error: err.message
+    })
 
-catDiv.innerHTML += `
-<div class="cat" onclick="filterCat('${cat}')">
-${showName}
-</div>
-`
-
-})
+  }
 
 }
