@@ -38,14 +38,13 @@ const map = {}
 
 allMenu.forEach(item=>{
 
-const name = CATEGORY_MAP[item.category_id]
+const raw = CATEGORY_MAP[item.category_id]
 
-if(!name) return
+if(!raw) return
 
-const parts = name.split("_")
+const [orderStr,thaiName] = raw.split("_")
 
-const order = parseInt(parts[0])
-const thaiName = parts[1]
+const order = parseInt(orderStr)
 
 if(!map[item.category_id]){
 
@@ -112,14 +111,14 @@ container.innerHTML=""
 
 const sorted=[...menu].sort((a,b)=>{
 
-const catA = CATEGORY_MAP[a.category_id] || "99"
-const catB = CATEGORY_MAP[b.category_id] || "99"
+const mapA = CATEGORY_MAP[a.category_id]
+const mapB = CATEGORY_MAP[b.category_id]
 
-const orderA=parseInt(catA.split("_")[0])
-const orderB=parseInt(catB.split("_")[0])
+const orderA = mapA ? parseInt(mapA.split("_")[0]) : 999
+const orderB = mapB ? parseInt(mapB.split("_")[0]) : 999
 
-if(orderA!==orderB){
-return orderA-orderB
+if(orderA !== orderB){
+return orderA - orderB
 }
 
 return a.name.localeCompare(b.name,"th")
