@@ -1,14 +1,16 @@
 export function toggleCart(){
 
-const cart=document.getElementById("cart")
+const cart = document.getElementById("cart")
 
-if(cart.style.right==="0px"){
+const current = window.getComputedStyle(cart).right
 
-cart.style.right="-100%"
+if(current === "0px"){
+
+cart.style.right = "-100%"
 
 }else{
 
-cart.style.right="0"
+cart.style.right = "0"
 
 }
 
