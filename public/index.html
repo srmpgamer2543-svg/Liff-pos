@@ -246,23 +246,30 @@ ${item.price} บาท
 
 }
 
-/* หมวดหมู่เรียงตาม 01_02_03 และแสดงชื่อไทย */
+/* แก้หมวดหมู่ */
 
 function renderCategories(){
 
 const catDiv = document.getElementById("categories")
 
-let cats = [...new Set(menuData.map(i => i.category_name))]
+// กันค่า null
+let cats = [...new Set(
+menuData
+.filter(i => i.category_name)
+.map(i => i.category_name)
+)]
 
+// เรียงตามเลข
 cats.sort((a,b)=>{
 
-let na = parseInt(a.split("_")[0]) || 999
-let nb = parseInt(b.split("_")[0]) || 999
+let na = parseInt((a || "").split("_")[0]) || 999
+let nb = parseInt((b || "").split("_")[0]) || 999
 
 return na - nb
 
 })
 
+// ปุ่มทั้งหมด
 catDiv.innerHTML = `
 <div class="cat" onclick="renderMenu(menuData)">
 ทั้งหมด
@@ -271,8 +278,12 @@ catDiv.innerHTML = `
 
 cats.forEach(cat => {
 
-let parts = cat.split("_")
-let showName = parts.length > 1 ? parts.slice(1).join("_") : cat
+let parts = (cat || "").split("_")
+
+let showName =
+parts.length > 1
+? parts.slice(1).join("_")
+: cat
 
 catDiv.innerHTML += `
 <div class="cat" onclick="filterCat('${cat}')">
@@ -286,16 +297,20 @@ ${showName}
 
 function filterCat(cat){
 
-const filtered = menuData.filter(i => i.category_name === cat)
+const filtered =
+menuData.filter(i => i.category_name === cat)
+
 renderMenu(filtered)
 
 }
 
 function addToCart(id){
 
-let item = menuData.find(i => i.id === id)
+let item =
+menuData.find(i => i.id === id)
 
-let found = cart.find(i => i.id === id)
+let found =
+cart.find(i => i.id === id)
 
 if(found){
 found.qty++
@@ -312,9 +327,14 @@ updateCart()
 
 function updateCart(){
 
-const cartItems = document.getElementById("cartItems")
-const cartCount = document.getElementById("cartCount")
-const totalPrice = document.getElementById("totalPrice")
+const cartItems =
+document.getElementById("cartItems")
+
+const cartCount =
+document.getElementById("cartCount")
+
+const totalPrice =
+document.getElementById("totalPrice")
 
 cartItems.innerHTML = ""
 
@@ -350,7 +370,8 @@ totalPrice.innerText = total
 
 function changeQty(id,amount){
 
-let item = cart.find(i => i.id === id)
+let item =
+cart.find(i => i.id === id)
 
 item.qty += amount
 
@@ -364,7 +385,8 @@ updateCart()
 
 function toggleCart(){
 
-const cartBox = document.getElementById("cart")
+const cartBox =
+document.getElementById("cart")
 
 cartBox.style.display =
 cartBox.style.display === "block"
