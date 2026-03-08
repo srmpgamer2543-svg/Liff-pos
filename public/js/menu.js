@@ -24,14 +24,23 @@ const map = {}
 
 allMenu.forEach(item => {
 
-if(!map[item.category_id]){
+const rawName = item.category_name || item.category_id || "อื่นๆ"
 
-map[item.category_id] = {
-id: item.category_id,
-name: item.category_name || item.category_id,
-order: item.category_order || 0
+let order = 999
+let name = rawName
+
+if(rawName.includes("_")){
+const parts = rawName.split("_")
+order = parseInt(parts[0]) || 999
+name = parts.slice(1).join("_")
 }
 
+if(!map[rawName]){
+map[rawName] = {
+id: rawName,
+name: name,
+order: order
+}
 }
 
 })
@@ -63,8 +72,13 @@ btn.innerText = cat.name
 btn.onclick = () => {
 
 const filtered = allMenu
-.filter(i => i.category_id === cat.id)
-.sort((a,b)=>a.name.localeCompare(b.name))
+.filter(i => {
+
+const rawName = i.category_name || i.category_id
+
+return rawName === cat.id
+
+})
 
 renderMenu(filtered)
 
@@ -85,11 +99,26 @@ container.innerHTML=""
 
 const sorted = [...menu].sort((a,b)=>{
 
-if(a.category_order !== b.category_order){
-return (a.category_order||0) - (b.category_order||0)
+const getOrder = (item) => {
+
+const raw = item.category_name || item.category_id || ""
+
+if(raw.includes("_")){
+return parseInt(raw.split("_")[0]) || 999
 }
 
-return a.name.localeCompare(b.name)
+return 999
+
+}
+
+const orderA = getOrder(a)
+const orderB = getOrder(b)
+
+if(orderA !== orderB){
+return orderA - orderB
+}
+
+return a.name.localeCompare(b.name,"th")
 
 })
 
