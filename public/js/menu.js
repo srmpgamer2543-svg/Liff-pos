@@ -4,6 +4,16 @@ import { addToCart } from "./cart.js"
 let allMenu = []
 let categories = []
 
+/* กำหนดหมวดหมู่ที่ต้องการให้แสดง */
+const CATEGORY_ORDER = [
+{ key: "01_", name: "เมนูชา", order: 1 },
+{ key: "02_", name: "เมนูนมสด", order: 2 },
+{ key: "03_", name: "เมนูผลไม้", order: 3 },
+{ key: "04_", name: "เมนูโซดา", order: 4 },
+{ key: "05_", name: "เมนูปังเย็น", order: 5 },
+{ key: "06_", name: "เมนูขนมปัง", order: 6 }
+]
+
 export async function loadMenu(){
 
 const menu = await getMenu()
@@ -24,24 +34,25 @@ const map = {}
 
 allMenu.forEach(item => {
 
-const rawName = item.category_name || item.category_id || "อื่นๆ"
+const categoryName = item.category_name || ""
 
-let order = 999
-let name = rawName
+CATEGORY_ORDER.forEach(cat => {
 
-if(rawName.includes("_")){
-const parts = rawName.split("_")
-order = parseInt(parts[0]) || 999
-name = parts.slice(1).join("_")
+if(categoryName.startsWith(cat.key)){
+
+if(!map[cat.name]){
+
+map[cat.name] = {
+id: cat.name,
+name: cat.name,
+order: cat.order
 }
 
-if(!map[rawName]){
-map[rawName] = {
-id: rawName,
-name: name,
-order: order
 }
+
 }
+
+})
 
 })
 
@@ -74,11 +85,11 @@ btn.onclick = () => {
 const filtered = allMenu
 .filter(i => {
 
-const rawName = i.category_name || i.category_id
-
-return rawName === cat.id
+const name = i.category_name || ""
+return name.includes(cat.name)
 
 })
+.sort((a,b)=>a.name.localeCompare(b.name,"th"))
 
 renderMenu(filtered)
 
@@ -99,23 +110,11 @@ container.innerHTML=""
 
 const sorted = [...menu].sort((a,b)=>{
 
-const getOrder = (item) => {
+const catA = CATEGORY_ORDER.find(c => (a.category_name||"").startsWith(c.key))?.order || 99
+const catB = CATEGORY_ORDER.find(c => (b.category_name||"").startsWith(c.key))?.order || 99
 
-const raw = item.category_name || item.category_id || ""
-
-if(raw.includes("_")){
-return parseInt(raw.split("_")[0]) || 999
-}
-
-return 999
-
-}
-
-const orderA = getOrder(a)
-const orderB = getOrder(b)
-
-if(orderA !== orderB){
-return orderA - orderB
+if(catA !== catB){
+return catA - catB
 }
 
 return a.name.localeCompare(b.name,"th")
@@ -132,7 +131,7 @@ div.innerHTML = `
 <img src="${item.image || ""}">
 <h3>${item.name}</h3>
 <p>${item.price}</p>
-<button>add</button>
+<button>เพิ่ม</button>
 `
 
 div.querySelector("button").onclick = () => addToCart(item)
