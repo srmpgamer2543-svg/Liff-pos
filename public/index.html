@@ -1,3 +1,6 @@
+<!DOCTYPE html>
+<html lang="th">
+
 <head>
 
 <meta charset="UTF-8">
@@ -106,3 +109,54 @@ cursor:pointer;
 </style>
 
 </head>
+
+<body>
+
+<div class="header">
+<h2>POS MENU</h2>
+</div>
+
+<div class="categories" id="categories"></div>
+
+<div class="menu" id="menu"></div>
+
+<script>
+
+async function loadMenu(){
+
+const res = await fetch("/api/get-menu")
+const data = await res.json()
+
+const menuDiv = document.getElementById("menu")
+
+menuDiv.innerHTML = ""
+
+data.forEach(item => {
+
+menuDiv.innerHTML += `
+<div class="card">
+<img src="${item.image || 'https://via.placeholder.com/300'}">
+
+<div class="name">
+${item.name}
+</div>
+
+<div class="price">
+${item.price} บาท
+<button class="add">+</button>
+</div>
+
+</div>
+`
+
+})
+
+}
+
+loadMenu()
+
+</script>
+
+</body>
+
+</html>
