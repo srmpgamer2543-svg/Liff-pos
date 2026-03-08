@@ -20,7 +20,7 @@ margin:0;
 text-align:center;
 padding:20px;
 background:white;
-font-size:28px;
+font-size:30px;
 font-weight:bold;
 }
 
@@ -35,11 +35,11 @@ gap:10px;
 
 .cat{
 background:#eee;
-padding:10px 18px;
+padding:12px 20px;
 border-radius:20px;
 white-space:nowrap;
 cursor:pointer;
-font-size:18px;
+font-size:20px;
 font-weight:bold;
 }
 
@@ -69,7 +69,7 @@ border-radius:12px;
 /* ชื่อเมนู */
 
 .name{
-font-size:22px;
+font-size:24px;
 margin-top:8px;
 font-weight:bold;
 }
@@ -79,7 +79,7 @@ font-weight:bold;
 .price{
 color:#1db954;
 font-weight:bold;
-font-size:20px;
+font-size:22px;
 margin-top:5px;
 }
 
@@ -90,10 +90,10 @@ float:right;
 background:#1db954;
 color:white;
 border:none;
-width:36px;
-height:36px;
+width:40px;
+height:40px;
 border-radius:50%;
-font-size:22px;
+font-size:24px;
 cursor:pointer;
 }
 
@@ -131,12 +131,14 @@ overflow:auto;
 
 .cart h3{
 margin-top:0;
+font-size:24px;
 }
 
 .cart-item{
 display:flex;
 justify-content:space-between;
 margin-bottom:10px;
+font-size:18px;
 }
 
 .qty{
@@ -145,11 +147,13 @@ gap:5px;
 }
 
 .qty button{
-width:25px;
+width:30px;
+height:30px;
+font-size:18px;
 }
 
 .total{
-font-size:20px;
+font-size:22px;
 font-weight:bold;
 margin-top:10px;
 }
@@ -160,7 +164,7 @@ color:white;
 border:none;
 width:100%;
 padding:15px;
-font-size:20px;
+font-size:22px;
 border-radius:10px;
 margin-top:10px;
 }
@@ -223,6 +227,7 @@ data.forEach(item => {
 
 menuDiv.innerHTML += `
 <div class="card">
+
 <img src="${item.image || 'https://via.placeholder.com/300'}">
 
 <div class="name">
@@ -245,15 +250,30 @@ function renderCategories(){
 
 const catDiv = document.getElementById("categories")
 
-let cats = [...new Set(menuData.map(i => i.category_id))]
+let cats = [...new Set(menuData.map(i => i.category_name))]
 
-catDiv.innerHTML = `<div class="cat" onclick="renderMenu(menuData)">All</div>`
+cats.sort((a,b)=>{
+
+let na = parseInt(a.split("_")[0])
+let nb = parseInt(b.split("_")[0])
+
+return na-nb
+
+})
+
+catDiv.innerHTML = `
+<div class="cat" onclick="renderMenu(menuData)">
+All
+</div>
+`
 
 cats.forEach(cat => {
 
+let showName = cat.split("_")[1] || cat
+
 catDiv.innerHTML += `
 <div class="cat" onclick="filterCat('${cat}')">
-${cat}
+${showName}
 </div>
 `
 
@@ -263,7 +283,7 @@ ${cat}
 
 function filterCat(cat){
 
-const filtered = menuData.filter(i => i.category_id === cat)
+const filtered = menuData.filter(i => i.category_name === cat)
 renderMenu(filtered)
 
 }
@@ -275,16 +295,12 @@ let item = menuData.find(i => i.id === id)
 let found = cart.find(i => i.id === id)
 
 if(found){
-
 found.qty++
-
 }else{
-
 cart.push({
 ...item,
 qty:1
 })
-
 }
 
 updateCart()
@@ -336,9 +352,7 @@ let item = cart.find(i => i.id === id)
 item.qty += amount
 
 if(item.qty <=0){
-
 cart = cart.filter(i => i.id !== id)
-
 }
 
 updateCart()
