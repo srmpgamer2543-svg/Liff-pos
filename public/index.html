@@ -32,24 +32,62 @@ padding:8px 14px;
 border-radius:20px;
 background:#eee;
 cursor:pointer;
+border:none;
+}
+
+.cat-btn.active{
+background:#22c55e;
+color:white;
 }
 
 #menu{
 display:grid;
 grid-template-columns:repeat(2,1fr);
-gap:10px;
-padding:10px;
+gap:12px;
+padding:12px;
 }
 
 .item{
 background:white;
-border-radius:10px;
-padding:10px;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 2px 6px rgba(0,0,0,.08);
+position:relative;
 }
 
 .item img{
 width:100%;
-border-radius:8px;
+height:150px;
+object-fit:cover;
+}
+
+.item-info{
+padding:10px;
+}
+
+.item-name{
+font-size:16px;
+font-weight:600;
+}
+
+.item-price{
+color:#16a34a;
+font-size:18px;
+font-weight:bold;
+}
+
+.add-btn{
+position:absolute;
+bottom:10px;
+right:10px;
+background:#22c55e;
+color:white;
+border:none;
+width:36px;
+height:36px;
+border-radius:50%;
+font-size:20px;
+cursor:pointer;
 }
 
 .cart-button{
