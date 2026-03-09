@@ -1,82 +1,121 @@
-async function loadMenu() {
+import { addToCart } from "./cart.js"
+import { getMenu, getCategories } from "./api.js"
 
-  const res = await fetch("/api/get-menu");
-  const data = await res.json();
+export async function loadMenu(){
 
-  const menuContainer = document.getElementById("menu");
-  const categoryContainer = document.getElementById("categories");
+ const menu = await getMenu()
+ const categories = await getCategories()
 
-  if (!menuContainer || !categoryContainer) return;
+ const menuContainer = document.getElementById("menu")
+ const categoryContainer = document.getElementById("categories")
 
-  menuContainer.innerHTML = "";
-  categoryContainer.innerHTML = "";
+ if(!menuContainer || !categoryContainer) return
 
-  const categories = {};
+ menuContainer.innerHTML=""
+ categoryContainer.innerHTML=""
 
-  data.forEach(item => {
+ const categoryMap={}
 
-    const catName = item.categories?.name || "อื่นๆ";
+ categories.forEach(c=>{
 
-    if (!categories[catName]) {
-      categories[catName] = [];
+  categoryMap[c.id]={
+   name:c.name,
+   items:[]
+  }
+
+ })
+
+ menu.forEach(item=>{
+
+  if(categoryMap[item.category_id]){
+
+   categoryMap[item.category_id].items.push(item)
+
+  }else{
+
+   if(!categoryMap["other"]){
+
+    categoryMap["other"]={
+     name:"อื่นๆ",
+     items:[]
     }
 
-    categories[catName].push(item);
+   }
 
-  });
+   categoryMap["other"].items.push(item)
 
-  const sortedCategories = Object.keys(categories).sort((a,b)=>{
-    const numA = parseInt(a.split("_")[0]) || 999;
-    const numB = parseInt(b.split("_")[0]) || 999;
-    return numA - numB;
-  });
+  }
 
-  const allBtn = document.createElement("button");
-  allBtn.innerText = "ทั้งหมด";
-  allBtn.onclick = () => renderMenu(data);
-  categoryContainer.appendChild(allBtn);
+ })
 
-  sortedCategories.forEach(cat => {
+ const sortedCategories = Object.values(categoryMap).sort((a,b)=>{
 
-    const btn = document.createElement("button");
+  const numA=parseInt(a.name.match(/^\d+/)?.[0]||999)
+  const numB=parseInt(b.name.match(/^\d+/)?.[0]||999)
 
-    const cleanName = cat.replace(/^\d+_/, "");
+  return numA-numB
 
-    btn.innerText = cleanName;
+ })
 
-    btn.onclick = () => {
-      renderMenu(categories[cat]);
-    };
+ const allBtn=document.createElement("button")
+ allBtn.className="cat-btn"
+ allBtn.innerText="ทั้งหมด"
+ allBtn.onclick=()=>renderMenu(menu)
 
-    categoryContainer.appendChild(btn);
+ categoryContainer.appendChild(allBtn)
 
-  });
+ sortedCategories.forEach(cat=>{
 
-  renderMenu(data);
+  const btn=document.createElement("button")
+  btn.className="cat-btn"
 
-}
+  const cleanName=cat.name.replace(/^\d+_/,"")
 
-function renderMenu(list) {
+  btn.innerText=cleanName
 
-  const menuContainer = document.getElementById("menu");
-  menuContainer.innerHTML = "";
+  btn.onclick=()=>{
 
-  list.forEach(item => {
+   renderMenu(cat.items)
 
-    const card = document.createElement("div");
-    card.className = "menu-card";
+  }
 
-    card.innerHTML = `
-      <img src="${item.image || ""}" style="width:100%">
-      <h3>${item.name}</h3>
-      <p>${item.price} บาท</p>
-      <button onclick="addToCart('${item.id}')">เพิ่ม</button>
-    `;
+  categoryContainer.appendChild(btn)
 
-    menuContainer.appendChild(card);
+ })
 
-  });
+ renderMenu(menu)
 
 }
 
-loadMenu();
+function renderMenu(list){
+
+ const menuContainer=document.getElementById("menu")
+
+ menuContainer.innerHTML=""
+
+ list.forEach(item=>{
+
+  const card=document.createElement("div")
+
+  card.className="item"
+
+  card.innerHTML=`
+
+   <img src="${item.image||""}">
+   <h3>${item.name}</h3>
+   <p>${item.price} บาท</p>
+   <button>เพิ่ม</button>
+
+  `
+
+  card.querySelector("button").onclick=()=>{
+
+   addToCart(item)
+
+  }
+
+  menuContainer.appendChild(card)
+
+ })
+
+}
