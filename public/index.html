@@ -141,6 +141,7 @@ border:none;
 background:#4caf50;
 color:white;
 font-size:36px;
+cursor:pointer;
 }
 
 /* CART */
@@ -165,13 +166,12 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,.4);
-
+background:rgba(0,0,0,.45);
 display:none;
 z-index:2000;
 }
 
-/* MODIFIER MODAL */
+/* MODAL */
 
 #modifierModal{
 position:absolute;
@@ -180,9 +180,10 @@ left:0;
 width:100%;
 height:55%;
 background:white;
-border-radius:20px 20px 0 0;
-box-shadow:0 -5px 20px rgba(0,0,0,.2);
-transition:.35s;
+border-radius:22px 22px 0 0;
+box-shadow:0 -10px 30px rgba(0,0,0,.25);
+transition:transform .35s cubic-bezier(.22,.61,.36,1);
+transform:translateY(100%);
 padding:20px;
 overflow:auto;
 }
@@ -192,22 +193,32 @@ display:block;
 }
 
 #modifierOverlay.active #modifierModal{
-bottom:0;
+transform:translateY(0);
 }
 
 .mod-group{
-margin-bottom:20px;
+margin-bottom:25px;
 }
 
 .mod-title{
 font-size:28px;
 font-weight:bold;
-margin-bottom:10px;
+margin-bottom:12px;
 }
 
 .mod-option{
 font-size:24px;
-margin:6px 0;
+margin:8px 0;
+}
+
+.confirm-btn{
+width:100%;
+padding:18px;
+font-size:26px;
+background:#4caf50;
+color:white;
+border:none;
+border-radius:12px;
 }
 
 </style>
@@ -238,7 +249,7 @@ margin:6px 0;
 <button onclick="checkout()">Checkout</button>
 </div>
 
-<!-- MODIFIER OVERLAY -->
+<!-- MODIFIER -->
 
 <div id="modifierOverlay">
 
@@ -249,8 +260,6 @@ margin:6px 0;
 <script type="module" src="/js/app.js"></script>
 
 <script>
-
-/* smooth logo collapse */
 
 let ticking=false
 
@@ -278,22 +287,20 @@ ticking=true
 
 })
 
-/* modifier overlay control */
+/* modifier control */
 
 const overlay=document.getElementById("modifierOverlay")
 const modal=document.getElementById("modifierModal")
 
-/* close when click outside */
-
 overlay.addEventListener("click",(e)=>{
 
 if(e.target===overlay){
-closeModifier()
+
+overlay.classList.remove("active")
+
 }
 
 })
-
-/* prevent close when click inside modal */
 
 modal.addEventListener("click",(e)=>{
 
@@ -301,17 +308,18 @@ e.stopPropagation()
 
 })
 
-/* global close function */
+window.openModifier=(html)=>{
 
-function closeModifier(){
+modal.innerHTML=html
+overlay.classList.add("active")
+
+}
+
+window.closeModifier=()=>{
 
 overlay.classList.remove("active")
 
 }
-
-/* make global */
-
-window.closeModifier=closeModifier
 
 </script>
 
