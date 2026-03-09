@@ -278,17 +278,40 @@ ticking=true
 
 })
 
-/* close modifier when click outside */
+/* modifier overlay control */
 
 const overlay=document.getElementById("modifierOverlay")
+const modal=document.getElementById("modifierModal")
+
+/* close when click outside */
 
 overlay.addEventListener("click",(e)=>{
 
 if(e.target===overlay){
-overlay.classList.remove("active")
+closeModifier()
 }
 
 })
+
+/* prevent close when click inside modal */
+
+modal.addEventListener("click",(e)=>{
+
+e.stopPropagation()
+
+})
+
+/* global close function */
+
+function closeModifier(){
+
+overlay.classList.remove("active")
+
+}
+
+/* make global */
+
+window.closeModifier=closeModifier
 
 </script>
 
