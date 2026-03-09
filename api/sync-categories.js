@@ -6,38 +6,42 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
+  try {
 
-  const response = await fetch("https://api.loyverse.com/v1.0/categories", {
-    headers: {
-      Authorization: `Bearer ${process.env.LOYVERSE_TOKEN}`
-    }
-  });
-
-  const data = await response.json();
-
-  if (!data.categories) {
-    return res.json({
-      error: "Loyverse API error",
-      response: data
+    const response = await fetch("https://api.loyverse.com/v1.0/categories", {
+      headers: {
+        Authorization: `Bearer ${process.env.LOYVERSE_API_KEY}`
+      }
     });
+
+    const data = await response.json();
+
+    if (!data.categories) {
+      return res.json({
+        error: "Loyverse API error",
+        response: data
+      });
+    }
+
+    const categories = data.categories.map(c => ({
+      id: c.id,
+      name: c.name
+    }));
+
+    await supabase
+      .from("categories")
+      .upsert(categories);
+
+    res.json({
+      success: true,
+      total: categories.length
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.message
+    });
+
   }
-
-  const categories = data.categories.map(c => ({
-    id: c.id,
-    name: c.name
-  }));
-
-  const { error } = await supabase
-    .from("categories")
-    .upsert(categories);
-
-  if (error) {
-    return res.json({ error });
-  }
-
-  res.json({
-    success: true,
-    total: categories.length
-  });
-
 }
