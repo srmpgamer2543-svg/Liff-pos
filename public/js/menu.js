@@ -55,6 +55,25 @@ export async function loadMenu(){
  const sortedCategories=Object.values(categoryMap)
  .sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
 
+ /* ปุ่มทั้งหมด */
+
+ const allBtn=document.createElement("button")
+ allBtn.className="cat-btn"
+ allBtn.innerText="ทั้งหมด"
+
+ allBtn.onclick=()=>{
+
+  const sorted=[...menu]
+  .sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
+
+  renderMenu(sorted)
+
+ }
+
+ categoryContainer.appendChild(allBtn)
+
+ /* ปุ่มหมวด */
+
  sortedCategories.forEach(cat=>{
 
   const btn=document.createElement("button")
