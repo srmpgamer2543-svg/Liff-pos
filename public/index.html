@@ -25,6 +25,9 @@ top:0;
 z-index:1000;
 background:white;
 box-shadow:0 2px 6px rgba(0,0,0,.1);
+
+transform:translateZ(0);
+will-change:transform;
 }
 
 /* LOGO */
@@ -68,12 +71,14 @@ justify-content:space-between;
 padding:20px 24px;
 background:white;
 border-top:1px solid #eee;
+
 position:sticky;
 top:0;
 z-index:20;
 
-will-change:transform;
 transform:translateZ(0);
+will-change:transform;
+backface-visibility:hidden;
 }
 
 .shop-name{
@@ -95,12 +100,14 @@ background:white;
 padding:18px;
 gap:16px;
 border-top:1px solid #eee;
+
 position:sticky;
 top:80px;
 z-index:20;
 
-will-change:transform;
 transform:translateZ(0);
+will-change:transform;
+backface-visibility:hidden;
 }
 
 .cat-btn{
