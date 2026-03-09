@@ -8,10 +8,10 @@ export async function loadMenu(){
  const menu = await getMenu()
  const categories = await getCategories()
 
- fullMenu = menu
-
  const menuContainer = document.getElementById("menu")
  const categoryContainer = document.getElementById("categories")
+
+ if(!menuContainer || !categoryContainer) return
 
  menuContainer.innerHTML=""
  categoryContainer.innerHTML=""
@@ -19,10 +19,12 @@ export async function loadMenu(){
  const categoryMap={}
 
  categories.forEach(c=>{
+
   categoryMap[c.id]={
    name:c.name,
    items:[]
   }
+
  })
 
  menu.forEach(item=>{
@@ -42,13 +44,20 @@ export async function loadMenu(){
 
  })
 
+ const sortedMenu=[]
+
+ sortedCategories.forEach(cat=>{
+  sortedMenu.push(...cat.items)
+ })
+
+ fullMenu = sortedMenu
+
  const allBtn=document.createElement("button")
- allBtn.className="cat-btn active"
+ allBtn.className="cat-btn"
  allBtn.innerText="ทั้งหมด"
 
  allBtn.onclick=()=>{
 
-  setActive(allBtn)
   renderMenu(fullMenu)
 
  }
@@ -66,7 +75,6 @@ export async function loadMenu(){
 
   btn.onclick=()=>{
 
-   setActive(btn)
    renderMenu(cat.items)
 
   }
@@ -75,16 +83,7 @@ export async function loadMenu(){
 
  })
 
- renderMenu(menu)
-
-}
-
-function setActive(btn){
-
- document.querySelectorAll(".cat-btn")
- .forEach(b=>b.classList.remove("active"))
-
- btn.classList.add("active")
+ renderMenu(fullMenu)
 
 }
 
