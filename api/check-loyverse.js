@@ -7,7 +7,7 @@ export default async function handler(req, res) {
    {
     method: "GET",
     headers: {
-     "Authorization": "Bearer 34b14f9c227247aaa1cb8af92921bf0b",
+     "Authorization": `Bearer ${process.env.LOYVERSE_API_KEY}`,
      "Content-Type": "application/json"
     },
     cache: "no-store"
