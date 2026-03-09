@@ -5,7 +5,7 @@ let menuData=[]
 
 function getPrefixNumber(name){
 
- const m=name.match(/^(\d+)/)
+ const m=name.match(/^(\d+)[_\- ]?/)
  return m?parseInt(m[1]):999
 
 }
@@ -15,7 +15,6 @@ export async function loadMenu(){
  const menu=await getMenu()
  const categories=await getCategories()
 
- const menuContainer=document.getElementById("menu")
  const categoryContainer=document.getElementById("categories")
 
  menuData=menu
@@ -49,7 +48,7 @@ export async function loadMenu(){
   const btn=document.createElement("button")
   btn.className="cat-btn"
 
-  const cleanName=cat.name.replace(/^\d+_/,"")
+  const cleanName=cat.name.replace(/^\d+[_\- ]?/,"")
 
   btn.innerText=cleanName
 
@@ -84,7 +83,7 @@ function renderMenu(list){
   const card=document.createElement("div")
   card.className="item"
 
-  const cleanName=item.name.replace(/^\d+_/,"")
+  const cleanName=item.name.replace(/^\d+[_\- ]?/,"")
 
   card.innerHTML=`
 
@@ -112,7 +111,7 @@ function openModifier(item){
 
  modal.innerHTML=`
 
- <h2>${item.name.replace(/^\d+_/,"")}</h2>
+ <h2>${item.name.replace(/^\d+[_\- ]?/,"")}</h2>
 
  <div class="mod-group">
 
