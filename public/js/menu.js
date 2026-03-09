@@ -7,7 +7,7 @@ function getPrefixNumber(name){
 
  if(!name) return 999
 
- const match=name.match(/^(\d+)[_\-\s]?/)
+ const match = name.match(/^(\d+)/)
 
  return match ? parseInt(match[1]) : 999
 
@@ -17,29 +17,41 @@ function cleanName(name){
 
  if(!name) return ""
 
- return name.replace(/^\d+[_\-\s]?/,"")
+ return name.replace(/^\d+[\s_\-\.\)\:]*?/,"")
+
+}
+
+function sortByPrefix(a,b){
+
+ const pa = getPrefixNumber(a.name)
+ const pb = getPrefixNumber(b.name)
+
+ if(pa !== pb){
+  return pa - pb
+ }
+
+ return a.name.localeCompare(b.name)
 
 }
 
 export async function loadMenu(){
 
- const menu=await getMenu()
- const categories=await getCategories()
+ const menu = await getMenu()
+ const categories = await getCategories()
 
- const categoryContainer=document.getElementById("categories")
+ const categoryContainer = document.getElementById("categories")
 
- menuData=menu
+ menuData = menu
 
- categoryContainer.innerHTML=""
+ categoryContainer.innerHTML = ""
 
- const allBtn=document.createElement("button")
- allBtn.className="cat-btn"
- allBtn.innerText="ทั้งหมด"
+ const allBtn = document.createElement("button")
+ allBtn.className = "cat-btn"
+ allBtn.innerText = "ทั้งหมด"
 
- allBtn.onclick=()=>{
+ allBtn.onclick = ()=>{
 
-  const sorted=[...menu]
-  .sort((a,b)=>getPrefixNumber(a.name)-getPrefixNumber(b.name))
+  const sorted = [...menu].sort(sortByPrefix)
 
   renderMenu(sorted)
 
@@ -47,21 +59,21 @@ export async function loadMenu(){
 
  categoryContainer.appendChild(allBtn)
 
- const sortedCategories=[...categories]
- .sort((a,b)=>getPrefixNumber(a.name)-getPrefixNumber(b.name))
+ const sortedCategories = [...categories]
+ .sort(sortByPrefix)
 
  sortedCategories.forEach(cat=>{
 
-  const btn=document.createElement("button")
-  btn.className="cat-btn"
+  const btn = document.createElement("button")
+  btn.className = "cat-btn"
 
-  btn.innerText=cleanName(cat.name)
+  btn.innerText = cleanName(cat.name)
 
-  btn.onclick=()=>{
+  btn.onclick = ()=>{
 
-   const items=menu
-   .filter(i=>i.category_id===cat.id)
-   .sort((a,b)=>getPrefixNumber(a.name)-getPrefixNumber(b.name))
+   const items = menu
+   .filter(i => String(i.category_id) === String(cat.id))
+   .sort(sortByPrefix)
 
    renderMenu(items)
 
@@ -71,8 +83,7 @@ export async function loadMenu(){
 
  })
 
- const sorted=[...menu]
- .sort((a,b)=>getPrefixNumber(a.name)-getPrefixNumber(b.name))
+ const sorted = [...menu].sort(sortByPrefix)
 
  renderMenu(sorted)
 
@@ -80,17 +91,17 @@ export async function loadMenu(){
 
 function renderMenu(list){
 
- const menuContainer=document.getElementById("menu")
- menuContainer.innerHTML=""
+ const menuContainer = document.getElementById("menu")
+ menuContainer.innerHTML = ""
 
  list.forEach(item=>{
 
-  const card=document.createElement("div")
-  card.className="item"
+  const card = document.createElement("div")
+  card.className = "item"
 
-  const clean=cleanName(item.name)
+  const clean = cleanName(item.name)
 
-  card.innerHTML=`
+  card.innerHTML = `
 
   <img src="${item.image||""}">
 
@@ -101,7 +112,7 @@ function renderMenu(list){
 
   `
 
-  card.onclick=()=>openModifier(item)
+  card.onclick = ()=>openModifier(item)
 
   menuContainer.appendChild(card)
 
@@ -111,10 +122,10 @@ function renderMenu(list){
 
 function openModifier(item){
 
- const overlay=document.getElementById("modifierOverlay")
- const modal=document.getElementById("modifierModal")
+ const overlay = document.getElementById("modifierOverlay")
+ const modal = document.getElementById("modifierModal")
 
- modal.innerHTML=`
+ modal.innerHTML = `
 
  <h2>${cleanName(item.name)}</h2>
 
@@ -177,7 +188,7 @@ function openModifier(item){
 
  overlay.classList.add("active")
 
- overlay.onclick=(e)=>{
+ overlay.onclick = (e)=>{
 
   if(e.target===overlay){
    overlay.classList.remove("active")
