@@ -3,12 +3,13 @@ async function loadMenu() {
   const data = await res.json();
 
   const menuContainer = document.getElementById("menu");
-  const categoryContainer = document.getElementById("categories");
+  const categoryContainer = document.getElementById("category-bar");
+
+  if (!menuContainer || !categoryContainer) return;
 
   menuContainer.innerHTML = "";
   categoryContainer.innerHTML = "";
 
-  // จัดกลุ่มตามหมวด
   const categories = {};
 
   data.forEach(item => {
@@ -21,10 +22,8 @@ async function loadMenu() {
     categories[catName].push(item);
   });
 
-  // เรียงหมวดตามเลขหน้า
   const sortedCategories = Object.keys(categories).sort();
 
-  // ปุ่มหมวด
   const allBtn = document.createElement("button");
   allBtn.innerText = "ทั้งหมด";
   allBtn.onclick = () => renderMenu(data);
@@ -33,9 +32,7 @@ async function loadMenu() {
   sortedCategories.forEach(cat => {
     const btn = document.createElement("button");
 
-    // ลบเลขหน้า
     const cleanName = cat.replace(/^\d+_/, "");
-
     btn.innerText = cleanName;
 
     btn.onclick = () => {
