@@ -10,6 +10,7 @@ body{
 font-family:sans-serif;
 margin:0;
 background:#f5f5f5;
+overflow-x:hidden;
 }
 
 /* HEADER */
@@ -28,21 +29,21 @@ box-shadow:0 2px 6px rgba(0,0,0,.1);
 display:flex;
 justify-content:center;
 align-items:center;
-padding:10px;
+padding:20px;
 background:#ffffff;
 will-change:transform,opacity;
-transition:transform .35s cubic-bezier(.25,.8,.25,1),opacity .25s ease;
+transition:transform .45s cubic-bezier(.25,.8,.25,1),opacity .35s ease;
 }
 
-/* logo size = 1/4 screen */
+/* LOGO SIZE 3x */
 
 .logo-area img{
-height:25vh;
-max-height:200px;
+height:75vh;
+max-height:500px;
 object-fit:contain;
 }
 
-/* smooth hide */
+/* hide animation */
 
 .logo-hidden{
 transform:translateY(-120%);
@@ -56,7 +57,7 @@ pointer-events:none;
 display:flex;
 align-items:center;
 justify-content:space-between;
-padding:18px 22px;
+padding:20px 24px;
 background:white;
 border-top:1px solid #eee;
 }
@@ -67,7 +68,7 @@ font-weight:bold;
 }
 
 .cart-btn{
-font-size:32px;
+font-size:34px;
 cursor:pointer;
 }
 
@@ -77,9 +78,20 @@ cursor:pointer;
 display:flex;
 overflow-x:auto;
 background:white;
-padding:16px;
+padding:18px;
 gap:16px;
 border-top:1px solid #eee;
+
+position:relative;
+
+will-change:transform;
+transition:transform .45s cubic-bezier(.25,.8,.25,1);
+}
+
+/* when moved up */
+
+.categories-up{
+transform:translateY(-120px);
 }
 
 /* category button */
@@ -120,8 +132,6 @@ object-fit:cover;
 display:block;
 }
 
-/* item info */
-
 .item-info{
 padding:14px;
 }
@@ -138,8 +148,6 @@ font-size:35px;
 color:#2e7d32;
 font-weight:700;
 }
-
-/* add button */
 
 .add-btn{
 position:absolute;
@@ -201,7 +209,7 @@ padding:10px;
 
 <script>
 
-/* ultra smooth scroll logo hide */
+/* ULTRA SMOOTH SCROLL ENGINE */
 
 let ticking=false
 
@@ -212,26 +220,19 @@ if(!ticking){
 requestAnimationFrame(()=>{
 
 const logo=document.getElementById("logoArea")
+const cats=document.getElementById("categories")
+
 const y=window.scrollY
 
-if(y>120){
+if(y>160){
 
 logo.classList.add("logo-hidden")
+cats.classList.add("categories-up")
 
 }else{
 
 logo.classList.remove("logo-hidden")
-
-}
-
-/* snap to top */
-
-if(y<60 && y>0){
-
-window.scrollTo({
-top:0,
-behavior:"smooth"
-})
+cats.classList.remove("categories-up")
 
 }
 
