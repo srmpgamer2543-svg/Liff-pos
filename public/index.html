@@ -35,23 +35,13 @@ will-change:transform,opacity;
 transition:transform .45s cubic-bezier(.25,.8,.25,1),opacity .35s ease;
 }
 
-/* LOGO SIZE */
-
 .logo-area img{
 height:75vh;
 max-height:500px;
 object-fit:contain;
 }
 
-/* hide animation */
-
-.logo-hidden{
-transform:translateY(-120%);
-opacity:0;
-pointer-events:none;
-}
-
-/* top bar */
+/* TOP BAR */
 
 .topbar{
 display:flex;
@@ -60,6 +50,9 @@ justify-content:space-between;
 padding:20px 24px;
 background:white;
 border-top:1px solid #eee;
+
+will-change:transform;
+transition:transform .45s cubic-bezier(.25,.8,.25,1);
 }
 
 .shop-name{
@@ -85,8 +78,6 @@ border-top:1px solid #eee;
 will-change:transform;
 transition:transform .45s cubic-bezier(.25,.8,.25,1);
 }
-
-/* category button */
 
 .cat-btn{
 padding:20px 40px;
@@ -155,8 +146,6 @@ font-size:36px;
 cursor:pointer;
 }
 
-/* cart */
-
 #cart{
 position:fixed;
 right:-100%;
@@ -180,7 +169,7 @@ padding:10px;
 <img src="/logo.png" alt="logo">
 </div>
 
-<div class="topbar">
+<div class="topbar" id="topbar">
 <div class="shop-name">🍞มีนม.ขนมปัง.🍞</div>
 <div class="cart-btn" onclick="toggleCart()">🛒</div>
 </div>
@@ -201,8 +190,6 @@ padding:10px;
 
 <script>
 
-/* ULTRA SMOOTH SCROLL ENGINE */
-
 let ticking=false
 
 window.addEventListener("scroll",()=>{
@@ -213,22 +200,22 @@ requestAnimationFrame(()=>{
 
 const logo=document.getElementById("logoArea")
 const cats=document.getElementById("categories")
+const topbar=document.getElementById("topbar")
 
 const y=window.scrollY
 const logoHeight = logo.offsetHeight
 
-/* scroll progress */
-
-const progress = Math.min(y / logoHeight,1)
+const progress = Math.min(y/logoHeight,1)
 
 /* logo slide */
 
-logo.style.transform = `translateY(-${progress*100}%)`
-logo.style.opacity = 1-progress
+logo.style.transform=`translateY(-${progress*100}%)`
+logo.style.opacity=1-progress
 
-/* categories slide */
+/* topbar + categories slide */
 
-cats.style.transform = `translateY(-${logoHeight*progress}px)`
+topbar.style.transform=`translateY(-${logoHeight*progress}px)`
+cats.style.transform=`translateY(-${logoHeight*progress}px)`
 
 ticking=false
 
