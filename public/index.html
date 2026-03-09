@@ -20,29 +20,34 @@ top:0;
 z-index:1000;
 background:white;
 box-shadow:0 2px 6px rgba(0,0,0,.1);
-transition:all .35s ease;
 }
+
+/* LOGO AREA */
 
 .logo-area{
 display:flex;
 justify-content:center;
 align-items:center;
-padding:18px;
+padding:10px;
 background:#ffffff;
-transition:all .35s ease;
+will-change:transform,opacity;
+transition:transform .35s cubic-bezier(.25,.8,.25,1),opacity .25s ease;
 }
+
+/* logo size = 1/4 screen */
 
 .logo-area img{
-height:70px;
-transition:all .35s ease;
+height:25vh;
+max-height:200px;
+object-fit:contain;
 }
 
+/* smooth hide */
+
 .logo-hidden{
-transform:translateY(-100%);
+transform:translateY(-120%);
 opacity:0;
-height:0;
-padding:0;
-overflow:hidden;
+pointer-events:none;
 }
 
 /* top bar */
@@ -51,18 +56,18 @@ overflow:hidden;
 display:flex;
 align-items:center;
 justify-content:space-between;
-padding:14px 16px;
+padding:18px 22px;
 background:white;
 border-top:1px solid #eee;
 }
 
 .shop-name{
-font-size:26px;
+font-size:30px;
 font-weight:bold;
 }
 
 .cart-btn{
-font-size:28px;
+font-size:32px;
 cursor:pointer;
 }
 
@@ -72,15 +77,15 @@ cursor:pointer;
 display:flex;
 overflow-x:auto;
 background:white;
-padding:14px;
-gap:14px;
+padding:16px;
+gap:16px;
 border-top:1px solid #eee;
 }
 
 /* category button */
 
 .cat-btn{
-padding:18px 36px;
+padding:20px 40px;
 border-radius:40px;
 background:#eee;
 cursor:pointer;
@@ -150,13 +155,7 @@ font-size:36px;
 cursor:pointer;
 }
 
-/* floating cart */
-
-.cart-button{
-display:none;
-}
-
-/* cart panel */
+/* cart */
 
 #cart{
 position:fixed;
@@ -202,22 +201,45 @@ padding:10px;
 
 <script>
 
-/* hide logo on scroll */
+/* ultra smooth scroll logo hide */
 
-let lastScroll=0
+let ticking=false
 
 window.addEventListener("scroll",()=>{
 
-const logo=document.getElementById("logoArea")
-const current=window.scrollY
+if(!ticking){
 
-if(current>80){
+requestAnimationFrame(()=>{
+
+const logo=document.getElementById("logoArea")
+const y=window.scrollY
+
+if(y>120){
 
 logo.classList.add("logo-hidden")
 
 }else{
 
 logo.classList.remove("logo-hidden")
+
+}
+
+/* snap to top */
+
+if(y<60 && y>0){
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+})
+
+}
+
+ticking=false
+
+})
+
+ticking=true
 
 }
 
