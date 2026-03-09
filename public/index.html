@@ -34,15 +34,20 @@ background:#ffffff;
 height:75vh;
 max-height:500px;
 
-transition:transform .55s cubic-bezier(.22,.61,.36,1),opacity .4s;
-will-change:transform,opacity;
-transform:translateZ(0);
-pointer-events:none;
+transition:transform .45s cubic-bezier(.22,.61,.36,1),opacity .35s,height .35s;
+will-change:transform;
+overflow:hidden;
 }
 
 .logo-area img{
 max-width:60%;
 height:auto;
+}
+
+.logo-hidden{
+transform:translateY(-120%);
+opacity:0;
+height:0;
 }
 
 /* TOPBAR */
@@ -54,8 +59,9 @@ justify-content:space-between;
 padding:20px 24px;
 background:white;
 border-top:1px solid #eee;
-position:relative;
-z-index:10;
+position:sticky;
+top:0;
+z-index:20;
 }
 
 .shop-name{
@@ -77,8 +83,9 @@ background:white;
 padding:18px;
 gap:16px;
 border-top:1px solid #eee;
-position:relative;
-z-index:10;
+position:sticky;
+top:80px;
+z-index:20;
 }
 
 .cat-btn{
@@ -256,39 +263,22 @@ border-radius:12px;
 
 <script>
 
-let ticking=false
-
 window.addEventListener("scroll",()=>{
 
- if(!ticking){
+ const logo=document.getElementById("logoArea")
+ const y=window.scrollY
 
-  requestAnimationFrame(()=>{
+ if(y>100){
 
-   const logo=document.getElementById("logoArea")
+  logo.classList.add("logo-hidden")
 
-   const y=window.scrollY
+ }else{
 
-   if(y>120){
-
-    logo.style.transform="translateY(-120%) scale(.92)"
-    logo.style.opacity="0"
-
-   }else{
-
-    logo.style.transform="translateY(0) scale(1)"
-    logo.style.opacity="1"
-
-   }
-
-   ticking=false
-
-  })
-
-  ticking=true
+  logo.classList.remove("logo-hidden")
 
  }
 
-},{passive:true})
+})
 
 </script>
 
