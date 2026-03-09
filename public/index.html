@@ -43,7 +43,8 @@ transform .55s cubic-bezier(.22,.61,.36,1),
 opacity .35s,
 height .35s;
 
-will-change:transform;
+will-change:transform,opacity;
+transform:translateZ(0);
 overflow:hidden;
 }
 
@@ -70,6 +71,9 @@ border-top:1px solid #eee;
 position:sticky;
 top:0;
 z-index:20;
+
+will-change:transform;
+transform:translateZ(0);
 }
 
 .shop-name{
@@ -94,6 +98,9 @@ border-top:1px solid #eee;
 position:sticky;
 top:80px;
 z-index:20;
+
+will-change:transform;
+transform:translateZ(0);
 }
 
 .cat-btn{
@@ -124,11 +131,12 @@ position:relative;
 display:flex;
 flex-direction:column;
 cursor:pointer;
-transition:transform .15s ease;
+
+transition:transform .18s ease;
 }
 
 .item:active{
-transform:scale(.97);
+transform:scale(.96);
 }
 
 .item img{
@@ -202,6 +210,8 @@ transition:transform .55s cubic-bezier(.22,.61,.36,1);
 padding:20px;
 
 overflow:auto;
+
+will-change:transform;
 }
 
 #modifierOverlay.active{
@@ -211,8 +221,6 @@ display:block;
 #modifierOverlay.active #modifierModal{
 transform:translateY(0);
 }
-
-/* MODIFIER CONTENT */
 
 .mod-group{
 margin-bottom:25px;
@@ -277,38 +285,35 @@ cursor:pointer;
 
 <script>
 
-/* HEADER SCROLL EFFECT */
+let ticking=false
 
 window.addEventListener("scroll",()=>{
 
- const logo=document.getElementById("logoArea")
- const y=window.scrollY
+ if(!ticking){
 
- if(y>120){
+  requestAnimationFrame(()=>{
 
-  logo.classList.add("logo-hidden")
+   const logo=document.getElementById("logoArea")
 
- }else{
+   if(window.scrollY>120){
 
-  logo.classList.remove("logo-hidden")
+    logo.classList.add("logo-hidden")
 
- }
+   }else{
 
-})
+    logo.classList.remove("logo-hidden")
 
-/* MODIFIER CANCEL CLICK OUTSIDE */
+   }
 
-const overlay=document.getElementById("modifierOverlay")
+   ticking=false
 
-overlay.addEventListener("click",(e)=>{
+  })
 
- if(e.target===overlay){
-
-  overlay.classList.remove("active")
+  ticking=true
 
  }
 
-})
+},{passive:true})
 
 </script>
 
