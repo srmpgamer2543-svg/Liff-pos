@@ -5,153 +5,166 @@ let fullMenu=[]
 
 function getOrderNumber(name){
 
-const match=name.match(/^(\d+)/)
+ const match=name.match(/^(\d+)/)
 
-return match?parseInt(match[1]):999
+ return match?parseInt(match[1]):999
 
 }
 
 export async function loadMenu(){
 
-const menu=await getMenu()
-const categories=await getCategories()
+ const menu=await getMenu()
+ const categories=await getCategories()
 
-const menuContainer=document.getElementById("menu")
-const categoryContainer=document.getElementById("categories")
+ const menuContainer=document.getElementById("menu")
+ const categoryContainer=document.getElementById("categories")
 
-if(!menuContainer||!categoryContainer)return
+ if(!menuContainer||!categoryContainer)return
 
-menuContainer.innerHTML=""
-categoryContainer.innerHTML=""
+ menuContainer.innerHTML=""
+ categoryContainer.innerHTML=""
 
-const categoryMap={}
+ const categoryMap={}
 
-categories.forEach(c=>{
+ categories.forEach(c=>{
 
-categoryMap[c.id]={
-name:c.name,
-items:[]
-}
+  categoryMap[c.id]={
+   id:c.id,
+   name:c.name,
+   items:[]
+  }
 
-})
+ })
 
-menu.forEach(item=>{
+ menu.forEach(item=>{
 
-if(categoryMap[item.category_id]){
-categoryMap[item.category_id].items.push(item)
-}
+  if(categoryMap[item.category_id]){
 
-})
+   categoryMap[item.category_id].items.push(item)
 
-const sortedCategories=Object.values(categoryMap)
-.sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
+  }
 
-sortedCategories.forEach(cat=>{
+ })
 
-const btn=document.createElement("button")
-btn.className="cat-btn"
+ const sortedCategories=Object.values(categoryMap)
+ .sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
 
-btn.innerText=cat.name.replace(/^\d+_/,"")
+ sortedCategories.forEach(cat=>{
 
-btn.onclick=()=>renderMenu(cat.items)
+  const btn=document.createElement("button")
+  btn.className="cat-btn"
 
-categoryContainer.appendChild(btn)
+  const cleanName=cat.name.replace(/^\d+_/,"")
 
-})
+  btn.innerText=cleanName
 
-fullMenu=menu.sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
+  btn.onclick=()=>{
 
-renderMenu(fullMenu)
+   const sortedItems=[...cat.items]
+   .sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
+
+   renderMenu(sortedItems)
+
+  }
+
+  categoryContainer.appendChild(btn)
+
+ })
+
+ fullMenu=[...menu]
+ .sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
+
+ renderMenu(fullMenu)
 
 }
 
 function renderMenu(list){
 
-const menuContainer=document.getElementById("menu")
+ const menuContainer=document.getElementById("menu")
 
-menuContainer.innerHTML=""
+ menuContainer.innerHTML=""
 
-list.forEach(item=>{
+ list.forEach(item=>{
 
-const card=document.createElement("div")
-card.className="item"
+  const card=document.createElement("div")
+  card.className="item"
 
-const cleanName=item.name.replace(/^\d+_/,"")
+  const cleanName=item.name.replace(/^\d+_/,"")
 
-card.innerHTML=`
+  card.innerHTML=`
 
-<img src="${item.image||""}">
+  <img src="${item.image||""}">
 
-<div class="item-info">
-<div class="item-name">${cleanName}</div>
-<div class="item-price">${item.price} ฿</div>
-</div>
+  <div class="item-info">
+  <div class="item-name">${cleanName}</div>
+  <div class="item-price">${item.price} ฿</div>
+  </div>
 
-<button class="add-btn">+</button>
+  <button class="add-btn">+</button>
 
-`
+  `
 
-card.onclick=()=>openModifierUI(item)
+  card.onclick=()=>openModifierUI(item)
 
-menuContainer.appendChild(card)
+  menuContainer.appendChild(card)
 
-})
+ })
 
 }
 
 function openModifierUI(item){
 
-const html=`
+ const html=`
 
-<div class="mod-group">
+ <div class="mod-group">
 
-<div class="mod-title">เลือกประเภท</div>
+ <div class="mod-title">เลือกประเภท</div>
 
-<label class="mod-option">
-<input type="radio" name="temp" value="เย็น"> เย็น
-</label>
+ <label class="mod-option">
+ <input type="radio" name="temp" value="เย็น"> เย็น
+ </label>
 
-<label class="mod-option">
-<input type="radio" name="temp" value="ปั่น"> ปั่น
-</label>
+ <label class="mod-option">
+ <input type="radio" name="temp" value="ปั่น"> ปั่น
+ </label>
 
-</div>
+ </div>
 
-<div class="mod-group">
+ <div class="mod-group">
 
-<div class="mod-title">ระดับความหวาน</div>
+ <div class="mod-title">ระดับความหวาน</div>
 
-<label class="mod-option"><input type="radio" name="sweet" value="100%">100%</label>
-<label class="mod-option"><input type="radio" name="sweet" value="50%">50%</label>
-<label class="mod-option"><input type="radio" name="sweet" value="25%">25%</label>
+ <label class="mod-option"><input type="radio" name="sweet" value="100%">100%</label>
+ <label class="mod-option"><input type="radio" name="sweet" value="50%">50%</label>
+ <label class="mod-option"><input type="radio" name="sweet" value="25%">25%</label>
 
-</div>
+ </div>
 
-<div class="mod-group">
+ <div class="mod-group">
 
-<div class="mod-title">ท็อปปิ้ง</div>
+ <div class="mod-title">ท็อปปิ้ง</div>
 
-<label class="mod-option"><input type="checkbox" value="ไข่มุก">ไข่มุก</label>
-<label class="mod-option"><input type="checkbox" value="วิปครีม">วิปครีม</label>
+ <label class="mod-option"><input type="checkbox" value="ไข่มุก">ไข่มุก</label>
+ <label class="mod-option"><input type="checkbox" value="วิปครีม">วิปครีม</label>
 
-</div>
+ </div>
 
-<button class="confirm-btn">เพิ่มลงตะกร้า</button>
+ <button class="confirm-btn">เพิ่มลงตะกร้า</button>
 
-`
+ `
 
-window.openModifier(html)
+ window.openModifier(html)
 
-setTimeout(()=>{
+ setTimeout(()=>{
 
-document.querySelector(".confirm-btn").onclick=()=>{
+  document.querySelector(".confirm-btn").onclick=()=>{
 
-addToCart(item)
+   addToCart(item)
 
-window.closeModifier()
+   window.closeModifier()
 
-}
+  }
 
-},50)
+ },50)
 
 }
