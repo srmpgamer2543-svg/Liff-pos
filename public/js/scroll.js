@@ -1,3 +1,6 @@
+const logo=document.getElementById("logoArea")
+
+let lastState=false
 let ticking=false
 
 window.addEventListener("scroll",()=>{
@@ -6,15 +9,13 @@ window.addEventListener("scroll",()=>{
 
   requestAnimationFrame(()=>{
 
-   const logo=document.getElementById("logoArea")
+   const shouldHide=window.scrollY>120
 
-   if(window.scrollY>120){
+   if(shouldHide!==lastState){
 
-    logo.classList.add("logo-hidden")
+    logo.classList.toggle("logo-hidden",shouldHide)
 
-   }else{
-
-    logo.classList.remove("logo-hidden")
+    lastState=shouldHide
 
    }
 
