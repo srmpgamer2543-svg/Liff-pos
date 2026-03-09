@@ -1,38 +1,31 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
- process.env.SUPABASE_URL,
- process.env.SUPABASE_KEY
-)
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
-export default async function handler(req,res){
+export default async function handler(req, res) {
+  try {
 
- try{
+    const { data, error } = await supabase
+      .from("items")
+      .select(`
+        id,
+        name,
+        price,
+        image,
+        category_id,
+        categories (
+          name
+        )
+      `);
 
-  const { data, error } = await supabase
-   .from("menu")
-   .select(`
-    id,
-    name,
-    price,
-    image,
-    category_id,
-    categories (
-     id,
-     name
-    )
-   `)
+    if (error) throw error;
 
-  if(error){
-   return res.status(500).json({ error:error.message })
+    res.status(200).json(data);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-
-  res.status(200).json(data)
-
- }catch(err){
-
-  res.status(500).json({ error:err.message })
-
- }
-
 }
