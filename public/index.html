@@ -254,58 +254,39 @@ border-radius:12px;
 <script type="module" src="/js/app.js"></script>
 
 <script>
+<script>
 
 let ticking=false
 
 window.addEventListener("scroll",()=>{
 
-if(!ticking){
+ if(!ticking){
 
-requestAnimationFrame(()=>{
+  requestAnimationFrame(()=>{
 
-const logo=document.getElementById("logoArea")
+   const logo=document.getElementById("logoArea")
 
-if(window.scrollY>120){
-logo.classList.add("logo-hidden")
-}else{
-logo.classList.remove("logo-hidden")
-}
+   if(window.scrollY>120){
 
-ticking=false
+    logo.style.transform="translateY(-100%)"
+    logo.style.opacity="0"
 
-})
+   }else{
 
-ticking=true
+    logo.style.transform="translateY(0)"
+    logo.style.opacity="1"
 
-}
+   }
 
-})
+   ticking=false
 
-const overlay=document.getElementById("modifierOverlay")
-const modal=document.getElementById("modifierModal")
+  })
 
-overlay.addEventListener("click",(e)=>{
+  ticking=true
 
-if(e.target===overlay){
-overlay.classList.remove("active")
-}
+ }
 
-})
-
-modal.addEventListener("click",(e)=>{
-e.stopPropagation()
-})
-
-window.openModifier=(html)=>{
-
-modal.innerHTML=html
-overlay.classList.add("active")
-
-}
-
-window.closeModifier=()=>{
-overlay.classList.remove("active")
-}
+},{passive:true})
 
 </script>
 
