@@ -1,24 +1,27 @@
-export default async function handler(req, res) {
+import { createClient } from "@supabase/supabase-js"
 
- try {
+const supabase = createClient(
+ process.env.SUPABASE_URL,
+ process.env.SUPABASE_KEY
+)
 
-  const response = await fetch(
-   "https://api.loyverse.com/v1.0/categories",
-   {
-    headers:{
-     Authorization: `Bearer ${process.env.LOYVERSE_API_KEY}`
-    }
-   }
-  )
+export default async function handler(req, res){
 
-  const data = await response.json()
+ try{
 
-  res.status(200).json(data.categories)
+  const { data, error } = await supabase
+   .from("categories")
+   .select("*")
+   .order("name")
 
- } catch (error) {
+  if(error) throw error
+
+  res.status(200).json(data)
+
+ }catch(err){
 
   res.status(500).json({
-   error:error.message
+   error:err.message
   })
 
  }
