@@ -3,6 +3,14 @@ import { getMenu, getCategories } from "./api.js"
 
 let fullMenu=[]
 
+function getOrderNumber(name){
+
+const match=name.match(/^(\d+)/)
+
+return match?parseInt(match[1]):999
+
+}
+
 export async function loadMenu(){
 
 const menu=await getMenu()
@@ -36,6 +44,7 @@ categoryMap[item.category_id].items.push(item)
 })
 
 const sortedCategories=Object.values(categoryMap)
+.sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
 
 sortedCategories.forEach(cat=>{
 
@@ -50,9 +59,9 @@ categoryContainer.appendChild(btn)
 
 })
 
-fullMenu=menu
+fullMenu=menu.sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
 
-renderMenu(menu)
+renderMenu(fullMenu)
 
 }
 
@@ -67,12 +76,14 @@ list.forEach(item=>{
 const card=document.createElement("div")
 card.className="item"
 
+const cleanName=item.name.replace(/^\d+_/,"")
+
 card.innerHTML=`
 
 <img src="${item.image||""}">
 
 <div class="item-info">
-<div class="item-name">${item.name}</div>
+<div class="item-name">${cleanName}</div>
 <div class="item-price">${item.price} ฿</div>
 </div>
 
