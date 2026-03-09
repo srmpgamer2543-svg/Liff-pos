@@ -7,7 +7,7 @@ function getPrefixNumber(name){
 
  if(!name) return 999
 
- const match=name.match(/^(\d+)/)
+ const match=name.match(/^(\d+)[_\-\s]?/)
 
  return match ? parseInt(match[1]) : 999
 
@@ -15,7 +15,9 @@ function getPrefixNumber(name){
 
 function cleanName(name){
 
- return name.replace(/^\d+[_\- ]?/,"")
+ if(!name) return ""
+
+ return name.replace(/^\d+[_\-\s]?/,"")
 
 }
 
@@ -29,8 +31,6 @@ export async function loadMenu(){
  menuData=menu
 
  categoryContainer.innerHTML=""
-
- /* ปุ่มทั้งหมด */
 
  const allBtn=document.createElement("button")
  allBtn.className="cat-btn"
@@ -47,8 +47,6 @@ export async function loadMenu(){
 
  categoryContainer.appendChild(allBtn)
 
- /* เรียงหมวด */
-
  const sortedCategories=[...categories]
  .sort((a,b)=>getPrefixNumber(a.name)-getPrefixNumber(b.name))
 
@@ -62,7 +60,7 @@ export async function loadMenu(){
   btn.onclick=()=>{
 
    const items=menu
-   .filter(i=>String(i.category_id)===String(cat.id))
+   .filter(i=>i.category_id===cat.id)
    .sort((a,b)=>getPrefixNumber(a.name)-getPrefixNumber(b.name))
 
    renderMenu(items)
@@ -182,9 +180,7 @@ function openModifier(item){
  overlay.onclick=(e)=>{
 
   if(e.target===overlay){
-
    overlay.classList.remove("active")
-
   }
 
  }
@@ -199,11 +195,8 @@ function openModifier(item){
    const sweet=document.querySelector("input[name=sweet]:checked")
 
    if(!temp||!sweet){
-
     alert("กรุณาเลือกตัวเลือกที่จำเป็น")
-
     return
-
    }
 
    const toppings=[...document.querySelectorAll("input[type=checkbox]:checked")]
