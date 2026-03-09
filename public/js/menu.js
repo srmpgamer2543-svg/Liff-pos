@@ -17,15 +17,15 @@ const CATEGORY_MAP = {
 
 export async function loadMenu(){
 
-const menu = await getMenu()
+ const menu = await getMenu()
 
-allMenu = menu || []
+ allMenu = menu || []
 
-prepareCategories()
+ prepareCategories()
 
-renderCategories()
+ renderCategories()
 
-renderMenu(allMenu)
+ renderMenu(allMenu)
 
 }
 
@@ -34,31 +34,31 @@ renderMenu(allMenu)
 
 function prepareCategories(){
 
-const map = {}
+ const map = {}
 
-allMenu.forEach(item=>{
+ allMenu.forEach(item=>{
 
-const raw = CATEGORY_MAP[item.category_id]
+  const raw = CATEGORY_MAP[item.category_id]
 
-if(!raw) return
+  if(!raw) return
 
-const [orderStr,thaiName] = raw.split("_")
+  const [orderStr,thaiName] = raw.split("_")
 
-const order = parseInt(orderStr)
+  const order = parseInt(orderStr)
 
-if(!map[item.category_id]){
+  if(!map[item.category_id]){
 
-map[item.category_id] = {
-id:item.category_id,
-name:thaiName,
-order:order
-}
+   map[item.category_id] = {
+    id:item.category_id,
+    name:thaiName,
+    order:order
+   }
 
-}
+  }
 
-})
+ })
 
-categories = Object.values(map).sort((a,b)=>a.order-b.order)
+ categories = Object.values(map).sort((a,b)=>a.order-b.order)
 
 }
 
@@ -67,81 +67,103 @@ categories = Object.values(map).sort((a,b)=>a.order-b.order)
 
 function renderCategories(){
 
-const container = document.getElementById("categories")
-if(!container) return
+ const container = document.getElementById("categories")
 
-container.innerHTML=""
+ if(!container) return
 
-const allBtn=document.createElement("button")
-allBtn.innerText="ทั้งหมด"
+ container.innerHTML=""
 
-allBtn.onclick=()=>renderMenu(allMenu)
+ const allBtn=document.createElement("button")
+ allBtn.className="cat-btn"
+ allBtn.innerText="ทั้งหมด"
 
-container.appendChild(allBtn)
+ allBtn.onclick=()=>{
 
-categories.forEach(cat=>{
+  const sorted = sortMenu(allMenu)
 
-const btn=document.createElement("button")
+  renderMenu(sorted)
 
-btn.innerText=cat.name
+ }
 
-btn.onclick=()=>{
+ container.appendChild(allBtn)
 
-const filtered = allMenu.filter(i=>i.category_id===cat.id)
+ categories.forEach(cat=>{
 
-renderMenu(filtered)
+  const btn=document.createElement("button")
 
-}
+  btn.className="cat-btn"
 
-container.appendChild(btn)
+  btn.innerText=cat.name
 
-})
+  btn.onclick=()=>{
+
+   const filtered = allMenu.filter(i=>i.category_id===cat.id)
+
+   const sorted = sortMenu(filtered)
+
+   renderMenu(sorted)
+
+  }
+
+  container.appendChild(btn)
+
+ })
 
 }
 
 
 /* เรียงเมนู */
 
-function renderMenu(menu){
+function sortMenu(menu){
 
-const container=document.getElementById("menu")
-if(!container) return
+ return [...menu].sort((a,b)=>{
 
-container.innerHTML=""
+  const mapA = CATEGORY_MAP[a.category_id]
+  const mapB = CATEGORY_MAP[b.category_id]
 
-const sorted=[...menu].sort((a,b)=>{
+  const orderA = mapA ? parseInt(mapA.split("_")[0]) : 999
+  const orderB = mapB ? parseInt(mapB.split("_")[0]) : 999
 
-const mapA = CATEGORY_MAP[a.category_id]
-const mapB = CATEGORY_MAP[b.category_id]
+  if(orderA !== orderB){
+   return orderA - orderB
+  }
 
-const orderA = mapA ? parseInt(mapA.split("_")[0]) : 999
-const orderB = mapB ? parseInt(mapB.split("_")[0]) : 999
+  return a.name.localeCompare(b.name,"th")
 
-if(orderA !== orderB){
-return orderA - orderB
+ })
+
 }
 
-return a.name.localeCompare(b.name,"th")
 
-})
+/* แสดงเมนู */
 
-sorted.forEach(item=>{
+function renderMenu(menu){
 
-const div=document.createElement("div")
+ const container=document.getElementById("menu")
 
-div.className="item"
+ if(!container) return
 
-div.innerHTML=`
-<img src="${item.image || ""}">
-<h3>${item.name}</h3>
-<p>${item.price}</p>
-<button>เพิ่ม</button>
-`
+ container.innerHTML=""
 
-div.querySelector("button").onclick=()=>addToCart(item)
+ const sorted = sortMenu(menu)
 
-container.appendChild(div)
+ sorted.forEach(item=>{
 
-})
+  const div=document.createElement("div")
+
+  div.className="item"
+
+  div.innerHTML=`
+  <img src="${item.image || ""}">
+  <h3>${item.name}</h3>
+  <p>${item.price}</p>
+  <button>เพิ่ม</button>
+  `
+
+  div.querySelector("button").onclick=()=>addToCart(item)
+
+  container.appendChild(div)
+
+ })
 
 }
