@@ -38,11 +38,17 @@ export async function loadMenu(){
 
  menu.forEach(item=>{
 
-  if(categoryMap[item.category_id]){
+  if(!categoryMap[item.category_id]){
 
-   categoryMap[item.category_id].items.push(item)
+   categoryMap[item.category_id]={
+    id:item.category_id,
+    name:"อื่นๆ",
+    items:[]
+   }
 
   }
+
+  categoryMap[item.category_id].items.push(item)
 
  })
 
