@@ -34,14 +34,15 @@ background:#ffffff;
 height:75vh;
 max-height:500px;
 
-transition:transform .45s cubic-bezier(.22,.61,.36,1),opacity .35s;
-will-change:transform;
+transition:transform .55s cubic-bezier(.22,.61,.36,1),opacity .4s;
+will-change:transform,opacity;
+transform:translateZ(0);
+pointer-events:none;
 }
 
-.logo-hidden{
-transform:translateY(-100%);
-opacity:0;
-position:absolute;
+.logo-area img{
+max-width:60%;
+height:auto;
 }
 
 /* TOPBAR */
@@ -254,7 +255,6 @@ border-radius:12px;
 <script type="module" src="/js/app.js"></script>
 
 <script>
-<script>
 
 let ticking=false
 
@@ -266,14 +266,16 @@ window.addEventListener("scroll",()=>{
 
    const logo=document.getElementById("logoArea")
 
-   if(window.scrollY>120){
+   const y=window.scrollY
 
-    logo.style.transform="translateY(-100%)"
+   if(y>120){
+
+    logo.style.transform="translateY(-120%) scale(.92)"
     logo.style.opacity="0"
 
    }else{
 
-    logo.style.transform="translateY(0)"
+    logo.style.transform="translateY(0) scale(1)"
     logo.style.opacity="1"
 
    }
