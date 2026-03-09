@@ -53,9 +53,9 @@ export default async function handler(req, res) {
    return{
     id:item.id,
     name:item.item_name,
-    category_id:item.category_id,
-    image:item.image_url,
-    price:price
+    category_id:item.category_id ? String(item.category_id) : null,
+    image:item.image_url||null,
+    price:Number(price)
    }
 
   })
