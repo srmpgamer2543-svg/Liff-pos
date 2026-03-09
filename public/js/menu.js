@@ -5,8 +5,17 @@ let menuData=[]
 
 function getPrefixNumber(name){
 
- const m=name.match(/^(\d+)[_\- ]?/)
- return m?parseInt(m[1]):999
+ if(!name) return 999
+
+ const match=name.match(/^(\d+)/)
+
+ return match ? parseInt(match[1]) : 999
+
+}
+
+function cleanName(name){
+
+ return name.replace(/^\d+[_\- ]?/,"")
 
 }
 
@@ -38,7 +47,7 @@ export async function loadMenu(){
 
  categoryContainer.appendChild(allBtn)
 
- /* หมวด */
+ /* เรียงหมวด */
 
  const sortedCategories=[...categories]
  .sort((a,b)=>getPrefixNumber(a.name)-getPrefixNumber(b.name))
@@ -48,14 +57,12 @@ export async function loadMenu(){
   const btn=document.createElement("button")
   btn.className="cat-btn"
 
-  const cleanName=cat.name.replace(/^\d+[_\- ]?/,"")
-
-  btn.innerText=cleanName
+  btn.innerText=cleanName(cat.name)
 
   btn.onclick=()=>{
 
    const items=menu
-   .filter(i=>i.category_id===cat.id)
+   .filter(i=>String(i.category_id)===String(cat.id))
    .sort((a,b)=>getPrefixNumber(a.name)-getPrefixNumber(b.name))
 
    renderMenu(items)
@@ -83,14 +90,14 @@ function renderMenu(list){
   const card=document.createElement("div")
   card.className="item"
 
-  const cleanName=item.name.replace(/^\d+[_\- ]?/,"")
+  const clean=cleanName(item.name)
 
   card.innerHTML=`
 
   <img src="${item.image||""}">
 
   <div class="item-info">
-  <div class="item-name">${cleanName}</div>
+  <div class="item-name">${clean}</div>
   <div class="item-price">${item.price} ฿</div>
   </div>
 
@@ -111,7 +118,7 @@ function openModifier(item){
 
  modal.innerHTML=`
 
- <h2>${item.name.replace(/^\d+[_\- ]?/,"")}</h2>
+ <h2>${cleanName(item.name)}</h2>
 
  <div class="mod-group">
 
