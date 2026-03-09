@@ -2,6 +2,7 @@ import { addToCart } from "./cart.js"
 import { getMenu, getCategories } from "./api.js"
 
 let menuData=[]
+let categoriesData=[]
 
 function getPrefixNumber(name){
 
@@ -42,6 +43,7 @@ export async function loadMenu(){
  const categoryContainer = document.getElementById("categories")
 
  menuData = menu
+ categoriesData = [...categories].sort(sortByPrefix)
 
  categoryContainer.innerHTML = ""
 
@@ -51,7 +53,21 @@ export async function loadMenu(){
 
  allBtn.onclick = ()=>{
 
-  const sorted = [...menu].sort(sortByPrefix)
+  const sorted=[...menuData].sort((a,b)=>{
+
+   const ca = categoriesData.find(c=>String(c.id)===String(a.category_id))
+   const cb = categoriesData.find(c=>String(c.id)===String(b.category_id))
+
+   const pa = getPrefixNumber(ca?.name)
+   const pb = getPrefixNumber(cb?.name)
+
+   if(pa !== pb){
+    return pa - pb
+   }
+
+   return sortByPrefix(a,b)
+
+  })
 
   renderMenu(sorted)
 
@@ -59,8 +75,7 @@ export async function loadMenu(){
 
  categoryContainer.appendChild(allBtn)
 
- const sortedCategories = [...categories]
- .sort(sortByPrefix)
+ const sortedCategories=[...categoriesData]
 
  sortedCategories.forEach(cat=>{
 
@@ -71,7 +86,7 @@ export async function loadMenu(){
 
   btn.onclick = ()=>{
 
-   const items = menu
+   const items = menuData
    .filter(i => String(i.category_id) === String(cat.id))
    .sort(sortByPrefix)
 
@@ -83,7 +98,21 @@ export async function loadMenu(){
 
  })
 
- const sorted = [...menu].sort(sortByPrefix)
+ const sorted=[...menuData].sort((a,b)=>{
+
+  const ca = categoriesData.find(c=>String(c.id)===String(a.category_id))
+  const cb = categoriesData.find(c=>String(c.id)===String(b.category_id))
+
+  const pa = getPrefixNumber(ca?.name)
+  const pb = getPrefixNumber(cb?.name)
+
+  if(pa !== pb){
+   return pa - pb
+  }
+
+  return sortByPrefix(a,b)
+
+ })
 
  renderMenu(sorted)
 
