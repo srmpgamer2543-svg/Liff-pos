@@ -1,15 +1,17 @@
 import { addToCart } from "./cart.js"
 import { getMenu, getCategories } from "./api.js"
 
+let fullMenu = []
+
 export async function loadMenu(){
 
  const menu = await getMenu()
  const categories = await getCategories()
 
+ fullMenu = menu
+
  const menuContainer = document.getElementById("menu")
  const categoryContainer = document.getElementById("categories")
-
- if(!menuContainer || !categoryContainer) return
 
  menuContainer.innerHTML=""
  categoryContainer.innerHTML=""
@@ -17,33 +19,16 @@ export async function loadMenu(){
  const categoryMap={}
 
  categories.forEach(c=>{
-
   categoryMap[c.id]={
    name:c.name,
    items:[]
   }
-
  })
 
  menu.forEach(item=>{
 
   if(categoryMap[item.category_id]){
-
    categoryMap[item.category_id].items.push(item)
-
-  }else{
-
-   if(!categoryMap["other"]){
-
-    categoryMap["other"]={
-     name:"อื่นๆ",
-     items:[]
-    }
-
-   }
-
-   categoryMap["other"].items.push(item)
-
   }
 
  })
@@ -58,9 +43,15 @@ export async function loadMenu(){
  })
 
  const allBtn=document.createElement("button")
- allBtn.className="cat-btn"
+ allBtn.className="cat-btn active"
  allBtn.innerText="ทั้งหมด"
- allBtn.onclick=()=>renderMenu(menu)
+
+ allBtn.onclick=()=>{
+
+  setActive(allBtn)
+  renderMenu(fullMenu)
+
+ }
 
  categoryContainer.appendChild(allBtn)
 
@@ -75,6 +66,7 @@ export async function loadMenu(){
 
   btn.onclick=()=>{
 
+   setActive(btn)
    renderMenu(cat.items)
 
   }
@@ -84,6 +76,15 @@ export async function loadMenu(){
  })
 
  renderMenu(menu)
+
+}
+
+function setActive(btn){
+
+ document.querySelectorAll(".cat-btn")
+ .forEach(b=>b.classList.remove("active"))
+
+ btn.classList.add("active")
 
 }
 
@@ -102,13 +103,17 @@ function renderMenu(list){
   card.innerHTML=`
 
    <img src="${item.image||""}">
-   <h3>${item.name}</h3>
-   <p>${item.price} บาท</p>
-   <button>เพิ่ม</button>
+
+   <div class="item-info">
+    <div class="item-name">${item.name}</div>
+    <div class="item-price">${item.price} ฿</div>
+   </div>
+
+   <button class="add-btn">+</button>
 
   `
 
-  card.querySelector("button").onclick=()=>{
+  card.querySelector(".add-btn").onclick=()=>{
 
    addToCart(item)
 
