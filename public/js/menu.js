@@ -1,13 +1,12 @@
 import { addToCart } from "./cart.js"
 import { getMenu, getCategories } from "./api.js"
 
-let fullMenu=[]
+let menuData=[]
 
-function getOrderNumber(name){
+function getPrefixNumber(name){
 
- const match=name.match(/^(\d+)/)
-
- return match?parseInt(match[1]):999
+ const m=name.match(/^(\d+)/)
+ return m?parseInt(m[1]):999
 
 }
 
@@ -19,41 +18,9 @@ export async function loadMenu(){
  const menuContainer=document.getElementById("menu")
  const categoryContainer=document.getElementById("categories")
 
- if(!menuContainer||!categoryContainer)return
+ menuData=menu
 
- menuContainer.innerHTML=""
  categoryContainer.innerHTML=""
-
- const categoryMap={}
-
- categories.forEach(c=>{
-
-  categoryMap[c.id]={
-   id:c.id,
-   name:c.name,
-   items:[]
-  }
-
- })
-
- menu.forEach(item=>{
-
-  if(!categoryMap[item.category_id]){
-
-   categoryMap[item.category_id]={
-    id:item.category_id,
-    name:"อื่นๆ",
-    items:[]
-   }
-
-  }
-
-  categoryMap[item.category_id].items.push(item)
-
- })
-
- const sortedCategories=Object.values(categoryMap)
- .sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
 
  /* ปุ่มทั้งหมด */
 
@@ -64,7 +31,7 @@ export async function loadMenu(){
  allBtn.onclick=()=>{
 
   const sorted=[...menu]
-  .sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
+  .sort((a,b)=>getPrefixNumber(a.name)-getPrefixNumber(b.name))
 
   renderMenu(sorted)
 
@@ -72,7 +39,10 @@ export async function loadMenu(){
 
  categoryContainer.appendChild(allBtn)
 
- /* ปุ่มหมวด */
+ /* หมวด */
+
+ const sortedCategories=[...categories]
+ .sort((a,b)=>getPrefixNumber(a.name)-getPrefixNumber(b.name))
 
  sortedCategories.forEach(cat=>{
 
@@ -85,10 +55,11 @@ export async function loadMenu(){
 
   btn.onclick=()=>{
 
-   const sortedItems=[...cat.items]
-   .sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
+   const items=menu
+   .filter(i=>i.category_id===cat.id)
+   .sort((a,b)=>getPrefixNumber(a.name)-getPrefixNumber(b.name))
 
-   renderMenu(sortedItems)
+   renderMenu(items)
 
   }
 
@@ -96,17 +67,16 @@ export async function loadMenu(){
 
  })
 
- fullMenu=[...menu]
- .sort((a,b)=>getOrderNumber(a.name)-getOrderNumber(b.name))
+ const sorted=[...menu]
+ .sort((a,b)=>getPrefixNumber(a.name)-getPrefixNumber(b.name))
 
- renderMenu(fullMenu)
+ renderMenu(sorted)
 
 }
 
 function renderMenu(list){
 
  const menuContainer=document.getElementById("menu")
-
  menuContainer.innerHTML=""
 
  list.forEach(item=>{
@@ -125,11 +95,9 @@ function renderMenu(list){
   <div class="item-price">${item.price} ฿</div>
   </div>
 
-  <button class="add-btn">+</button>
-
   `
 
-  card.onclick=()=>openModifierUI(item)
+  card.onclick=()=>openModifier(item)
 
   menuContainer.appendChild(card)
 
@@ -137,31 +105,49 @@ function renderMenu(list){
 
 }
 
-function openModifierUI(item){
+function openModifier(item){
 
- const html=`
+ const overlay=document.getElementById("modifierOverlay")
+ const modal=document.getElementById("modifierModal")
+
+ modal.innerHTML=`
+
+ <h2>${item.name.replace(/^\d+_/,"")}</h2>
 
  <div class="mod-group">
 
- <div class="mod-title">เลือกประเภท</div>
+ <div class="mod-title">เลือกประเภท *</div>
 
  <label class="mod-option">
- <input type="radio" name="temp" value="เย็น"> เย็น
+ <input type="radio" name="temp" value="เย็น">
+ เย็น
  </label>
 
  <label class="mod-option">
- <input type="radio" name="temp" value="ปั่น"> ปั่น
+ <input type="radio" name="temp" value="ปั่น">
+ ปั่น
  </label>
 
  </div>
 
  <div class="mod-group">
 
- <div class="mod-title">ระดับความหวาน</div>
+ <div class="mod-title">ระดับความหวาน *</div>
 
- <label class="mod-option"><input type="radio" name="sweet" value="100%">100%</label>
- <label class="mod-option"><input type="radio" name="sweet" value="50%">50%</label>
- <label class="mod-option"><input type="radio" name="sweet" value="25%">25%</label>
+ <label class="mod-option">
+ <input type="radio" name="sweet" value="100%">
+ 100%
+ </label>
+
+ <label class="mod-option">
+ <input type="radio" name="sweet" value="50%">
+ 50%
+ </label>
+
+ <label class="mod-option">
+ <input type="radio" name="sweet" value="25%">
+ 25%
+ </label>
 
  </div>
 
@@ -169,8 +155,15 @@ function openModifierUI(item){
 
  <div class="mod-title">ท็อปปิ้ง</div>
 
- <label class="mod-option"><input type="checkbox" value="ไข่มุก">ไข่มุก</label>
- <label class="mod-option"><input type="checkbox" value="วิปครีม">วิปครีม</label>
+ <label class="mod-option">
+ <input type="checkbox" value="ไข่มุก">
+ ไข่มุก
+ </label>
+
+ <label class="mod-option">
+ <input type="checkbox" value="วิปครีม">
+ วิปครีม
+ </label>
 
  </div>
 
@@ -178,15 +171,46 @@ function openModifierUI(item){
 
  `
 
- window.openModifier(html)
+ overlay.classList.add("active")
+
+ overlay.onclick=(e)=>{
+
+  if(e.target===overlay){
+
+   overlay.classList.remove("active")
+
+  }
+
+ }
 
  setTimeout(()=>{
 
-  document.querySelector(".confirm-btn").onclick=()=>{
+  const btn=document.querySelector(".confirm-btn")
 
-   addToCart(item)
+  btn.onclick=()=>{
 
-   window.closeModifier()
+   const temp=document.querySelector("input[name=temp]:checked")
+   const sweet=document.querySelector("input[name=sweet]:checked")
+
+   if(!temp||!sweet){
+
+    alert("กรุณาเลือกตัวเลือกที่จำเป็น")
+
+    return
+
+   }
+
+   const toppings=[...document.querySelectorAll("input[type=checkbox]:checked")]
+   .map(i=>i.value)
+
+   addToCart({
+    ...item,
+    type:temp.value,
+    sweet:sweet.value,
+    toppings:toppings
+   })
+
+   overlay.classList.remove("active")
 
   }
 
