@@ -12,7 +12,6 @@ export default async function handler(req, res) {
   const { data, error } = await supabase
    .from("menu")
    .select("*")
-   .order("name")
 
   if (error) {
    return res.status(500).json({
@@ -20,11 +19,11 @@ export default async function handler(req, res) {
    })
   }
 
-  return res.status(200).json(data)
+  res.status(200).json(data)
 
  } catch (err) {
 
-  return res.status(500).json({
+  res.status(500).json({
    error: err.message
   })
 
