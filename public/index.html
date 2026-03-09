@@ -211,16 +211,10 @@ requestAnimationFrame(()=>{
 
 const logo=document.getElementById("logoArea")
 
-const y=window.scrollY
-
-if(y>120){
-
+if(window.scrollY>120){
 logo.classList.add("logo-hidden")
-
 }else{
-
 logo.classList.remove("logo-hidden")
-
 }
 
 ticking=false
