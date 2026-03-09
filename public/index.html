@@ -29,19 +29,32 @@ box-shadow:0 2px 6px rgba(0,0,0,.1);
 display:flex;
 justify-content:center;
 align-items:center;
-padding:20px;
 background:#ffffff;
-will-change:transform,opacity;
-transition:transform .45s cubic-bezier(.25,.8,.25,1),opacity .35s ease;
-}
 
-.logo-area img{
 height:75vh;
 max-height:500px;
+
+overflow:hidden;
+
+transition:height .45s cubic-bezier(.25,.8,.25,1),
+opacity .35s ease;
+}
+
+/* logo image */
+
+.logo-area img{
+height:100%;
 object-fit:contain;
 }
 
-/* TOP BAR */
+/* hidden state */
+
+.logo-hidden{
+height:0;
+opacity:0;
+}
+
+/* top bar */
 
 .topbar{
 display:flex;
@@ -50,9 +63,6 @@ justify-content:space-between;
 padding:20px 24px;
 background:white;
 border-top:1px solid #eee;
-
-will-change:transform;
-transition:transform .45s cubic-bezier(.25,.8,.25,1);
 }
 
 .shop-name{
@@ -74,9 +84,6 @@ background:white;
 padding:18px;
 gap:16px;
 border-top:1px solid #eee;
-
-will-change:transform;
-transition:transform .45s cubic-bezier(.25,.8,.25,1);
 }
 
 .cat-btn{
@@ -146,6 +153,8 @@ font-size:36px;
 cursor:pointer;
 }
 
+/* cart */
+
 #cart{
 position:fixed;
 right:-100%;
@@ -169,7 +178,7 @@ padding:10px;
 <img src="/logo.png" alt="logo">
 </div>
 
-<div class="topbar" id="topbar">
+<div class="topbar">
 <div class="shop-name">🍞มีนม.ขนมปัง.🍞</div>
 <div class="cart-btn" onclick="toggleCart()">🛒</div>
 </div>
@@ -190,6 +199,8 @@ padding:10px;
 
 <script>
 
+/* smooth logo collapse */
+
 let ticking=false
 
 window.addEventListener("scroll",()=>{
@@ -199,23 +210,18 @@ if(!ticking){
 requestAnimationFrame(()=>{
 
 const logo=document.getElementById("logoArea")
-const cats=document.getElementById("categories")
-const topbar=document.getElementById("topbar")
 
 const y=window.scrollY
-const logoHeight = logo.offsetHeight
 
-const progress = Math.min(y/logoHeight,1)
+if(y>120){
 
-/* logo slide */
+logo.classList.add("logo-hidden")
 
-logo.style.transform=`translateY(-${progress*100}%)`
-logo.style.opacity=1-progress
+}else{
 
-/* topbar + categories slide */
+logo.classList.remove("logo-hidden")
 
-topbar.style.transform=`translateY(-${logoHeight*progress}px)`
-cats.style.transform=`translateY(-${logoHeight*progress}px)`
+}
 
 ticking=false
 
