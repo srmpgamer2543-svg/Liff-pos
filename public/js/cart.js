@@ -18,7 +18,12 @@ cart.forEach(i=>{
 
 const div=document.createElement("div")
 
-div.innerText=`${i.name} - ${i.price}`
+div.innerText=
+`${i.name}
+${i.type||""}
+${i.sweet||""}
+${i.toppings?.join(",")||""}
+- ${i.price}`
 
 el.appendChild(div)
 
