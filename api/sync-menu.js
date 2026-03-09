@@ -41,9 +41,8 @@ export default async function handler(req, res) {
 
     })
 
-    // INSERT / UPDATE เข้า Supabase
     const { error } = await supabase
-      .from("menu")
+      .from("items")
       .upsert(menu)
 
     if (error) {
