@@ -27,13 +27,13 @@ padding:14px;
 gap:14px;
 }
 
-/* ปรับปุ่มหมวดใหญ่ขึ้น */
+/* ชื่อหมวด */
 .cat-btn{
-padding:20px 40px;
+padding:18px 36px;
 border-radius:40px;
 background:#eee;
 cursor:pointer;
-font-size:22px;
+font-size:30px;
 font-weight:bold;
 white-space:nowrap;
 }
@@ -41,14 +41,16 @@ white-space:nowrap;
 #menu{
 display:grid;
 grid-template-columns:repeat(2,1fr);
-gap:12px;
-padding:12px;
+gap:14px;
+padding:14px;
 }
 
 .item{
 background:white;
-border-radius:12px;
-padding:10px;
+border-radius:16px;
+overflow:hidden;
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+position:relative;
 }
 
 /* รูปเมนู 16:9 */
@@ -56,29 +58,40 @@ padding:10px;
 width:100%;
 aspect-ratio:16/9;
 object-fit:cover;
-border-radius:10px;
 }
 
-.item h3{
-font-size:18px;
-margin:8px 0 4px;
+/* กล่องข้อมูล */
+.item-info{
+padding:14px;
 }
 
-.item p{
-font-size:16px;
+/* ชื่อเมนู */
+.item-name{
+font-size:50px;
+font-weight:bold;
+line-height:1.2;
+margin-bottom:6px;
+}
+
+/* ราคา */
+.item-price{
+font-size:40px;
 color:#2e7d32;
 font-weight:bold;
-margin:0;
 }
 
-.item button{
-margin-top:8px;
-padding:8px;
+/* ปุ่ม + */
+.add-btn{
+position:absolute;
+right:16px;
+bottom:16px;
+width:60px;
+height:60px;
+border-radius:50%;
 border:none;
-border-radius:6px;
 background:#4caf50;
 color:white;
-font-size:14px;
+font-size:36px;
 cursor:pointer;
 }
 
