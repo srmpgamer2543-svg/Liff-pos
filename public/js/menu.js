@@ -190,13 +190,24 @@ function openModifier(item){
 
  item.modifier_groups.forEach(group=>{
 
+  const min = group.min_select || 0
+  const max = group.max_select || group.modifiers.length
+
   html+=`<div class="mod-group">`
-  html+=`<div class="mod-title">${group.name}</div>`
+
+  html+=`
+  <div class="mod-title">
+  ${group.name}
+  <div style="font-size:20px;color:#888;">
+  เลือก ${min}${max>1 ? ` - ${max}` : ""}
+  </div>
+  </div>
+  `
 
   group.modifiers.forEach(mod=>{
 
    const type =
-   group.min_select===1 && group.max_select===1
+   min===1 && max===1
    ? "radio"
    : "checkbox"
 
@@ -204,7 +215,10 @@ function openModifier(item){
 
    <label class="mod-option">
 
+   <span>
    ${mod.name}
+   ${mod.price>0 ? `(+${mod.price})` : ""}
+   </span>
 
    <input
     type="${type}"
@@ -245,15 +259,23 @@ function openModifier(item){
   btn.onclick=()=>{
 
    const selections={}
+   let valid=true
 
    item.modifier_groups.forEach(group=>{
 
     const checked=[...document.querySelectorAll(`input[name="${group.id}"]:checked`)]
     .map(i=>i.value)
 
+    if(checked.length < (group.min_select||0)){
+     alert(`กรุณาเลือก ${group.name}`)
+     valid=false
+    }
+
     selections[group.name]=checked
 
    })
+
+   if(!valid) return
 
    addToCart({
 
