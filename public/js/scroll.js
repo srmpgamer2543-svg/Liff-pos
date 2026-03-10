@@ -1,7 +1,6 @@
 const logo = document.getElementById("logoArea")
 const topbar = document.querySelector(".topbar")
 const categories = document.getElementById("categories")
-const menu = document.getElementById("menuGrid") // container การ์ดเมนู
 
 let targetScroll = 0
 let currentScroll = 0
@@ -54,13 +53,6 @@ function animate(){
 
  const catMove = -390 * progress
  categories.style.transform = `translate3d(0,${catMove}px,0)`
-
- /* ------------------- */
- /* MENU GRID (สำคัญ) */
- /* ------------------- */
-
- const menuMove = -390 * progress
- menu.style.transform = `translate3d(0,${menuMove}px,0)`
 
  requestAnimationFrame(animate)
 
