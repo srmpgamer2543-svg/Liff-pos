@@ -87,7 +87,7 @@ padding:23px 41px;
 border-radius:45px;
 background:#eee;
 cursor:pointer;
-font-size:31px;
+font-size:40px;
 font-weight:bold;
 white-space:nowrap;
 border:none;
@@ -132,7 +132,7 @@ padding:16px;
 /* NAME */
 
 .item-name{
-font-size:35px;
+font-size:45px;
 font-weight:700;
 margin-bottom:8px;
 line-height:1.1;
@@ -141,7 +141,7 @@ line-height:1.1;
 /* PRICE */
 
 .item-price{
-font-size:30px;
+font-size:40px;
 font-weight:700;
 color:#16a34a;
 }
