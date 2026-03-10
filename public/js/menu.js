@@ -4,10 +4,6 @@ import { getMenu, getCategories } from "./api.js"
 let menuData = []
 let categoriesData = []
 
-/* ------------------- */
-/* PREFIX NUMBER */
-/* ------------------- */
-
 function getPrefixNumber(name){
 
  if(!name) return 999
@@ -18,10 +14,6 @@ function getPrefixNumber(name){
 
 }
 
-/* ------------------- */
-/* CLEAN NAME */
-/* ------------------- */
-
 function cleanName(name){
 
  if(!name) return ""
@@ -30,11 +22,11 @@ function cleanName(name){
 
 }
 
-/* ------------------- */
-/* SORT MENU */
-/* ------------------- */
-
 function sortMenuItems(a,b){
+
+ if(a.category_id !== b.category_id){
+  return (a.category_id || "").localeCompare(b.category_id || "")
+ }
 
  const pa = getPrefixNumber(a.name)
  const pb = getPrefixNumber(b.name)
@@ -46,10 +38,6 @@ function sortMenuItems(a,b){
  return a.name.localeCompare(b.name,"th")
 
 }
-
-/* ------------------- */
-/* SORT CATEGORY */
-/* ------------------- */
 
 function sortCategories(a,b){
 
@@ -64,10 +52,6 @@ function sortCategories(a,b){
 
 }
 
-/* ------------------- */
-/* LOAD MENU */
-/* ------------------- */
-
 export async function loadMenu(){
 
  const menu = await getMenu()
@@ -76,12 +60,9 @@ export async function loadMenu(){
  const categoryContainer = document.getElementById("categories")
 
  menuData = menu
-
  categoriesData = [...categories].sort(sortCategories)
 
  categoryContainer.innerHTML = ""
-
- /* ALL BUTTON */
 
  const allBtn = document.createElement("button")
  allBtn.className = "cat-btn"
@@ -96,8 +77,6 @@ export async function loadMenu(){
  }
 
  categoryContainer.appendChild(allBtn)
-
- /* CATEGORY BUTTONS */
 
  categoriesData.forEach(cat=>{
 
@@ -137,10 +116,6 @@ export async function loadMenu(){
 
 }
 
-/* ------------------- */
-/* RENDER MENU */
-/* ------------------- */
-
 function renderMenu(list){
 
  const grid=document.getElementById("menuGrid")
@@ -173,8 +148,6 @@ function renderMenu(list){
 
   `
 
-  /* CLICK ITEM */
-
   card.addEventListener("click",(e)=>{
 
    e.stopPropagation()
@@ -190,8 +163,6 @@ function renderMenu(list){
    openModifier(item)
 
   })
-
-  /* CLICK + BUTTON */
 
   const addBtn=card.querySelector(".add-btn")
 
@@ -217,10 +188,6 @@ function renderMenu(list){
 
 }
 
-/* ------------------- */
-/* MODIFIER MODAL */
-/* ------------------- */
-
 function openModifier(item){
 
  const overlay=document.getElementById("modifierOverlay")
@@ -231,7 +198,6 @@ function openModifier(item){
  item.modifier_groups.forEach(group=>{
 
   html+=`<div class="mod-group">`
-
   html+=`<div class="mod-title">${group.name}</div>`
 
   group.modifiers.forEach(mod=>{
