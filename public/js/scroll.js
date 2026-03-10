@@ -1,35 +1,37 @@
 const logo = document.getElementById("logoArea")
 const topbar = document.querySelector(".topbar")
 const categories = document.getElementById("categories")
+const menu = document.getElementById("menuGrid") // container การ์ดเมนู
 
 let targetScroll = 0
 let currentScroll = 0
 
-const spring = 0.08
-const friction = 0.82
+/* iOS spring physics */
 
-function animate() {
+const stiffness = 0.09
+const damping = 0.8
+
+function animate(){
 
  targetScroll = window.scrollY
 
  const delta = targetScroll - currentScroll
- currentScroll += delta * spring
+ currentScroll += delta * stiffness
 
  const y = currentScroll
 
- /* ระยะ scroll */
  const maxScroll = 320
  const progress = Math.min(y / maxScroll, 1)
 
- /* ----------------------- */
- /* LOGO (ไม่เปลี่ยน logic) */
- /* ----------------------- */
+ /* ------------------- */
+ /* LOGO */
+ /* ------------------- */
 
  const startHeight = 75
  const endHeight = 18
 
  const height =
-  startHeight - ((startHeight - endHeight) * progress)
+ startHeight - ((startHeight - endHeight) * progress)
 
  logo.style.height = `${height}vh`
 
@@ -39,21 +41,26 @@ function animate() {
  logo.style.transform = `translate3d(0,${logoTranslate}%,0)`
  logo.style.opacity = logoOpacity
 
- /* ----------------------- */
+ /* ------------------- */
  /* TOPBAR */
- /* ----------------------- */
+ /* ------------------- */
 
  const topbarMove = -390 * progress
-
  topbar.style.transform = `translate3d(0,${topbarMove}px,0)`
 
- /* ----------------------- */
- /* CATEGORY */
- /* ----------------------- */
+ /* ------------------- */
+ /* CATEGORIES */
+ /* ------------------- */
 
  const catMove = -390 * progress
-
  categories.style.transform = `translate3d(0,${catMove}px,0)`
+
+ /* ------------------- */
+ /* MENU GRID (สำคัญ) */
+ /* ------------------- */
+
+ const menuMove = -390 * progress
+ menu.style.transform = `translate3d(0,${menuMove}px,0)`
 
  requestAnimationFrame(animate)
 
