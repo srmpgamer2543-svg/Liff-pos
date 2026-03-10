@@ -130,7 +130,7 @@ export default async function handler(req, res) {
     price = variant.stores[0].price
    }
 
-   const itemGroups = (item.modifier_ids || [])
+   const itemGroups = (item.modifier_groups_ids || [])
     .map(function (id) {
      return groupsWithMods.find(function (x) {
       return x.id === id
