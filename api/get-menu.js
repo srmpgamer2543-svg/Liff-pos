@@ -7,89 +7,58 @@ export default async function handler(req, res) {
   }
 
   // =========================
-  // ดึง ITEMS
+  // FETCH FUNCTION (cursor pagination)
   // =========================
-  let allItems = []
-  let cursor = null
+  async function fetchAll(url, key) {
 
-  while (true) {
+   let all = []
+   let cursor = null
 
-   let url = "https://api.loyverse.com/v1.0/items?limit=250"
+   while (true) {
 
-   if (cursor) {
-    url += "&cursor=" + cursor
+    let fullUrl = url + "?limit=250"
+
+    if (cursor) {
+     fullUrl += "&cursor=" + cursor
+    }
+
+    const response = await fetch(fullUrl, { headers })
+    const data = await response.json()
+
+    if (data[key]) {
+     all = all.concat(data[key])
+    }
+
+    if (!data.cursor) break
+    cursor = data.cursor
+
    }
 
-   const response = await fetch(url, { headers })
-   const data = await response.json()
-
-   if (data.items) {
-    allItems = allItems.concat(data.items)
-   }
-
-   if (!data.cursor) break
-   cursor = data.cursor
+   return all
   }
 
 
   // =========================
-  // ดึง MODIFIER GROUPS
+  // ดึงข้อมูลทั้งหมด
   // =========================
-  let allGroups = []
-  let groupCursor = null
+  const allItems = await fetchAll(
+   "https://api.loyverse.com/v1.0/items",
+   "items"
+  )
 
-  while (true) {
+  const groups = await fetchAll(
+   "https://api.loyverse.com/v1.0/modifier_groups",
+   "modifier_groups"
+  )
 
-   let url = "https://api.loyverse.com/v1.0/modifier_groups?limit=250"
-
-   if (groupCursor) {
-    url += "&cursor=" + groupCursor
-   }
-
-   const response = await fetch(url, { headers })
-   const data = await response.json()
-
-   if (data.modifier_groups) {
-    allGroups = allGroups.concat(data.modifier_groups)
-   }
-
-   if (!data.cursor) break
-   groupCursor = data.cursor
-  }
-
-  const groups = allGroups
+  const modifiers = await fetchAll(
+   "https://api.loyverse.com/v1.0/modifiers",
+   "modifiers"
+  )
 
 
   // =========================
-  // ดึง MODIFIERS
-  // =========================
-  let allModifiers = []
-  let modCursor = null
-
-  while (true) {
-
-   let url = "https://api.loyverse.com/v1.0/modifiers?limit=250"
-
-   if (modCursor) {
-    url += "&cursor=" + modCursor
-   }
-
-   const response = await fetch(url, { headers })
-   const data = await response.json()
-
-   if (data.modifiers) {
-    allModifiers = allModifiers.concat(data.modifiers)
-   }
-
-   if (!data.cursor) break
-   modCursor = data.cursor
-  }
-
-  const modifiers = allModifiers
-
-
-  // =========================
-  // รวม modifier เข้า group
+  // รวม modifiers เข้า group
   // =========================
   const groupsWithMods = groups.map(function (g) {
 
@@ -102,15 +71,20 @@ export default async function handler(req, res) {
       id: m.id,
       name: m.name,
       price: Number(m.price || 0),
-      price_text: Number(m.price || 0) > 0 ? "+" + Number(m.price) : ""
+      price_text: Number(m.price || 0) > 0
+       ? "+" + Number(m.price)
+       : ""
      }
     })
 
    return {
     id: g.id,
     name: g.name,
-    min_select: g.min_select,
-    max_select: g.max_select,
+
+    // รองรับทั้ง 2 แบบของ Loyverse
+    min_select: g.min_select ?? g.min_selected ?? 0,
+    max_select: g.max_select ?? g.max_selected ?? 0,
+
     modifiers: mods
    }
 
@@ -118,11 +92,14 @@ export default async function handler(req, res) {
 
 
   // =========================
-  // สร้าง MENU
+  // สร้าง MENU พร้อม modifier
   // =========================
   const menu = allItems.map(function (item) {
 
-   const variant = item.variants && item.variants[0] ? item.variants[0] : {}
+   const variant =
+    item.variants && item.variants.length
+     ? item.variants[0]
+     : {}
 
    let price = variant.default_price || 0
 
@@ -130,10 +107,16 @@ export default async function handler(req, res) {
     price = variant.stores[0].price
    }
 
-   const itemGroups = (item.modifier_groups_ids || [])
+   // รองรับทั้ง modifier_groups_ids และ modifier_ids
+   const groupIds =
+    item.modifier_groups_ids ||
+    item.modifier_ids ||
+    []
+
+   const itemGroups = groupIds
     .map(function (id) {
-     return groupsWithMods.find(function (x) {
-      return x.id === id
+     return groupsWithMods.find(function (g) {
+      return g.id === id
      })
     })
     .filter(Boolean)
@@ -144,6 +127,7 @@ export default async function handler(req, res) {
     category_id: item.category_id || null,
     image: item.image_url || null,
     price: Number(price),
+
     modifier_groups: itemGroups
    }
 
