@@ -1,6 +1,7 @@
 export default async function handler(req, res) {
 
  const API = "https://api.loyverse.com/v1.0"
+
  const headers = {
   Authorization: `Bearer ${process.env.LOYVERSE_API_KEY}`
  }
@@ -21,31 +22,19 @@ export default async function handler(req, res) {
   const modifiers = modifiersData.modifiers || []
   const categories = categoriesData.categories || []
 
-  // map categories
+  // map category name
   const categoryMap = {}
+
   categories.forEach(c => {
    categoryMap[c.id] = c.name
   })
 
-  // map modifiers by group
-  const modifiersByGroup = {}
-
-  modifiers.forEach(m => {
-
-   const gid = m.modifier_group_id
-   if (!gid) return
-
-   if (!modifiersByGroup[gid]) {
-    modifiersByGroup[gid] = []
-   }
-
-   modifiersByGroup[gid].push({
-    id: m.id,
-    name: m.name,
-    price: Number(m.price || 0)
-   })
-
-  })
+  // convert modifiers → options
+  const modifierOptions = modifiers.map(m => ({
+   id: m.id,
+   name: m.name,
+   price: Number(m.price || 0)
+  }))
 
   // build menu
   const menu = items.map(item => {
@@ -55,22 +44,24 @@ export default async function handler(req, res) {
     item.variants?.[0]?.default_price ||
     0
 
-   const modifier_groups = (item.modifier_ids || []).map(gid => ({
-    id: gid,
-    name: gid,
-    min_select: 0,
-    max_select: 1,
-    modifiers: modifiersByGroup[gid] || []
-   }))
-
    return {
     id: item.id,
     name: item.item_name,
     category_id: item.category_id,
     category: categoryMap[item.category_id] || "",
-    image: item.image_url,
+    image: item.image_url || null,
     price: Number(price),
-    modifier_groups
+
+    modifier_groups: [
+     {
+      id: "default",
+      name: "ตัวเลือกเพิ่มเติม",
+      min_select: 0,
+      max_select: 10,
+      modifiers: modifierOptions
+     }
+    ]
+
    }
 
   })
