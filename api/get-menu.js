@@ -8,65 +8,91 @@ export default async function handler(req, res) {
 
  try {
 
-  const [itemsRes, modifiersRes, categoriesRes] = await Promise.all([
+  const [
+   itemsRes,
+   modifiersRes,
+   groupsRes,
+   categoriesRes
+  ] = await Promise.all([
    fetch(`${API}/items`, { headers }),
    fetch(`${API}/modifiers`, { headers }),
+   fetch(`${API}/modifier_groups`, { headers }),
    fetch(`${API}/categories`, { headers })
   ])
 
   const itemsData = await itemsRes.json()
   const modifiersData = await modifiersRes.json()
+  const groupsData = await groupsRes.json()
   const categoriesData = await categoriesRes.json()
 
   const items = itemsData.items || []
   const modifiers = modifiersData.modifiers || []
+  const groups = groupsData.modifier_groups || []
   const categories = categoriesData.categories || []
 
-  // map category name
+  // map category
   const categoryMap = {}
-
   categories.forEach(c => {
-   categoryMap[c.id] = c.name
+   categoryMap[c.id] = c
   })
 
-  // convert modifiers → options
-  const modifierOptions = modifiers.map(m => ({
-   id: m.id,
-   name: m.name,
-   price: Number(m.price || 0)
-  }))
+  // map options by group
+  const optionsByGroup = {}
+  modifiers.forEach(m => {
+
+   const gid = m.modifier_group_id
+   if (!gid) return
+
+   if (!optionsByGroup[gid]) {
+    optionsByGroup[gid] = []
+   }
+
+   optionsByGroup[gid].push(m)
+
+  })
+
+  // attach options to modifier group
+  const groupsWithOptions = {}
+  groups.forEach(g => {
+
+   groupsWithOptions[g.id] = {
+    ...g,
+    options: optionsByGroup[g.id] || []
+   }
+
+  })
 
   // build menu
   const menu = items.map(item => {
 
-   const price =
-    item.variants?.[0]?.stores?.[0]?.price ||
-    item.variants?.[0]?.default_price ||
-    0
+   const itemGroups = (item.modifier_ids || []).map(gid => {
+    return groupsWithOptions[gid] || null
+   }).filter(Boolean)
 
    return {
-    id: item.id,
-    name: item.item_name,
-    category_id: item.category_id,
-    category: categoryMap[item.category_id] || "",
-    image: item.image_url || null,
-    price: Number(price),
 
-    modifier_groups: [
-     {
-      id: "default",
-      name: "ตัวเลือกเพิ่มเติม",
-      min_select: 0,
-      max_select: 10,
-      modifiers: modifierOptions
-     }
-    ]
+    ...item,                      // raw item จาก Loyverse
+    category: categoryMap[item.category_id] || null,
+    modifier_groups: itemGroups   // group + options
 
    }
 
   })
 
-  res.status(200).json(menu)
+  res.status(200).json({
+
+   source: "loyverse",
+
+   totals: {
+    items: items.length,
+    modifiers: modifiers.length,
+    modifier_groups: groups.length,
+    categories: categories.length
+   },
+
+   menu
+
+  })
 
  } catch (err) {
 
