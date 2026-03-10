@@ -1,30 +1,39 @@
-const logo=document.getElementById("logoArea")
+const logo = document.getElementById("logoArea")
+const topbar = document.querySelector(".topbar")
+const categories = document.getElementById("categories")
 
-let lastState=false
-let ticking=false
+let ticking = false
 
-window.addEventListener("scroll",()=>{
+window.addEventListener("scroll", () => {
 
- if(!ticking){
+ if (!ticking) {
 
-  requestAnimationFrame(()=>{
+  requestAnimationFrame(() => {
 
-   const shouldHide=window.scrollY>120
+   const y = window.scrollY
 
-   if(shouldHide!==lastState){
+   const progress = Math.min(y / 120, 1)
 
-    logo.classList.toggle("logo-hidden",shouldHide)
+   const logoTranslate = -120 * progress
+   const logoOpacity = 1 - progress
+   const logoHeight = 1 - progress
 
-    lastState=shouldHide
+   logo.style.transform = `translateY(${logoTranslate}%)`
+   logo.style.opacity = logoOpacity
+   logo.style.height = `${75 - (75 * progress)}vh`
 
-   }
+   const topbarTranslate = -40 * progress
+   topbar.style.transform = `translateY(${topbarTranslate}px)`
 
-   ticking=false
+   const catTranslate = -40 * progress
+   categories.style.transform = `translateY(${catTranslate}px)`
+
+   ticking = false
 
   })
 
-  ticking=true
+  ticking = true
 
  }
 
-},{passive:true})
+}, { passive: true })
