@@ -1,155 +1,76 @@
 export default async function handler(req, res) {
 
+ const API = "https://api.loyverse.com/v1.0"
+ const headers = {
+  Authorization: `Bearer ${process.env.LOYVERSE_API_KEY}`
+ }
+
  try {
 
-  const headers = {
-   Authorization: `Bearer ${process.env.LOYVERSE_API_KEY}`
-  }
+  const [itemsRes, modifiersRes, categoriesRes] = await Promise.all([
+   fetch(`${API}/items`, { headers }),
+   fetch(`${API}/modifiers`, { headers }),
+   fetch(`${API}/categories`, { headers })
+  ])
 
-  async function fetchAll(url, key) {
+  const itemsData = await itemsRes.json()
+  const modifiersData = await modifiersRes.json()
+  const categoriesData = await categoriesRes.json()
 
-   let all = []
-   let cursor = null
+  const items = itemsData.items || []
+  const modifiers = modifiersData.modifiers || []
+  const categories = categoriesData.categories || []
 
-   while (true) {
-
-    let fullUrl = url + "?limit=250"
-
-    if (cursor) fullUrl += "&cursor=" + cursor
-
-    const response = await fetch(fullUrl, { headers })
-    const data = await response.json()
-
-    if (data[key]) all = all.concat(data[key])
-
-    if (!data.cursor) break
-    cursor = data.cursor
-   }
-
-   return all
-  }
-
-  const allItems = await fetchAll(
-   "https://api.loyverse.com/v1.0/items",
-   "items"
-  )
-
-  const groups = await fetchAll(
-   "https://api.loyverse.com/v1.0/modifier_groups",
-   "modifier_groups"
-  )
-
-  const modifiers = await fetchAll(
-   "https://api.loyverse.com/v1.0/modifiers",
-   "modifiers"
-  )
-
-  /* ----------------------- */
-  /* group info              */
-  /* ----------------------- */
-
-  const groupById = {}
-
-  groups.forEach(g => {
-
-   groupById[g.id] = {
-    id: g.id,
-    name: g.name,
-    min_select: g.min_select ?? g.min_selected ?? 0,
-    max_select: g.max_select ?? g.max_selected ?? 0,
-    modifiers: []
-   }
-
+  // map categories
+  const categoryMap = {}
+  categories.forEach(c => {
+   categoryMap[c.id] = c.name
   })
 
-  /* ----------------------- */
-  /* map modifiers           */
-  /* ----------------------- */
+  // map modifiers by group
+  const modifiersByGroup = {}
 
   modifiers.forEach(m => {
 
-   const gid =
-    m.modifier_group_id ||
-    (Array.isArray(m.modifier_group_ids) ? m.modifier_group_ids[0] : null)
+   const gid = m.modifier_group_id
+   if (!gid) return
 
-   if (gid && groupById[gid]) {
-
-    groupById[gid].modifiers.push({
-     id: m.id,
-     name: m.name,
-     price: Number(m.price || 0)
-    })
-
+   if (!modifiersByGroup[gid]) {
+    modifiersByGroup[gid] = []
    }
+
+   modifiersByGroup[gid].push({
+    id: m.id,
+    name: m.name,
+    price: Number(m.price || 0)
+   })
 
   })
 
-  /* ----------------------- */
-  /* fallback: modifier = group */
-  /* ----------------------- */
-
-  if (groups.length === 0) {
-
-   modifiers.forEach(m => {
-
-    groupById[m.id] = {
-     id: m.id,
-     name: m.name,
-     min_select: 0,
-     max_select: 1,
-     modifiers: [
-      {
-       id: m.id,
-       name: m.name,
-       price: Number(m.price || 0)
-      }
-     ]
-    }
-
-   })
-
-  }
-
-  /* ----------------------- */
-  /* build menu              */
-  /* ----------------------- */
-
-  const menu = allItems.map(item => {
-
-   const variant = item.variants?.[0] || {}
+  // build menu
+  const menu = items.map(item => {
 
    const price =
-    variant.stores?.[0]?.price ??
-    variant.default_price ??
+    item.variants?.[0]?.stores?.[0]?.price ||
+    item.variants?.[0]?.default_price ||
     0
 
-   const itemGroups = []
-
-   const groupIds = item.modifier_ids || []
-
-   groupIds.forEach(groupId => {
-
-    const group = groupById[groupId]
-
-    if (!group) return
-
-    itemGroups.push({
-     id: group.id,
-     name: group.name,
-     min_select: group.min_select,
-     max_select: group.max_select,
-     modifiers: group.modifiers
-    })
-
-   })
+   const modifier_groups = (item.modifier_ids || []).map(gid => ({
+    id: gid,
+    name: gid,
+    min_select: 0,
+    max_select: 1,
+    modifiers: modifiersByGroup[gid] || []
+   }))
 
    return {
     id: item.id,
     name: item.item_name,
-    category_id: item.category_id || null,
-    image: item.image_url || null,
+    category_id: item.category_id,
+    category: categoryMap[item.category_id] || "",
+    image: item.image_url,
     price: Number(price),
-    modifier_groups: itemGroups
+    modifier_groups
    }
 
   })
