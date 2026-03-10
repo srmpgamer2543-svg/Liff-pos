@@ -55,6 +55,7 @@ height:0;
 /* TOPBAR */
 
 .topbar{
+.topbar{
 display:flex;
 align-items:center;
 justify-content:space-between;
@@ -67,11 +68,6 @@ z-index:20;
 transform:translateZ(0);
 will-change:transform;
 backface-visibility:hidden;
-
-/* เพิ่ม smooth animation */
-transition:
-transform .55s cubic-bezier(.22,.61,.36,1),
-top .55s cubic-bezier(.22,.61,.36,1);
 }
 
 .shop-name{
@@ -99,11 +95,6 @@ z-index:20;
 transform:translateZ(0);
 will-change:transform;
 backface-visibility:hidden;
-
-/* เพิ่ม smooth animation */
-transition:
-transform .55s cubic-bezier(.22,.61,.36,1),
-top .55s cubic-bezier(.22,.61,.36,1);
 }
 
 .cat-btn{
