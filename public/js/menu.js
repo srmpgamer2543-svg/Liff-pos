@@ -116,22 +116,17 @@ function renderMenu(list){
 
   `
 
-  /* iOS tap feedback */
-
-  card.addEventListener("touchstart",()=>{
-
-   card.style.transform="scale(.96)"
-
-  })
-
-  card.addEventListener("touchend",()=>{
-
-   card.style.transform="scale(1)"
-
-  })
-
   card.onclick = ()=>{
+
+   if(!item.modifier_groups || item.modifier_groups.length===0){
+
+    addToCart(item)
+    return
+
+   }
+
    openModifier(item)
+
   }
 
   grid.appendChild(card)
@@ -145,66 +140,45 @@ function openModifier(item){
  const overlay = document.getElementById("modifierOverlay")
  const modal = document.getElementById("modifierModal")
 
- modal.innerHTML = `
+ let html=`<h2>${cleanName(item.name)}</h2>`
 
- <h2>${cleanName(item.name)}</h2>
+ item.modifier_groups.forEach(group=>{
 
- <div class="mod-group">
+  html+=`<div class="mod-group">`
 
- <div class="mod-title">เลือกประเภท *</div>
+  html+=`<div class="mod-title">${group.name}</div>`
 
- <label class="mod-option">
- เย็น
- <input type="radio" name="temp" value="เย็น">
- </label>
+  group.modifiers.forEach(mod=>{
 
- <label class="mod-option">
- ปั่น
- <input type="radio" name="temp" value="ปั่น">
- </label>
+   const type = group.min_select === 1 && group.max_select === 1
+   ? "radio"
+   : "checkbox"
 
- </div>
+   html+=`
 
- <div class="mod-group">
+   <label class="mod-option">
 
- <div class="mod-title">ระดับความหวาน *</div>
+   ${mod.name}
 
- <label class="mod-option">
- 100%
- <input type="radio" name="sweet" value="100%">
- </label>
+   <input
+    type="${type}"
+    name="${group.id}"
+    value="${mod.name}"
+   >
 
- <label class="mod-option">
- 50%
- <input type="radio" name="sweet" value="50%">
- </label>
+   </label>
 
- <label class="mod-option">
- 25%
- <input type="radio" name="sweet" value="25%">
- </label>
+   `
 
- </div>
+  })
 
- <div class="mod-group">
+  html+=`</div>`
 
- <div class="mod-title">ท็อปปิ้ง</div>
+ })
 
- <label class="mod-option">
- ไข่มุก
- <input type="checkbox" value="ไข่มุก">
- </label>
+ html+=`<button class="confirm-btn">เพิ่มลงตะกร้า</button>`
 
- <label class="mod-option">
- วิปครีม
- <input type="checkbox" value="วิปครีม">
- </label>
-
- </div>
-
- <button class="confirm-btn">เพิ่มลงตะกร้า</button>
-
- `
+ modal.innerHTML = html
 
  overlay.classList.add("active")
 
@@ -216,26 +190,24 @@ function openModifier(item){
 
  setTimeout(()=>{
 
-  const btn = document.querySelector(".confirm-btn")
+  const btn=document.querySelector(".confirm-btn")
 
-  btn.onclick = ()=>{
+  btn.onclick=()=>{
 
-   const temp = document.querySelector("input[name=temp]:checked")
-   const sweet = document.querySelector("input[name=sweet]:checked")
+   const selections={}
 
-   if(!temp || !sweet){
-    alert("กรุณาเลือกตัวเลือก")
-    return
-   }
+   item.modifier_groups.forEach(group=>{
 
-   const toppings = [...document.querySelectorAll("input[type=checkbox]:checked")]
-   .map(i=>i.value)
+    const checked=[...document.querySelectorAll(`input[name="${group.id}"]:checked`)]
+    .map(i=>i.value)
+
+    selections[group.name]=checked
+
+   })
 
    addToCart({
     ...item,
-    type: temp.value,
-    sweet: sweet.value,
-    toppings: toppings
+    modifiers:selections
    })
 
    overlay.classList.remove("active")
