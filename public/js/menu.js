@@ -268,19 +268,29 @@ function openModifier(item){
 
     const checked=[...document.querySelectorAll(`input[name="${group.id}"]:checked`)]
 
-    if(checked.length < (group.min_select||0)){
+    const name = group.name || ""
+
+    const required =
+     name.includes("เย็น") ||
+     name.includes("ปั่น") ||
+     name.includes("ความหวาน")
+
+    if(required && checked.length===0){
+
      alert(`กรุณาเลือก ${group.name}`)
+
      valid=false
+
     }
 
     selections[group.name]=checked.map(i=>{
 
-     const name=i.dataset.name
+     const n=i.dataset.name
      const price=Number(i.dataset.price||0)
 
      extraPrice+=price
 
-     return name
+     return n
 
     })
 
