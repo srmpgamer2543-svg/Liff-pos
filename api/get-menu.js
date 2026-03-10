@@ -34,49 +34,28 @@ export default async function handler(req, res) {
    "items"
   )
 
-  const groups = await fetchAll(
-   "https://api.loyverse.com/v1.0/modifier_groups",
-   "modifier_groups"
-  )
-
   const modifiers = await fetchAll(
    "https://api.loyverse.com/v1.0/modifiers",
    "modifiers"
   )
 
-  const modifiersByGroup = {}
+  // สร้าง group จาก modifiers
+  const groupById = {}
 
   modifiers.forEach(m => {
 
-   const gid =
-    m.modifier_group_id ||
-    (Array.isArray(m.modifier_group_ids)
-      ? m.modifier_group_ids[0]
-      : null)
-
-   if (!gid) return
-
-   if (!modifiersByGroup[gid]) {
-    modifiersByGroup[gid] = []
-   }
-
-   modifiersByGroup[gid].push({
+   groupById[m.id] = {
     id: m.id,
     name: m.name,
-    price: Number(m.price || 0)
-   })
-
-  })
-
-  const groupById = {}
-
-  groups.forEach(g => {
-
-   groupById[g.id] = {
-    id: g.id,
-    name: g.name,
-    min_select: g.min_select ?? g.min_selected ?? 0,
-    max_select: g.max_select ?? g.max_selected ?? 0
+    min_select: 0,
+    max_select: 1,
+    modifiers: [
+     {
+      id: m.id,
+      name: m.name,
+      price: Number(m.price || 0)
+     }
+    ]
    }
 
   })
@@ -92,34 +71,15 @@ export default async function handler(req, res) {
 
    const itemGroups = []
 
-   // ใช้ modifier_ids เท่านั้น (ตามระบบของคุณ)
    const groupIds = item.modifier_ids || []
 
    groupIds.forEach(groupId => {
 
-    let group = groupById[groupId]
+    const group = groupById[groupId]
 
-    const mods = modifiersByGroup[groupId] || []
-
-    // ถ้า group ไม่มี → clone group จาก modifier
-    if (!group) {
-
-     group = {
-      id: groupId,
-      name: "Options",
-      min_select: 0,
-      max_select: mods.length
-     }
-
+    if (group) {
+     itemGroups.push(group)
     }
-
-    itemGroups.push({
-     id: group.id,
-     name: group.name,
-     min_select: group.min_select,
-     max_select: group.max_select,
-     modifiers: mods
-    })
 
    })
 
