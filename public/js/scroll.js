@@ -2,60 +2,61 @@ const logo = document.getElementById("logoArea")
 const topbar = document.querySelector(".topbar")
 const categories = document.getElementById("categories")
 
-let ticking = false
+let targetScroll = 0
+let currentScroll = 0
 
-window.addEventListener("scroll", () => {
+const spring = 0.08
+const friction = 0.82
 
- if (!ticking) {
+function animate() {
 
-  requestAnimationFrame(() => {
+ targetScroll = window.scrollY
 
-   const y = window.scrollY
+ const delta = targetScroll - currentScroll
+ currentScroll += delta * spring
 
-   /* ระยะ scroll สำหรับ animation */
-   const maxScroll = 320
-   const progress = Math.min(y / maxScroll, 1)
+ const y = currentScroll
 
-   /* ----------------------- */
-   /* LOGO COLLAPSE */
-   /* ----------------------- */
+ /* ระยะ scroll */
+ const maxScroll = 320
+ const progress = Math.min(y / maxScroll, 1)
 
-   const startHeight = 75
-   const endHeight = 18
+ /* ----------------------- */
+ /* LOGO (ไม่เปลี่ยน logic) */
+ /* ----------------------- */
 
-   const height =
-    startHeight - ((startHeight - endHeight) * progress)
+ const startHeight = 75
+ const endHeight = 18
 
-   logo.style.height = `${height}vh`
+ const height =
+  startHeight - ((startHeight - endHeight) * progress)
 
-   const logoTranslate = -390 * progress
-   const logoOpacity = 1 - progress
+ logo.style.height = `${height}vh`
 
-   logo.style.transform = `translateY(${logoTranslate}%)`
-   logo.style.opacity = logoOpacity
+ const logoTranslate = -390 * progress
+ const logoOpacity = 1 - progress
 
-   /* ----------------------- */
-   /* TOPBAR MOVE UP */
-   /* ----------------------- */
+ logo.style.transform = `translate3d(0,${logoTranslate}%,0)`
+ logo.style.opacity = logoOpacity
 
-   const topbarMove = -390 * progress
+ /* ----------------------- */
+ /* TOPBAR */
+ /* ----------------------- */
 
-   topbar.style.transform = `translateY(${topbarMove}px)`
+ const topbarMove = -390 * progress
 
-   /* ----------------------- */
-   /* CATEGORY MOVE UP */
-   /* ----------------------- */
+ topbar.style.transform = `translate3d(0,${topbarMove}px,0)`
 
-   const catMove = -390 * progress
+ /* ----------------------- */
+ /* CATEGORY */
+ /* ----------------------- */
 
-   categories.style.transform = `translateY(${catMove}px)`
+ const catMove = -390 * progress
 
-   ticking = false
+ categories.style.transform = `translate3d(0,${catMove}px,0)`
 
-  })
+ requestAnimationFrame(animate)
 
-  ticking = true
+}
 
- }
-
-}, { passive: true })
+animate()
