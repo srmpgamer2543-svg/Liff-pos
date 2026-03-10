@@ -26,7 +26,7 @@ function animate(){
  /* ------------------- */
 
  const startHeight = 400
- const endHeight = -30
+ const endHeight = -300
 
  const height =
  startHeight - ((startHeight - endHeight) * progress)
