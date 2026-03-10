@@ -48,7 +48,11 @@ export default async function handler(req, res) {
     name:item.item_name,
     category_id:item.category_id || null,
     image:item.image_url || null,
-    price:Number(price)
+    price:Number(price),
+
+    /* IMPORTANT */
+    modifier_groups:item.modifier_groups || []
+
    }
 
   })
