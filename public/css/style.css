@@ -253,3 +253,95 @@ cursor:pointer;
  transform: translateZ(0);
 
 }
+
+/* ========================= */
+/* iOS MODIFIER STYLE */
+/* ========================= */
+
+#modifierModal{
+position:absolute;
+bottom:0;
+left:0;
+width:100%;
+height:65%;
+background:white;
+border-radius:40px 40px 0 0;
+box-shadow:0 -20px 60px rgba(0,0,0,.25);
+transform:translateY(100%);
+transition:transform .45s cubic-bezier(.22,.61,.36,1);
+padding:30px;
+overflow:auto;
+}
+
+/* title */
+
+#modifierModal h2{
+font-size:46px;
+margin-bottom:25px;
+font-weight:700;
+}
+
+/* group */
+
+.mod-group{
+margin-bottom:35px;
+}
+
+/* section title */
+
+.mod-title{
+font-size:32px;
+font-weight:700;
+margin-bottom:16px;
+color:#444;
+}
+
+/* option row */
+
+.mod-option{
+display:flex;
+align-items:center;
+justify-content:space-between;
+background:#f7f7f7;
+padding:20px 24px;
+border-radius:18px;
+font-size:30px;
+margin-bottom:14px;
+cursor:pointer;
+}
+
+/* radio */
+
+.mod-option input[type=radio]{
+width:28px;
+height:28px;
+}
+
+/* checkbox */
+
+.mod-option input[type=checkbox]{
+width:28px;
+height:28px;
+}
+
+/* confirm button */
+
+.confirm-btn{
+width:100%;
+padding:28px;
+font-size:34px;
+font-weight:700;
+background:#22c55e;
+color:white;
+border:none;
+border-radius:22px;
+margin-top:20px;
+box-shadow:0 10px 25px rgba(0,0,0,.2);
+cursor:pointer;
+}
+
+/* iOS press effect */
+
+.confirm-btn:active{
+transform:scale(.97);
+}
