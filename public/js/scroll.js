@@ -12,34 +12,43 @@ window.addEventListener("scroll", () => {
 
    const y = window.scrollY
 
-   /* ระยะ scroll เพิ่มเพื่อให้ animation ลื่นขึ้น */
-   const progress = Math.min(y / 300, 1)
+   /* ระยะ scroll สำหรับ animation */
+   const maxScroll = 320
+   const progress = Math.min(y / maxScroll, 1)
 
-   /* LOGO */
+   /* ----------------------- */
+   /* LOGO COLLAPSE */
+   /* ----------------------- */
 
-   const logoTranslate = -60 * progress
-   const logoOpacity = 1 - (progress * 0.9)
+   const startHeight = 75
+   const endHeight = 18
+
+   const height =
+    startHeight - ((startHeight - endHeight) * progress)
+
+   logo.style.height = `${height}vh`
+
+   const logoTranslate = -80 * progress
+   const logoOpacity = 1 - progress
 
    logo.style.transform = `translateY(${logoTranslate}%)`
    logo.style.opacity = logoOpacity
 
-   /* ปรับความสูง logo ให้หดแบบ smooth */
+   /* ----------------------- */
+   /* TOPBAR MOVE UP */
+   /* ----------------------- */
 
-   const startHeight = 75
-   const endHeight = 25
-   const height = startHeight - ((startHeight - endHeight) * progress)
+   const topbarMove = -40 * progress
 
-   logo.style.height = `${height}vh`
+   topbar.style.transform = `translateY(${topbarMove}px)`
 
-   /* TOPBAR */
+   /* ----------------------- */
+   /* CATEGORY MOVE UP */
+   /* ----------------------- */
 
-   const topbarTranslate = -15 * progress
-   topbar.style.transform = `translateY(${topbarTranslate}px)`
+   const catMove = -35 * progress
 
-   /* CATEGORIES */
-
-   const catTranslate = -10 * progress
-   categories.style.transform = `translateY(${catTranslate}px)`
+   categories.style.transform = `translateY(${catMove}px)`
 
    ticking = false
 
