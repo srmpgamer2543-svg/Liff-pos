@@ -80,8 +80,8 @@ export default async function handler(req, res) {
     price = variant.stores[0].price
    }
 
-   const itemGroups = (item.modifier_groups || [])
-   .map(g => groupsWithMods.find(x => x.id === g.id))
+   const itemGroups = (item.modifier_group_ids || [])
+   .map(id => groupsWithMods.find(x => x.id === id))
    .filter(Boolean)
 
    return{
