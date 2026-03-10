@@ -7,11 +7,11 @@ const supabase = createClient(
 
 let lastSync = 0;
 
-async function runSync(req){
+function runSync(req){
 
   const now = Date.now()
 
-  if(now - lastSync < 15000){
+  if(now - lastSync < 1000){
     return
   }
 
@@ -24,9 +24,9 @@ async function runSync(req){
         ? `https://${process.env.VERCEL_URL}`
         : `https://${req.headers.host}`
 
-    await fetch(`${base}/api/sync-menu`,{
+    fetch(`${base}/api/sync-menu`,{
       method:"GET"
-    })
+    }).catch(()=>{})
 
   }catch(e){
 
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
   try {
 
-    await runSync(req)
+    runSync(req)
 
     const { data, error } = await supabase
       .from("items")
