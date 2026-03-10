@@ -22,7 +22,20 @@ function cleanName(name){
 
 }
 
-function sortByPrefix(a,b){
+function sortMenuItems(a,b){
+
+ const pa = getPrefixNumber(a.name)
+ const pb = getPrefixNumber(b.name)
+
+ if(pa !== pb){
+  return pa - pb
+ }
+
+ return a.name.localeCompare(b.name,"th")
+
+}
+
+function sortCategories(a,b){
 
  const pa = getPrefixNumber(a.name)
  const pb = getPrefixNumber(b.name)
@@ -43,7 +56,7 @@ export async function loadMenu(){
  const categoryContainer = document.getElementById("categories")
 
  menuData = menu
- categoriesData = [...categories].sort(sortByPrefix)
+ categoriesData = [...categories].sort(sortCategories)
 
  categoryContainer.innerHTML = ""
 
@@ -65,7 +78,7 @@ export async function loadMenu(){
     return pa - pb
    }
 
-   return sortByPrefix(a,b)
+   return sortMenuItems(a,b)
 
   })
 
@@ -75,9 +88,7 @@ export async function loadMenu(){
 
  categoryContainer.appendChild(allBtn)
 
- const sortedCategories=[...categoriesData]
-
- sortedCategories.forEach(cat=>{
+ categoriesData.forEach(cat=>{
 
   const btn = document.createElement("button")
   btn.className = "cat-btn"
@@ -88,7 +99,7 @@ export async function loadMenu(){
 
    const items = menuData
    .filter(i => String(i.category_id) === String(cat.id))
-   .sort(sortByPrefix)
+   .sort(sortMenuItems)
 
    renderMenu(items)
 
@@ -110,7 +121,7 @@ export async function loadMenu(){
    return pa - pb
   }
 
-  return sortByPrefix(a,b)
+  return sortMenuItems(a,b)
 
  })
 
