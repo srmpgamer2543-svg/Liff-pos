@@ -28,7 +28,7 @@ window.addEventListener("scroll", () => {
 
    logo.style.height = `${height}vh`
 
-   const logoTranslate = -90 * progress
+   const logoTranslate = -390 * progress
    const logoOpacity = 1 - progress
 
    logo.style.transform = `translateY(${logoTranslate}%)`
@@ -38,7 +38,7 @@ window.addEventListener("scroll", () => {
    /* TOPBAR MOVE UP */
    /* ----------------------- */
 
-   const topbarMove = -90 * progress
+   const topbarMove = -390 * progress
 
    topbar.style.transform = `translateY(${topbarMove}px)`
 
@@ -46,7 +46,7 @@ window.addEventListener("scroll", () => {
    /* CATEGORY MOVE UP */
    /* ----------------------- */
 
-   const catMove = -85 * progress
+   const catMove = -390 * progress
 
    categories.style.transform = `translateY(${catMove}px)`
 
