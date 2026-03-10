@@ -111,7 +111,7 @@ white-space:nowrap;
 
 #menu{
 display:grid;
-grid-template-columns:repeat(2,1fr);
+grid-template-columns:repeat(2,minmax(0,1fr));
 gap:14px;
 padding:14px;
 }
@@ -126,10 +126,7 @@ display:flex;
 flex-direction:column;
 cursor:pointer;
 transition:transform .18s ease;
-}
-
-.item:active{
-transform:scale(.96);
+min-width:0;
 }
 
 .item img{
@@ -140,15 +137,17 @@ object-fit:cover;
 
 .item-info{
 padding:14px;
+min-width:0;
 }
 
 .item-name{
-font-size:40px;
+font-size:20px;
 font-weight:700;
+word-break:break-word;
 }
 
 .item-price{
-font-size:35px;
+font-size:18px;
 color:#2e7d32;
 font-weight:700;
 }
