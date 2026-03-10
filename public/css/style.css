@@ -30,12 +30,10 @@ align-items:center;
 background:#ffffff;
 height:75vh;
 max-height:500px;
-
 transition:
 transform .55s cubic-bezier(.22,.61,.36,1),
 opacity .35s,
 height .35s;
-
 will-change:transform,opacity;
 transform:translateZ(0);
 overflow:hidden;
@@ -46,15 +44,8 @@ max-width:60%;
 height:auto;
 }
 
-.logo-hidden{
-transform:translateY(-120%);
-opacity:0;
-height:0;
-}
-
 /* TOPBAR */
 
-.topbar{
 .topbar{
 display:flex;
 align-items:center;
@@ -65,9 +56,6 @@ border-top:1px solid #eee;
 position:sticky;
 top:0;
 z-index:20;
-transform:translateZ(0);
-will-change:transform;
-backface-visibility:hidden;
 }
 
 .shop-name{
@@ -92,64 +80,82 @@ border-top:1px solid #eee;
 position:sticky;
 top:80px;
 z-index:20;
-transform:translateZ(0);
-will-change:transform;
-backface-visibility:hidden;
 }
 
 .cat-btn{
-padding:20px 40px;
+padding:18px 36px;
 border-radius:40px;
 background:#eee;
 cursor:pointer;
-font-size:30px;
+font-size:26px;
 font-weight:bold;
 white-space:nowrap;
+border:none;
 }
 
 /* MENU GRID */
 
 #menu{
 display:grid;
-grid-template-columns:repeat(2,minmax(0,1fr));
-gap:14px;
-padding:14px;
+grid-template-columns:repeat(2,1fr);
+gap:16px;
+padding:16px;
 }
+
+/* ITEM CARD */
 
 .item{
 background:white;
-border-radius:16px;
+border-radius:18px;
 overflow:hidden;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
+box-shadow:0 4px 12px rgba(0,0,0,0.12);
 position:relative;
+cursor:pointer;
 display:flex;
 flex-direction:column;
-cursor:pointer;
-transition:transform .18s ease;
-min-width:0;
 }
 
 .item img{
 width:100%;
-aspect-ratio:9/16;
+aspect-ratio:1/1;
 object-fit:cover;
 }
 
+/* INFO */
+
 .item-info{
 padding:14px;
-min-width:0;
 }
 
 .item-name{
-font-size:20px;
+font-size:22px;
 font-weight:700;
-word-break:break-word;
+margin-bottom:6px;
 }
 
 .item-price{
-font-size:18px;
-color:#2e7d32;
+font-size:22px;
 font-weight:700;
+color:#16a34a;
+}
+
+/* ADD BUTTON */
+
+.add-btn{
+position:absolute;
+right:10px;
+bottom:10px;
+width:42px;
+height:42px;
+border-radius:50%;
+background:#22c55e;
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+font-weight:bold;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
 }
 
 /* CART */
@@ -179,8 +185,6 @@ display:none;
 z-index:2000;
 }
 
-/* MODIFIER MODAL */
-
 #modifierModal{
 position:absolute;
 bottom:0;
@@ -194,7 +198,6 @@ transform:translateY(100%);
 transition:transform .55s cubic-bezier(.22,.61,.36,1);
 padding:20px;
 overflow:auto;
-will-change:transform;
 }
 
 #modifierOverlay.active{
