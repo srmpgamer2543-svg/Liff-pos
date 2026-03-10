@@ -44,10 +44,8 @@ export default async function handler(req, res) {
    "modifiers"
   )
 
-
-
   // =========================
-  // lookup modifier by id
+  // modifier lookup
   // =========================
 
   const modifierById = {}
@@ -63,29 +61,25 @@ export default async function handler(req, res) {
 
   })
 
-
   // =========================
-  // lookup group
+  // group lookup
   // =========================
 
-  const groupMap = {}
+  const groupById = {}
 
   groups.forEach(g => {
 
-   groupMap[g.id] = {
+   groupById[g.id] = {
     id: g.id,
     name: g.name,
     min_select: g.min_select ?? g.min_selected ?? 0,
-    max_select: g.max_select ?? g.max_selected ?? 0,
-    modifiers: []
+    max_select: g.max_select ?? g.max_selected ?? 0
    }
 
   })
 
-
-
   // =========================
-  // สร้าง MENU
+  // build menu
   // =========================
 
   const menu = allItems.map(item => {
@@ -105,23 +99,23 @@ export default async function handler(req, res) {
 
     if (!mod) return
 
-    const groupId = mod.group_id
+    const group = groupById[mod.group_id]
 
-    if (!groupMap[groupId]) return
+    if (!group) return
 
-    if (!itemGroups[groupId]) {
+    if (!itemGroups[group.id]) {
 
-     itemGroups[groupId] = {
-      id: groupMap[groupId].id,
-      name: groupMap[groupId].name,
-      min_select: groupMap[groupId].min_select,
-      max_select: groupMap[groupId].max_select,
+     itemGroups[group.id] = {
+      id: group.id,
+      name: group.name,
+      min_select: group.min_select,
+      max_select: group.max_select,
       modifiers: []
      }
 
     }
 
-    itemGroups[groupId].modifiers.push({
+    itemGroups[group.id].modifiers.push({
      id: mod.id,
      name: mod.name,
      price: mod.price
@@ -139,7 +133,6 @@ export default async function handler(req, res) {
    }
 
   })
-
 
   res.status(200).json(menu)
 
