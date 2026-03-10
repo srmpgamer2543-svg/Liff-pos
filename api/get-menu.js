@@ -49,43 +49,60 @@ export default async function handler(req, res) {
   )
 
 
-  // รวม modifiers เข้า group
-  const groupsWithMods = groups.map(g => {
 
-   const mods = modifiers
-    .filter(m => m.modifier_group_id === g.id)
-    .map(m => ({
-     id: m.id,
-     name: m.name,
-     price: Number(m.price || 0)
-    }))
+  // =========================
+  // สร้าง lookup modifiers ตาม group
+  // =========================
 
-   return {
+  const modifierMap = {}
+
+  modifiers.forEach(m => {
+
+   if (!modifierMap[m.modifier_group_id]) {
+    modifierMap[m.modifier_group_id] = []
+   }
+
+   modifierMap[m.modifier_group_id].push({
+    id: m.id,
+    name: m.name,
+    price: Number(m.price || 0)
+   })
+
+  })
+
+
+  // =========================
+  // สร้าง lookup group
+  // =========================
+
+  const groupMap = {}
+
+  groups.forEach(g => {
+
+   groupMap[g.id] = {
     id: g.id,
     name: g.name,
     min_select: g.min_select ?? g.min_selected ?? 0,
     max_select: g.max_select ?? g.max_selected ?? 0,
-    modifiers: mods
+    modifiers: modifierMap[g.id] || []
    }
 
   })
 
 
+
+  // =========================
+  // สร้าง MENU
+  // =========================
+
   const menu = allItems.map(item => {
 
    const variant = item.variants?.[0] || {}
 
-   let price = variant.default_price || 0
+   let price = variant.stores?.[0]?.price ?? variant.default_price ?? 0
 
-   if (variant.stores?.length) {
-    price = variant.stores[0].price
-   }
-
-   // 🔥 ใช้ modifier_ids
-   const groupIds = item.modifier_ids || []
-
-   const itemGroups = groupIds
-    .map(id => groupsWithMods.find(g => g.id === id))
+   const itemGroups = (item.modifier_ids || [])
+    .map(id => groupMap[id])
     .filter(Boolean)
 
    return {
@@ -99,6 +116,7 @@ export default async function handler(req, res) {
 
   })
 
+
   res.status(200).json(menu)
 
  } catch (err) {
@@ -109,4 +127,4 @@ export default async function handler(req, res) {
 
  }
 
-}
+    }
