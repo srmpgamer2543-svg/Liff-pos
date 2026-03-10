@@ -38,7 +38,7 @@ window.addEventListener("scroll", () => {
    /* TOPBAR MOVE UP */
    /* ----------------------- */
 
-   const topbarMove = -40 * progress
+   const topbarMove = -90 * progress
 
    topbar.style.transform = `translateY(${topbarMove}px)`
 
@@ -46,7 +46,7 @@ window.addEventListener("scroll", () => {
    /* CATEGORY MOVE UP */
    /* ----------------------- */
 
-   const catMove = -35 * progress
+   const catMove = -85 * progress
 
    categories.style.transform = `translateY(${catMove}px)`
 
