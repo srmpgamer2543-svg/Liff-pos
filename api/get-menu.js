@@ -1,67 +1,66 @@
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
-
-let lastSync = 0;
-
-function runSync(req){
-
-  const now = Date.now()
-
-  if(now - lastSync < 1000){
-    return
-  }
-
-  lastSync = now
-
-  try{
-
-    const base =
-      process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : `https://${req.headers.host}`
-
-    fetch(`${base}/api/sync-menu`,{
-      method:"GET"
-    }).catch(()=>{})
-
-  }catch(e){
-
-    console.log("sync error",e.message)
-
-  }
-
-}
-
 export default async function handler(req, res) {
 
-  try {
+ try{
 
-    runSync(req)
+  let allItems=[]
+  let cursor=null
 
-    const { data, error } = await supabase
-      .from("items")
-      .select(`
-        id,
-        name,
-        price,
-        image,
-        category_id
-      `)
+  while(true){
 
-    if (error) throw error
+   let url="https://api.loyverse.com/v1.0/items"
 
-    res.status(200).json(data)
+   if(cursor){
+    url+=`?cursor=${cursor}`
+   }
 
-  } catch (err) {
+   const response = await fetch(url,{
+    headers:{
+     Authorization:`Bearer ${process.env.LOYVERSE_API_KEY}`
+    }
+   })
 
-    res.status(500).json({
-      error: err.message
-    })
+   const data=await response.json()
+
+   if(data.items){
+    allItems=[...allItems,...data.items]
+   }
+
+   if(!data.cursor){
+    break
+   }
+
+   cursor=data.cursor
 
   }
+
+  const menu = allItems.map(item=>{
+
+   const variant = item.variants?.[0] || {}
+
+   let price = variant.default_price || 0
+
+   if(variant.stores && variant.stores.length>0){
+    price = variant.stores[0].price
+   }
+
+   return{
+    id:item.id,
+    name:item.item_name,
+    category_id:item.category_id || null,
+    image:item.image_url || null,
+    price:Number(price)
+   }
+
+  })
+
+  res.status(200).json(menu)
+
+ }catch(err){
+
+  res.status(500).json({
+   error:err.message
+  })
+
+ }
 
 }
