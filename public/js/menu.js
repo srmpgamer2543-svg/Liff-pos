@@ -98,14 +98,16 @@ function renderMenu(list){
 
   card.innerHTML = `
 
-   <img src="${item.image || ""}">
+   <div class="menu-image">
+    <img src="${item.image || ""}">
+   </div>
 
    <div class="menu-name">
-   ${cleanName(item.name)}
+    ${cleanName(item.name)}
    </div>
 
    <div class="menu-price">
-   ${item.price} ฿
+    ${item.price} ฿
    </div>
 
   `
