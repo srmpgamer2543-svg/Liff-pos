@@ -1,6 +1,10 @@
+document.addEventListener("DOMContentLoaded",()=>{
+
 const logo = document.getElementById("logoArea")
 const topbar = document.querySelector(".topbar")
 const categories = document.getElementById("categories")
+
+if(!logo) return
 
 let targetScroll = 0
 let currentScroll = 0
@@ -39,10 +43,14 @@ function animate(){
 
  const logoImg = logo.querySelector("img")
 
- const scale = 1 - (progress * 0.4)
+ if(logoImg){
 
- logoImg.style.transform = `scale(${scale})`
- logoImg.style.transition = "transform .25s"
+  const scale = 1 - (progress * 0.4)
+
+  logoImg.style.transform = `scale(${scale})`
+  logoImg.style.transition = "transform .25s"
+
+ }
 
  /* ------------------- */
  /* LOGO OPACITY */
@@ -56,3 +64,5 @@ function animate(){
 }
 
 animate()
+
+})
