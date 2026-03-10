@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 <meta charset="UTF-8">
 <title>POS</title>
@@ -12,31 +13,32 @@
 
 <div class="header-wrapper">
 
-<div class="logo-area" id="logoArea">
-<img src="/logo.png">
-</div>
+  <div class="logo-area" id="logoArea">
+    <img src="/logo.png">
+  </div>
 
-<div class="topbar">
-<div class="shop-name">🍞มีนม.ขนมปัง.🍞</div>
-<div class="cart-btn" onclick="toggleCart()">🛒</div>
-</div>
+  <div class="topbar">
+    <div class="shop-name">🍞มีนม.ขนมปัง.🍞</div>
+    <div class="cart-btn" onclick="toggleCart()">🛒</div>
+  </div>
 
-<div id="categories"></div>
+  <div id="categories"></div>
 
 </div>
 
 <div id="menuGrid" class="menu-grid"></div>
 
 <div id="cart">
-<h3>Cart</h3>
-<div id="cart-items"></div>
-<button onclick="checkout()">Checkout</button>
+  <h3>Cart</h3>
+  <div id="cart-items"></div>
+  <button onclick="checkout()">Checkout</button>
 </div>
 
 <div id="modifierOverlay">
-<div id="modifierModal"></div>
+  <div id="modifierModal"></div>
 </div>
 
+<!-- โหลด JS -->
 <script type="module" src="/js/app.js"></script>
 <script src="/js/scroll.js"></script>
 
