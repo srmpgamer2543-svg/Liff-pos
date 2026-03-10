@@ -44,10 +44,6 @@ export default async function handler(req, res) {
    "modifiers"
   )
 
-  // =========================
-  // modifiers lookup
-  // =========================
-
   const modifiersByGroup = {}
 
   modifiers.forEach(m => {
@@ -66,10 +62,6 @@ export default async function handler(req, res) {
 
   })
 
-  // =========================
-  // group lookup
-  // =========================
-
   const groupById = {}
 
   groups.forEach(g => {
@@ -83,10 +75,6 @@ export default async function handler(req, res) {
 
   })
 
-  // =========================
-  // build menu
-  // =========================
-
   const menu = allItems.map(item => {
 
    const variant = item.variants?.[0] || {}
@@ -98,11 +86,8 @@ export default async function handler(req, res) {
 
    const itemGroups = []
 
-   // รองรับ modifier_ids
-   const groupIds =
-    item.modifier_ids ||
-    item.modifier_group_ids ||
-    []
+   // ใช้ modifier_ids เป็น group id โดยตรง
+   const groupIds = item.modifier_ids || []
 
    groupIds.forEach(groupId => {
 
