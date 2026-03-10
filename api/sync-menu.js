@@ -60,11 +60,22 @@ export default async function handler(req, res) {
 
   })
 
-  const {error}=await supabase
-  .from("items")
-  .upsert(menu)
+  const loyverseIds = menu.map(i=>`"${i.id}"`).join(",")
 
-  if(error) throw error
+  // UPSERT (insert or update)
+  const {error:upsertError}=await supabase
+  .from("items")
+  .upsert(menu,{onConflict:"id"})
+
+  if(upsertError) throw upsertError
+
+  // DELETE items not in Loyverse
+  const {error:deleteError}=await supabase
+  .from("items")
+  .delete()
+  .not("id","in",`(${loyverseIds})`)
+
+  if(deleteError) throw deleteError
 
   res.status(200).json({
    success:true,
