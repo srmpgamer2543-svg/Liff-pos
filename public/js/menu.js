@@ -1,8 +1,8 @@
 import { addToCart } from "./cart.js"
 import { getMenu, getCategories } from "./api.js"
 
-let menuData=[]
-let categoriesData=[]
+let menuData = []
+let categoriesData = []
 
 function getPrefixNumber(name){
  if(!name) return 999
@@ -54,10 +54,8 @@ export async function loadMenu(){
  allBtn.innerText = "All"
 
  allBtn.onclick = ()=>{
-
-  const sorted=[...menuData].sort(sortMenuItems)
+  const sorted = [...menuData].sort(sortMenuItems)
   renderMenu(sorted)
-
  }
 
  categoryContainer.appendChild(allBtn)
@@ -66,16 +64,15 @@ export async function loadMenu(){
 
   const btn = document.createElement("button")
   btn.className = "cat-btn"
-
   btn.innerText = cleanName(cat.name)
 
   btn.onclick = ()=>{
 
-   const items = menuData
-   .filter(i => String(i.category_id) === String(cat.id))
+   const filtered = menuData
+   .filter(item => item.category_id === cat.id)
    .sort(sortMenuItems)
 
-   renderMenu(items)
+   renderMenu(filtered)
 
   }
 
@@ -83,39 +80,41 @@ export async function loadMenu(){
 
  })
 
- renderMenu(menuData.sort(sortMenuItems))
+ const sorted=[...menuData].sort(sortMenuItems)
+ renderMenu(sorted)
 
 }
 
 function renderMenu(list){
 
- const menuContainer = document.getElementById("menuGrid") // แก้ตรงนี้
- menuContainer.innerHTML = ""
+ const grid = document.getElementById("menuGrid")
+
+ grid.innerHTML = ""
 
  list.forEach(item=>{
 
   const card = document.createElement("div")
-  card.className = "item"
-
-  const clean = cleanName(item.name)
-  const image = item.image ? item.image : "/no-image.png"
+  card.className = "menu-item"
 
   card.innerHTML = `
 
-  <img src="${image}" onerror="this.src='/no-image.png'">
+   <img src="${item.image || ""}">
 
-  <div class="item-info">
-    <div class="item-name">${clean}</div>
-    <div class="item-price">${item.price} ฿</div>
-  </div>
+   <div class="menu-name">
+   ${cleanName(item.name)}
+   </div>
 
-  <div class="add-btn">+</div>
+   <div class="menu-price">
+   ${item.price} ฿
+   </div>
 
   `
 
-  card.onclick = ()=>openModifier(item)
+  card.onclick = ()=>{
+   openModifier(item)
+  }
 
-  menuContainer.appendChild(card)
+  grid.appendChild(card)
 
  })
 
@@ -135,11 +134,13 @@ function openModifier(item){
  <div class="mod-title">เลือกประเภท *</div>
 
  <label class="mod-option">
- <input type="radio" name="temp" value="เย็น"> เย็น
+ เย็น
+ <input type="radio" name="temp" value="เย็น">
  </label>
 
  <label class="mod-option">
- <input type="radio" name="temp" value="ปั่น"> ปั่น
+ ปั่น
+ <input type="radio" name="temp" value="ปั่น">
  </label>
 
  </div>
@@ -149,15 +150,18 @@ function openModifier(item){
  <div class="mod-title">ระดับความหวาน *</div>
 
  <label class="mod-option">
- <input type="radio" name="sweet" value="100%">100%
+ 100%
+ <input type="radio" name="sweet" value="100%">
  </label>
 
  <label class="mod-option">
- <input type="radio" name="sweet" value="50%">50%
+ 50%
+ <input type="radio" name="sweet" value="50%">
  </label>
 
  <label class="mod-option">
- <input type="radio" name="sweet" value="25%">25%
+ 25%
+ <input type="radio" name="sweet" value="25%">
  </label>
 
  </div>
@@ -167,11 +171,13 @@ function openModifier(item){
  <div class="mod-title">ท็อปปิ้ง</div>
 
  <label class="mod-option">
- <input type="checkbox" value="ไข่มุก">ไข่มุก
+ ไข่มุก
+ <input type="checkbox" value="ไข่มุก">
  </label>
 
  <label class="mod-option">
- <input type="checkbox" value="วิปครีม">วิปครีม
+ วิปครีม
+ <input type="checkbox" value="วิปครีม">
  </label>
 
  </div>
@@ -183,35 +189,33 @@ function openModifier(item){
  overlay.classList.add("active")
 
  overlay.onclick = (e)=>{
-
-  if(e.target===overlay){
+  if(e.target === overlay){
    overlay.classList.remove("active")
   }
-
  }
 
  setTimeout(()=>{
 
-  const btn=document.querySelector(".confirm-btn")
+  const btn = document.querySelector(".confirm-btn")
 
-  btn.onclick=()=>{
+  btn.onclick = ()=>{
 
-   const temp=document.querySelector("input[name=temp]:checked")
-   const sweet=document.querySelector("input[name=sweet]:checked")
+   const temp = document.querySelector("input[name=temp]:checked")
+   const sweet = document.querySelector("input[name=sweet]:checked")
 
-   if(!temp||!sweet){
+   if(!temp || !sweet){
     alert("กรุณาเลือกตัวเลือก")
     return
    }
 
-   const toppings=[...document.querySelectorAll("input[type=checkbox]:checked")]
+   const toppings = [...document.querySelectorAll("input[type=checkbox]:checked")]
    .map(i=>i.value)
 
    addToCart({
     ...item,
-    type:temp.value,
-    sweet:sweet.value,
-    toppings:toppings
+    type: temp.value,
+    sweet: sweet.value,
+    toppings: toppings
    })
 
    overlay.classList.remove("active")
