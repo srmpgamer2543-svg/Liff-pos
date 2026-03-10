@@ -42,7 +42,7 @@ export default async function handler(req, res) {
     return {
      id: group.id,
      name: group.name,
-     options: group.options || []
+     modifiers: group.options || []
     }
 
    }).filter(Boolean)
