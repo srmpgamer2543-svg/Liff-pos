@@ -247,9 +247,7 @@ function openModifier(item){
  overlay.onclick=(e)=>{
 
   if(e.target===overlay){
-
    overlay.classList.remove("active")
-
   }
 
  }
@@ -266,20 +264,16 @@ function openModifier(item){
 
    item.modifier_groups.forEach(group=>{
 
+    const min = group.min_select || 0
+
     const checked=[...document.querySelectorAll(`input[name="${group.id}"]:checked`)]
 
-    const name = group.name || ""
-
-    const required =
-     name.includes("เย็น") ||
-     name.includes("ปั่น") ||
-     name.includes("ความหวาน")
-
-    if(required && checked.length===0){
+    if(checked.length < min){
 
      alert(`กรุณาเลือก ${group.name}`)
 
      valid=false
+     return
 
     }
 
