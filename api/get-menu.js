@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   const modifiers = modifiersData.modifiers || []
   const categories = categoriesData.categories || []
 
-  // map modifier by id
+  // map modifiers
   const modifierMap = {}
   modifiers.forEach(m => {
    modifierMap[m.id] = m
@@ -31,39 +31,56 @@ export default async function handler(req, res) {
   // map category
   const categoryMap = {}
   categories.forEach(c => {
-   categoryMap[c.id] = c
+   categoryMap[c.id] = c.name
   })
 
   const menu = items.map(item => {
 
+   // price จาก variant
+   const price =
+    item.variants?.[0]?.stores?.[0]?.price ||
+    item.variants?.[0]?.default_price ||
+    0
+
+   // ดึง option จริงจาก modifier_ids
    const options = (item.modifier_ids || [])
     .map(id => modifierMap[id])
     .filter(Boolean)
-
-   return {
-
-    ...item,
-
-    category: categoryMap[item.category_id] || null,
-
-    options: options.map(o => ({
+    .map(o => ({
      id: o.id,
      name: o.name,
      price: Number(o.price || 0)
     }))
+
+   return {
+
+    id: item.id,
+    name: item.item_name,
+    category_id: item.category_id,
+    category: categoryMap[item.category_id] || "",
+    image: item.image_url || null,
+
+    price: Number(price),
+
+    options,
+
+    // เก็บ raw data ไว้ debug
+    loyverse_raw: item
 
    }
 
   })
 
   res.status(200).json({
-   source: "loyverse",
-   items: menu
+   success: true,
+   total: menu.length,
+   data: menu
   })
 
  } catch (err) {
 
   res.status(500).json({
+   success: false,
    error: err.message
   })
 
