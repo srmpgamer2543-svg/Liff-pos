@@ -6,10 +6,6 @@ export default async function handler(req, res) {
    Authorization:`Bearer ${process.env.LOYVERSE_API_KEY}`
   }
 
-  /* ------------------- */
-  /* LOAD ITEMS */
-  /* ------------------- */
-
   let allItems=[]
   let cursor=null
 
@@ -33,22 +29,13 @@ export default async function handler(req, res) {
 
   }
 
-  /* ------------------- */
-  /* LOAD MODIFIER GROUPS */
-  /* ------------------- */
-
   const groupRes = await fetch(
    "https://api.loyverse.com/v1.0/modifier_groups",
    {headers}
   )
 
   const groupData = await groupRes.json()
-
   const groups = groupData.modifier_groups || []
-
-  /* ------------------- */
-  /* LOAD MODIFIERS */
-  /* ------------------- */
 
   const modRes = await fetch(
    "https://api.loyverse.com/v1.0/modifiers",
@@ -56,12 +43,7 @@ export default async function handler(req, res) {
   )
 
   const modData = await modRes.json()
-
   const modifiers = modData.modifiers || []
-
-  /* ------------------- */
-  /* ATTACH MODIFIERS TO GROUP */
-  /* ------------------- */
 
   const groupsWithMods = groups.map(g=>{
 
@@ -70,17 +52,9 @@ export default async function handler(req, res) {
    .map(m=>({
 
     id:m.id,
-
-    /* modifier name */
     name:m.name,
-
-    /* modifier price */
     price:Number(m.price || 0),
-
-    /* price text เผื่อ UI */
-    price_text: Number(m.price || 0) > 0 
-      ? `+${Number(m.price)}`
-      : ""
+    price_text:Number(m.price||0)>0?`+${Number(m.price)}`:""
 
    }))
 
@@ -90,16 +64,11 @@ export default async function handler(req, res) {
     name:g.name,
     min_select:g.min_select,
     max_select:g.max_select,
-
     modifiers:mods
 
    }
 
   })
-
-  /* ------------------- */
-  /* BUILD MENU */
-  /* ------------------- */
 
   const menu = allItems.map(item=>{
 
@@ -111,8 +80,8 @@ export default async function handler(req, res) {
     price = variant.stores[0].price
    }
 
-   const itemGroups = (item.modifier_group_ids || [])
-   .map(id => groupsWithMods.find(g=>g.id === id))
+   const itemGroups = (item.modifier_groups || [])
+   .map(g => groupsWithMods.find(x => x.id === g.id))
    .filter(Boolean)
 
    return{
@@ -121,11 +90,7 @@ export default async function handler(req, res) {
     name:item.item_name,
     category_id:item.category_id || null,
     image:item.image_url || null,
-
-    /* base price */
     price:Number(price),
-
-    /* ส่ง modifier ไป frontend */
     modifier_groups:itemGroups
 
    }
