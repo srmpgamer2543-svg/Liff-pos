@@ -241,3 +241,13 @@ border:none;
 border-radius:12px;
 cursor:pointer;
 }
+
+#logoArea,
+.topbar,
+#categories,
+#menuGrid{
+
+ will-change: transform;
+ transform: translateZ(0);
+
+}
