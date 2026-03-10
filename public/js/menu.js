@@ -22,11 +22,7 @@ function cleanName(name){
 
 }
 
-function sortMenuItems(a,b){
-
- if(a.category_id !== b.category_id){
-  return (a.category_id || "").localeCompare(b.category_id || "")
- }
+function sortCategories(a,b){
 
  const pa = getPrefixNumber(a.name)
  const pb = getPrefixNumber(b.name)
@@ -39,7 +35,14 @@ function sortMenuItems(a,b){
 
 }
 
-function sortCategories(a,b){
+function sortMenuItems(a,b){
+
+ const catA = categoriesData.findIndex(c => c.id === a.category_id)
+ const catB = categoriesData.findIndex(c => c.id === b.category_id)
+
+ if(catA !== catB){
+  return catA - catB
+ }
 
  const pa = getPrefixNumber(a.name)
  const pb = getPrefixNumber(b.name)
@@ -89,17 +92,7 @@ export async function loadMenu(){
   btn.onclick=()=>{
 
    const filtered = menuData
-   .filter(item => {
-
-    if(item.category_id === cat.id) return true
-
-    if(Array.isArray(item.category_ids)){
-     return item.category_ids.includes(cat.id)
-    }
-
-    return false
-
-   })
+   .filter(item => item.category_id === cat.id)
    .sort(sortMenuItems)
 
    renderMenu(filtered)
