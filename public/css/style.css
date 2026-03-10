@@ -28,7 +28,7 @@ display:flex;
 justify-content:center;
 align-items:center;
 background:#ffffff;
-height:75vh;
+padding:40px 0;
 max-height:500px;
 transition:
 transform .55s cubic-bezier(.22,.61,.36,1),
@@ -95,7 +95,7 @@ border:none;
 
 /* MENU GRID */
 
-#menu{
+#menuGrid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:16px;
@@ -241,6 +241,8 @@ border:none;
 border-radius:12px;
 cursor:pointer;
 }
+
+/* GPU ACCELERATION */
 
 #logoArea,
 .topbar,
