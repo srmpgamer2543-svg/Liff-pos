@@ -89,7 +89,7 @@ export async function loadMenu(){
 
 function renderMenu(list){
 
- const menuContainer = document.getElementById("menu")
+ const menuContainer = document.getElementById("menuGrid") // แก้ตรงนี้
  menuContainer.innerHTML = ""
 
  list.forEach(item=>{
