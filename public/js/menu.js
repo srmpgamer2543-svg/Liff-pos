@@ -5,25 +5,17 @@ let menuData=[]
 let categoriesData=[]
 
 function getPrefixNumber(name){
-
  if(!name) return 999
-
  const match = name.trim().match(/^(\d{1,3})/)
-
  return match ? parseInt(match[1]) : 999
-
 }
 
 function cleanName(name){
-
  if(!name) return ""
-
  return name.replace(/^\d{1,3}[\s_\-\.\)\:]*?/,"")
-
 }
 
 function sortMenuItems(a,b){
-
  const pa = getPrefixNumber(a.name)
  const pb = getPrefixNumber(b.name)
 
@@ -32,11 +24,9 @@ function sortMenuItems(a,b){
  }
 
  return a.name.localeCompare(b.name,"th")
-
 }
 
 function sortCategories(a,b){
-
  const pa = getPrefixNumber(a.name)
  const pb = getPrefixNumber(b.name)
 
@@ -45,7 +35,6 @@ function sortCategories(a,b){
  }
 
  return a.name.localeCompare(b.name,"th")
-
 }
 
 export async function loadMenu(){
@@ -62,26 +51,11 @@ export async function loadMenu(){
 
  const allBtn = document.createElement("button")
  allBtn.className = "cat-btn"
- allBtn.innerText = "ทั้งหมด"
+ allBtn.innerText = "All"
 
  allBtn.onclick = ()=>{
 
-  const sorted=[...menuData].sort((a,b)=>{
-
-   const ca = categoriesData.find(c=>String(c.id)===String(a.category_id))
-   const cb = categoriesData.find(c=>String(c.id)===String(b.category_id))
-
-   const pa = getPrefixNumber(ca?.name)
-   const pb = getPrefixNumber(cb?.name)
-
-   if(pa !== pb){
-    return pa - pb
-   }
-
-   return sortMenuItems(a,b)
-
-  })
-
+  const sorted=[...menuData].sort(sortMenuItems)
   renderMenu(sorted)
 
  }
@@ -109,23 +83,7 @@ export async function loadMenu(){
 
  })
 
- const sorted=[...menuData].sort((a,b)=>{
-
-  const ca = categoriesData.find(c=>String(c.id)===String(a.category_id))
-  const cb = categoriesData.find(c=>String(c.id)===String(b.category_id))
-
-  const pa = getPrefixNumber(ca?.name)
-  const pb = getPrefixNumber(cb?.name)
-
-  if(pa !== pb){
-   return pa - pb
-  }
-
-  return sortMenuItems(a,b)
-
- })
-
- renderMenu(sorted)
+ renderMenu(menuData.sort(sortMenuItems))
 
 }
 
@@ -140,7 +98,6 @@ function renderMenu(list){
   card.className = "item"
 
   const clean = cleanName(item.name)
-
   const image = item.image ? item.image : "/no-image.png"
 
   card.innerHTML = `
@@ -148,9 +105,11 @@ function renderMenu(list){
   <img src="${image}" onerror="this.src='/no-image.png'">
 
   <div class="item-info">
-  <div class="item-name">${clean}</div>
-  <div class="item-price">${item.price} ฿</div>
+    <div class="item-name">${clean}</div>
+    <div class="item-price">${item.price} ฿</div>
   </div>
+
+  <div class="add-btn">+</div>
 
   `
 
@@ -176,13 +135,11 @@ function openModifier(item){
  <div class="mod-title">เลือกประเภท *</div>
 
  <label class="mod-option">
- <input type="radio" name="temp" value="เย็น">
- เย็น
+ <input type="radio" name="temp" value="เย็น"> เย็น
  </label>
 
  <label class="mod-option">
- <input type="radio" name="temp" value="ปั่น">
- ปั่น
+ <input type="radio" name="temp" value="ปั่น"> ปั่น
  </label>
 
  </div>
@@ -192,18 +149,15 @@ function openModifier(item){
  <div class="mod-title">ระดับความหวาน *</div>
 
  <label class="mod-option">
- <input type="radio" name="sweet" value="100%">
- 100%
+ <input type="radio" name="sweet" value="100%">100%
  </label>
 
  <label class="mod-option">
- <input type="radio" name="sweet" value="50%">
- 50%
+ <input type="radio" name="sweet" value="50%">50%
  </label>
 
  <label class="mod-option">
- <input type="radio" name="sweet" value="25%">
- 25%
+ <input type="radio" name="sweet" value="25%">25%
  </label>
 
  </div>
@@ -213,13 +167,11 @@ function openModifier(item){
  <div class="mod-title">ท็อปปิ้ง</div>
 
  <label class="mod-option">
- <input type="checkbox" value="ไข่มุก">
- ไข่มุก
+ <input type="checkbox" value="ไข่มุก">ไข่มุก
  </label>
 
  <label class="mod-option">
- <input type="checkbox" value="วิปครีม">
- วิปครีม
+ <input type="checkbox" value="วิปครีม">วิปครีม
  </label>
 
  </div>
@@ -248,7 +200,7 @@ function openModifier(item){
    const sweet=document.querySelector("input[name=sweet]:checked")
 
    if(!temp||!sweet){
-    alert("กรุณาเลือกตัวเลือกที่จำเป็น")
+    alert("กรุณาเลือกตัวเลือก")
     return
    }
 
