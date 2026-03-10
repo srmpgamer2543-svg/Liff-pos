@@ -223,7 +223,9 @@ function openModifier(item){
    <input
     type="${type}"
     name="${group.id}"
-    value="${mod.name}"
+    value="${mod.id}"
+    data-name="${mod.name}"
+    data-price="${mod.price}"
    >
 
    </label>
@@ -260,18 +262,27 @@ function openModifier(item){
 
    const selections={}
    let valid=true
+   let extraPrice=0
 
    item.modifier_groups.forEach(group=>{
 
     const checked=[...document.querySelectorAll(`input[name="${group.id}"]:checked`)]
-    .map(i=>i.value)
 
     if(checked.length < (group.min_select||0)){
      alert(`กรุณาเลือก ${group.name}`)
      valid=false
     }
 
-    selections[group.name]=checked
+    selections[group.name]=checked.map(i=>{
+
+     const name=i.dataset.name
+     const price=Number(i.dataset.price||0)
+
+     extraPrice+=price
+
+     return name
+
+    })
 
    })
 
@@ -280,6 +291,7 @@ function openModifier(item){
    addToCart({
 
     ...item,
+    price:item.price + extraPrice,
     modifiers:selections
 
    })
