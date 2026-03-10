@@ -8,7 +8,7 @@ function getPrefixNumber(name){
 
  if(!name) return 999
 
- const match = name.match(/^(\d+)/)
+ const match = name.trim().match(/^(\d{1,3})/)
 
  return match ? parseInt(match[1]) : 999
 
@@ -18,7 +18,7 @@ function cleanName(name){
 
  if(!name) return ""
 
- return name.replace(/^\d+[\s_\-\.\)\:]*?/,"")
+ return name.replace(/^\d{1,3}[\s_\-\.\)\:]*?/,"")
 
 }
 
@@ -31,7 +31,7 @@ function sortByPrefix(a,b){
   return pa - pb
  }
 
- return a.name.localeCompare(b.name)
+ return a.name.localeCompare(b.name,"th")
 
 }
 
