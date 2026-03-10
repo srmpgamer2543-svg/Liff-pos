@@ -1,3 +1,5 @@
+import fetch from "node-fetch"
+
 export default async function handler(req, res) {
 
  try {
@@ -9,10 +11,18 @@ export default async function handler(req, res) {
     headers: {
      "Authorization": `Bearer ${process.env.LOYVERSE_API_KEY}`,
      "Content-Type": "application/json"
-    },
-    cache: "no-store"
+    }
    }
   )
+
+  if(!response.ok){
+   const text = await response.text()
+   return res.status(response.status).json({
+    error:"Loyverse request failed",
+    status:response.status,
+    body:text
+   })
+  }
 
   const data = await response.json()
 
