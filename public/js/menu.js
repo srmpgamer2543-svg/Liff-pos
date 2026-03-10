@@ -141,9 +141,11 @@ function renderMenu(list){
 
   const clean = cleanName(item.name)
 
+  const image = item.image ? item.image : "/no-image.png"
+
   card.innerHTML = `
 
-  <img src="${item.image||""}">
+  <img src="${image}" onerror="this.src='/no-image.png'">
 
   <div class="item-info">
   <div class="item-name">${clean}</div>
