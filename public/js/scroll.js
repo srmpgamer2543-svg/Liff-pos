@@ -28,7 +28,7 @@ window.addEventListener("scroll", () => {
 
    logo.style.height = `${height}vh`
 
-   const logoTranslate = -80 * progress
+   const logoTranslate = -90 * progress
    const logoOpacity = 1 - progress
 
    logo.style.transform = `translateY(${logoTranslate}%)`
