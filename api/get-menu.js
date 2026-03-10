@@ -45,32 +45,6 @@ export default async function handler(req, res) {
   )
 
   /* ----------------------- */
-  /* MAP modifiers → group   */
-  /* ----------------------- */
-
-  const modifiersByGroup = {}
-
-  modifiers.forEach(m => {
-
-   const gid =
-    m.modifier_group_id ||
-    (Array.isArray(m.modifier_group_ids) ? m.modifier_group_ids[0] : null)
-
-   if (!gid) return
-
-   if (!modifiersByGroup[gid]) {
-    modifiersByGroup[gid] = []
-   }
-
-   modifiersByGroup[gid].push({
-    id: m.id,
-    name: m.name,
-    price: Number(m.price || 0)
-   })
-
-  })
-
-  /* ----------------------- */
   /* group info              */
   /* ----------------------- */
 
@@ -82,10 +56,59 @@ export default async function handler(req, res) {
     id: g.id,
     name: g.name,
     min_select: g.min_select ?? g.min_selected ?? 0,
-    max_select: g.max_select ?? g.max_selected ?? 0
+    max_select: g.max_select ?? g.max_selected ?? 0,
+    modifiers: []
    }
 
   })
+
+  /* ----------------------- */
+  /* map modifiers           */
+  /* ----------------------- */
+
+  modifiers.forEach(m => {
+
+   const gid =
+    m.modifier_group_id ||
+    (Array.isArray(m.modifier_group_ids) ? m.modifier_group_ids[0] : null)
+
+   if (gid && groupById[gid]) {
+
+    groupById[gid].modifiers.push({
+     id: m.id,
+     name: m.name,
+     price: Number(m.price || 0)
+    })
+
+   }
+
+  })
+
+  /* ----------------------- */
+  /* fallback: modifier = group */
+  /* ----------------------- */
+
+  if (groups.length === 0) {
+
+   modifiers.forEach(m => {
+
+    groupById[m.id] = {
+     id: m.id,
+     name: m.name,
+     min_select: 0,
+     max_select: 1,
+     modifiers: [
+      {
+       id: m.id,
+       name: m.name,
+       price: Number(m.price || 0)
+      }
+     ]
+    }
+
+   })
+
+  }
 
   /* ----------------------- */
   /* build menu              */
@@ -108,8 +131,6 @@ export default async function handler(req, res) {
 
     const group = groupById[groupId]
 
-    const mods = modifiersByGroup[groupId] || []
-
     if (!group) return
 
     itemGroups.push({
@@ -117,7 +138,7 @@ export default async function handler(req, res) {
      name: group.name,
      min_select: group.min_select,
      max_select: group.max_select,
-     modifiers: mods
+     modifiers: group.modifiers
     })
 
    })
