@@ -1,5 +1,3 @@
-import fetch from "node-fetch"
-
 export default async function handler(req, res) {
 
  try {
@@ -14,15 +12,6 @@ export default async function handler(req, res) {
     }
    }
   )
-
-  if(!response.ok){
-   const text = await response.text()
-   return res.status(response.status).json({
-    error:"Loyverse request failed",
-    status:response.status,
-    body:text
-   })
-  }
 
   const data = await response.json()
 
