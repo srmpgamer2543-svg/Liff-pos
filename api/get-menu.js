@@ -7,10 +7,10 @@ export default async function handler(req, res) {
 
   while(true){
 
-   let url="https://api.loyverse.com/v1.0/items"
+   let url="https://api.loyverse.com/v1.0/items?limit=250"
 
    if(cursor){
-    url+=`?cursor=${cursor}`
+    url+=`&cursor=${cursor}`
    }
 
    const response = await fetch(url,{
