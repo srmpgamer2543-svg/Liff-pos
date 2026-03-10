@@ -48,7 +48,13 @@ export default async function handler(req, res) {
 
   modifiers.forEach(m => {
 
-   const gid = m.modifier_group_id
+   const gid =
+    m.modifier_group_id ||
+    (Array.isArray(m.modifier_group_ids)
+      ? m.modifier_group_ids[0]
+      : null)
+
+   if (!gid) return
 
    if (!modifiersByGroup[gid]) {
     modifiersByGroup[gid] = []
@@ -86,6 +92,7 @@ export default async function handler(req, res) {
 
    const itemGroups = []
 
+   // ใช้ modifier_ids เท่านั้น (ตามระบบของคุณ)
    const groupIds = item.modifier_ids || []
 
    groupIds.forEach(groupId => {
