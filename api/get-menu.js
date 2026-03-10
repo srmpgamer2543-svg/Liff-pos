@@ -1,12 +1,9 @@
-import fetch from "node-fetch"
-
 export default async function handler(req, res) {
 
  try{
 
   const headers={
-   Authorization:`Bearer ${process.env.LOYVERSE_API_KEY}`,
-   "Content-Type":"application/json"
+   Authorization:`Bearer ${process.env.LOYVERSE_API_KEY}`
   }
 
   let allItems=[]
@@ -21,15 +18,6 @@ export default async function handler(req, res) {
    }
 
    const response = await fetch(url,{headers})
-
-   if(!response.ok){
-    const text = await response.text()
-    return res.status(response.status).json({
-     error:"Loyverse items request failed",
-     body:text
-    })
-   }
-
    const data = await response.json()
 
    if(data.items){
