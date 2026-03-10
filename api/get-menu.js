@@ -45,7 +45,7 @@ export default async function handler(req, res) {
   )
 
   // =========================
-  // modifier lookup
+  // modifiers lookup
   // =========================
 
   const modifiersByGroup = {}
@@ -98,7 +98,13 @@ export default async function handler(req, res) {
 
    const itemGroups = []
 
-   ;(item.modifier_group_ids || []).forEach(groupId => {
+   // รองรับ modifier_ids
+   const groupIds =
+    item.modifier_ids ||
+    item.modifier_group_ids ||
+    []
+
+   groupIds.forEach(groupId => {
 
     const group = groupById[groupId]
 
