@@ -48,16 +48,21 @@ export default async function handler(req, res) {
   // modifier lookup
   // =========================
 
-  const modifierById = {}
+  const modifiersByGroup = {}
 
   modifiers.forEach(m => {
 
-   modifierById[m.id] = {
+   const gid = m.modifier_group_id
+
+   if (!modifiersByGroup[gid]) {
+    modifiersByGroup[gid] = []
+   }
+
+   modifiersByGroup[gid].push({
     id: m.id,
     name: m.name,
-    price: Number(m.price || 0),
-    group_id: m.modifier_group_id
-   }
+    price: Number(m.price || 0)
+   })
 
   })
 
@@ -91,34 +96,22 @@ export default async function handler(req, res) {
     variant.default_price ??
     0
 
-   const itemGroups = {}
+   const itemGroups = []
 
-   ;(item.modifier_ids || []).forEach(modId => {
+   ;(item.modifier_group_ids || []).forEach(groupId => {
 
-    const mod = modifierById[modId]
-
-    if (!mod) return
-
-    const group = groupById[mod.group_id]
+    const group = groupById[groupId]
 
     if (!group) return
 
-    if (!itemGroups[group.id]) {
+    const mods = modifiersByGroup[groupId] || []
 
-     itemGroups[group.id] = {
-      id: group.id,
-      name: group.name,
-      min_select: group.min_select,
-      max_select: group.max_select,
-      modifiers: []
-     }
-
-    }
-
-    itemGroups[group.id].modifiers.push({
-     id: mod.id,
-     name: mod.name,
-     price: mod.price
+    itemGroups.push({
+     id: group.id,
+     name: group.name,
+     min_select: group.min_select,
+     max_select: group.max_select,
+     modifiers: mods
     })
 
    })
@@ -129,7 +122,7 @@ export default async function handler(req, res) {
     category_id: item.category_id || null,
     image: item.image_url || null,
     price: Number(price),
-    modifier_groups: Object.values(itemGroups)
+    modifier_groups: itemGroups
    }
 
   })
