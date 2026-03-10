@@ -6,6 +6,10 @@ export default async function handler(req, res) {
    Authorization:`Bearer ${process.env.LOYVERSE_API_KEY}`
   }
 
+  /* ------------------- */
+  /* LOAD ALL ITEMS */
+  /* ------------------- */
+
   let allItems=[]
   let cursor=null
 
@@ -29,6 +33,10 @@ export default async function handler(req, res) {
 
   }
 
+  /* ------------------- */
+  /* LOAD MODIFIER GROUPS */
+  /* ------------------- */
+
   const groupRes = await fetch(
    "https://api.loyverse.com/v1.0/modifier_groups",
    {headers}
@@ -36,6 +44,10 @@ export default async function handler(req, res) {
 
   const groupData = await groupRes.json()
   const groups = groupData.modifier_groups || []
+
+  /* ------------------- */
+  /* LOAD MODIFIERS */
+  /* ------------------- */
 
   const modRes = await fetch(
    "https://api.loyverse.com/v1.0/modifiers",
@@ -45,14 +57,17 @@ export default async function handler(req, res) {
   const modData = await modRes.json()
   const modifiers = modData.modifiers || []
 
+  /* ------------------- */
+  /* ATTACH MODIFIERS TO GROUP */
+  /* ------------------- */
+
   const groupsWithMods = groups.map(g=>{
 
    const mods = modifiers
    .filter(m=>m.modifier_group_id === g.id)
    .map(m=>({
 
-    id:m.id,
-    name:m.name,
+    ...m,
     price:Number(m.price || 0),
     price_text:Number(m.price||0)>0?`+${Number(m.price)}`:""
 
@@ -60,15 +75,16 @@ export default async function handler(req, res) {
 
    return{
 
-    id:g.id,
-    name:g.name,
-    min_select:g.min_select,
-    max_select:g.max_select,
+    ...g,
     modifiers:mods
 
    }
 
   })
+
+  /* ------------------- */
+  /* BUILD MENU (FULL LOYVERSE DATA) */
+  /* ------------------- */
 
   const menu = allItems.map(item=>{
 
@@ -86,11 +102,8 @@ export default async function handler(req, res) {
 
    return{
 
-    id:item.id,
-    name:item.item_name,
-    category_id:item.category_id || null,
-    image:item.image_url || null,
-    price:Number(price),
+    ...item,                 // ⭐ ส่งข้อมูล Loyverse ทั้งหมด
+    price:Number(price),     // ⭐ price shortcut
     modifier_groups:itemGroups
 
    }
