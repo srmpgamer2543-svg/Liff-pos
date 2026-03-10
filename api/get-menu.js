@@ -6,9 +6,6 @@ export default async function handler(req, res) {
    Authorization: `Bearer ${process.env.LOYVERSE_API_KEY}`
   }
 
-  // =========================
-  // FETCH FUNCTION (cursor pagination)
-  // =========================
   async function fetchAll(url, key) {
 
    let all = []
@@ -31,16 +28,11 @@ export default async function handler(req, res) {
 
     if (!data.cursor) break
     cursor = data.cursor
-
    }
 
    return all
   }
 
-
-  // =========================
-  // ดึงข้อมูลทั้งหมด
-  // =========================
   const allItems = await fetchAll(
    "https://api.loyverse.com/v1.0/items",
    "items"
@@ -57,68 +49,43 @@ export default async function handler(req, res) {
   )
 
 
-  // =========================
   // รวม modifiers เข้า group
-  // =========================
-  const groupsWithMods = groups.map(function (g) {
+  const groupsWithMods = groups.map(g => {
 
    const mods = modifiers
-    .filter(function (m) {
-     return m.modifier_group_id === g.id
-    })
-    .map(function (m) {
-     return {
-      id: m.id,
-      name: m.name,
-      price: Number(m.price || 0),
-      price_text: Number(m.price || 0) > 0
-       ? "+" + Number(m.price)
-       : ""
-     }
-    })
+    .filter(m => m.modifier_group_id === g.id)
+    .map(m => ({
+     id: m.id,
+     name: m.name,
+     price: Number(m.price || 0)
+    }))
 
    return {
     id: g.id,
     name: g.name,
-
-    // รองรับทั้ง 2 แบบของ Loyverse
     min_select: g.min_select ?? g.min_selected ?? 0,
     max_select: g.max_select ?? g.max_selected ?? 0,
-
     modifiers: mods
    }
 
   })
 
 
-  // =========================
-  // สร้าง MENU พร้อม modifier
-  // =========================
-  const menu = allItems.map(function (item) {
+  const menu = allItems.map(item => {
 
-   const variant =
-    item.variants && item.variants.length
-     ? item.variants[0]
-     : {}
+   const variant = item.variants?.[0] || {}
 
    let price = variant.default_price || 0
 
-   if (variant.stores && variant.stores.length > 0) {
+   if (variant.stores?.length) {
     price = variant.stores[0].price
    }
 
-   // รองรับทั้ง modifier_groups_ids และ modifier_ids
-   const groupIds =
-    item.modifier_groups_ids ||
-    item.modifier_ids ||
-    []
+   // 🔥 ใช้ modifier_ids
+   const groupIds = item.modifier_ids || []
 
    const itemGroups = groupIds
-    .map(function (id) {
-     return groupsWithMods.find(function (g) {
-      return g.id === id
-     })
-    })
+    .map(id => groupsWithMods.find(g => g.id === id))
     .filter(Boolean)
 
    return {
@@ -127,12 +94,10 @@ export default async function handler(req, res) {
     category_id: item.category_id || null,
     image: item.image_url || null,
     price: Number(price),
-
     modifier_groups: itemGroups
    }
 
   })
-
 
   res.status(200).json(menu)
 
