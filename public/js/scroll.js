@@ -1,6 +1,7 @@
 const logo = document.getElementById("logoArea")
 const topbar = document.querySelector(".topbar")
 const categories = document.getElementById("categories")
+const header = document.querySelector(".header-wrapper")
 
 let targetScroll = 0
 let currentScroll = 0
@@ -8,7 +9,6 @@ let currentScroll = 0
 /* iOS spring physics */
 
 const stiffness = 0.09
-const damping = 0.8
 
 function animate(){
 
@@ -23,6 +23,13 @@ function animate(){
  const progress = Math.min(y / maxScroll, 1)
 
  /* ------------------- */
+ /* HEADER HEIGHT */
+ /* ------------------- */
+
+ const headerHeight = header.offsetHeight
+ const move = -headerHeight * progress
+
+ /* ------------------- */
  /* LOGO */
  /* ------------------- */
 
@@ -34,25 +41,22 @@ function animate(){
 
  logo.style.height = `${height}vh`
 
- const logoTranslate = -390 * progress
  const logoOpacity = 1 - progress
 
- logo.style.transform = `translate3d(0,${logoTranslate}%,0)`
+ logo.style.transform = `translate3d(0,${move}px,0)`
  logo.style.opacity = logoOpacity
 
  /* ------------------- */
  /* TOPBAR */
  /* ------------------- */
 
- const topbarMove = -390 * progress
- topbar.style.transform = `translate3d(0,${topbarMove}px,0)`
+ topbar.style.transform = `translate3d(0,${move}px,0)`
 
  /* ------------------- */
  /* CATEGORIES */
  /* ------------------- */
 
- const catMove = -390 * progress
- categories.style.transform = `translate3d(0,${catMove}px,0)`
+ categories.style.transform = `translate3d(0,${move}px,0)`
 
  requestAnimationFrame(animate)
 
