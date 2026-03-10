@@ -86,16 +86,25 @@ export default async function handler(req, res) {
 
    const itemGroups = []
 
-   // ใช้ modifier_ids เป็น group id โดยตรง
    const groupIds = item.modifier_ids || []
 
    groupIds.forEach(groupId => {
 
-    const group = groupById[groupId]
-
-    if (!group) return
+    let group = groupById[groupId]
 
     const mods = modifiersByGroup[groupId] || []
+
+    // ถ้า group ไม่มี → clone group จาก modifier
+    if (!group) {
+
+     group = {
+      id: groupId,
+      name: "Options",
+      min_select: 0,
+      max_select: mods.length
+     }
+
+    }
 
     itemGroups.push({
      id: group.id,
