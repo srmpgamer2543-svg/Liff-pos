@@ -116,6 +116,20 @@ function renderMenu(list){
 
   `
 
+  /* iOS tap feedback */
+
+  card.addEventListener("touchstart",()=>{
+
+   card.style.transform="scale(.96)"
+
+  })
+
+  card.addEventListener("touchend",()=>{
+
+   card.style.transform="scale(1)"
+
+  })
+
   card.onclick = ()=>{
    openModifier(item)
   }
