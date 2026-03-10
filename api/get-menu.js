@@ -34,31 +34,62 @@ export default async function handler(req, res) {
    "items"
   )
 
+  const groups = await fetchAll(
+   "https://api.loyverse.com/v1.0/modifier_groups",
+   "modifier_groups"
+  )
+
   const modifiers = await fetchAll(
    "https://api.loyverse.com/v1.0/modifiers",
    "modifiers"
   )
 
-  // สร้าง group จาก modifiers
-  const groupById = {}
+  /* ----------------------- */
+  /* MAP modifiers → group   */
+  /* ----------------------- */
+
+  const modifiersByGroup = {}
 
   modifiers.forEach(m => {
 
-   groupById[m.id] = {
+   const gid =
+    m.modifier_group_id ||
+    (Array.isArray(m.modifier_group_ids) ? m.modifier_group_ids[0] : null)
+
+   if (!gid) return
+
+   if (!modifiersByGroup[gid]) {
+    modifiersByGroup[gid] = []
+   }
+
+   modifiersByGroup[gid].push({
     id: m.id,
     name: m.name,
-    min_select: 0,
-    max_select: 1,
-    modifiers: [
-     {
-      id: m.id,
-      name: m.name,
-      price: Number(m.price || 0)
-     }
-    ]
+    price: Number(m.price || 0)
+   })
+
+  })
+
+  /* ----------------------- */
+  /* group info              */
+  /* ----------------------- */
+
+  const groupById = {}
+
+  groups.forEach(g => {
+
+   groupById[g.id] = {
+    id: g.id,
+    name: g.name,
+    min_select: g.min_select ?? g.min_selected ?? 0,
+    max_select: g.max_select ?? g.max_selected ?? 0
    }
 
   })
+
+  /* ----------------------- */
+  /* build menu              */
+  /* ----------------------- */
 
   const menu = allItems.map(item => {
 
@@ -77,9 +108,17 @@ export default async function handler(req, res) {
 
     const group = groupById[groupId]
 
-    if (group) {
-     itemGroups.push(group)
-    }
+    const mods = modifiersByGroup[groupId] || []
+
+    if (!group) return
+
+    itemGroups.push({
+     id: group.id,
+     name: group.name,
+     min_select: group.min_select,
+     max_select: group.max_select,
+     modifiers: mods
+    })
 
    })
 
