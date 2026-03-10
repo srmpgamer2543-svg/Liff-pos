@@ -81,6 +81,7 @@ export default async function handler(req, res) {
    }
    console.log(item.item_name,item.modifier_ids)
 console.log(groupsWithMods.map(g=>g.id))
+   console.log("GROUP IDS:", groupsWithMods.map(g => g.id))
 
    const itemGroups = (item.modifier_ids || [])
   .map(id => groupsWithMods.find(x => x.id === id))
