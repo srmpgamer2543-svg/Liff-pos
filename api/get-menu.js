@@ -14,76 +14,54 @@ export default async function handler(req, res) {
    fetch(`${API}/categories`, { headers })
   ])
 
-  const itemsData = await itemsRes.json()
-  const modifiersData = await modifiersRes.json()
-  const categoriesData = await categoriesRes.json()
+  const items = (await itemsRes.json()).items || []
+  const modifiers = (await modifiersRes.json()).modifiers || []
+  const categories = (await categoriesRes.json()).categories || []
 
-  const items = itemsData.items || []
-  const modifiers = modifiersData.modifiers || []
-  const categories = categoriesData.categories || []
-
-  // map modifiers
   const modifierMap = {}
-  modifiers.forEach(m => {
+  modifiers.forEach(m=>{
    modifierMap[m.id] = m
   })
 
-  // map category
   const categoryMap = {}
-  categories.forEach(c => {
+  categories.forEach(c=>{
    categoryMap[c.id] = c.name
   })
 
-  const menu = items.map(item => {
+  const menu = items.map(item=>{
 
-   // price จาก variant
    const price =
     item.variants?.[0]?.stores?.[0]?.price ||
     item.variants?.[0]?.default_price ||
     0
 
-   // ดึง option จริงจาก modifier_ids
-   const options = (item.modifier_ids || [])
-    .map(id => modifierMap[id])
-    .filter(Boolean)
-    .map(o => ({
-     id: o.id,
-     name: o.name,
-     price: Number(o.price || 0)
-    }))
+   const modifierGroups = (item.modifier_ids || []).map(id=>{
+    const group = modifierMap[id]
+    if(!group) return null
+
+    return {
+     id: group.id,
+     name: group.name,
+     options: group.options || []
+    }
+
+   }).filter(Boolean)
 
    return {
-
-    id: item.id,
-    name: item.item_name,
-    category_id: item.category_id,
-    category: categoryMap[item.category_id] || "",
-    image: item.image_url || null,
-
-    price: Number(price),
-
-    options,
-
-    // เก็บ raw data ไว้ debug
-    loyverse_raw: item
-
+    id:item.id,
+    name:item.item_name,
+    category:categoryMap[item.category_id] || "",
+    price,
+    image:item.image_url,
+    modifier_groups:modifierGroups
    }
 
   })
 
-  res.status(200).json({
-   success: true,
-   total: menu.length,
-   data: menu
-  })
+  res.json(menu)
 
- } catch (err) {
-
-  res.status(500).json({
-   success: false,
-   error: err.message
-  })
-
+ } catch(err){
+  res.status(500).json({error:err.message})
  }
 
 }
