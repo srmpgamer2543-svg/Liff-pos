@@ -15,16 +15,12 @@ export default async function handler(req, res) {
 
     let fullUrl = url + "?limit=250"
 
-    if (cursor) {
-     fullUrl += "&cursor=" + cursor
-    }
+    if (cursor) fullUrl += "&cursor=" + cursor
 
     const response = await fetch(fullUrl, { headers })
     const data = await response.json()
 
-    if (data[key]) {
-     all = all.concat(data[key])
-    }
+    if (data[key]) all = all.concat(data[key])
 
     if (!data.cursor) break
     cursor = data.cursor
@@ -51,28 +47,25 @@ export default async function handler(req, res) {
 
 
   // =========================
-  // สร้าง lookup modifiers ตาม group
+  // lookup modifier by id
   // =========================
 
-  const modifierMap = {}
+  const modifierById = {}
 
   modifiers.forEach(m => {
 
-   if (!modifierMap[m.modifier_group_id]) {
-    modifierMap[m.modifier_group_id] = []
-   }
-
-   modifierMap[m.modifier_group_id].push({
+   modifierById[m.id] = {
     id: m.id,
     name: m.name,
-    price: Number(m.price || 0)
-   })
+    price: Number(m.price || 0),
+    group_id: m.modifier_group_id
+   }
 
   })
 
 
   // =========================
-  // สร้าง lookup group
+  // lookup group
   // =========================
 
   const groupMap = {}
@@ -84,7 +77,7 @@ export default async function handler(req, res) {
     name: g.name,
     min_select: g.min_select ?? g.min_selected ?? 0,
     max_select: g.max_select ?? g.max_selected ?? 0,
-    modifiers: modifierMap[g.id] || []
+    modifiers: []
    }
 
   })
@@ -99,11 +92,42 @@ export default async function handler(req, res) {
 
    const variant = item.variants?.[0] || {}
 
-   let price = variant.stores?.[0]?.price ?? variant.default_price ?? 0
+   const price =
+    variant.stores?.[0]?.price ??
+    variant.default_price ??
+    0
 
-   const itemGroups = (item.modifier_ids || [])
-    .map(id => groupMap[id])
-    .filter(Boolean)
+   const itemGroups = {}
+
+   ;(item.modifier_ids || []).forEach(modId => {
+
+    const mod = modifierById[modId]
+
+    if (!mod) return
+
+    const groupId = mod.group_id
+
+    if (!groupMap[groupId]) return
+
+    if (!itemGroups[groupId]) {
+
+     itemGroups[groupId] = {
+      id: groupMap[groupId].id,
+      name: groupMap[groupId].name,
+      min_select: groupMap[groupId].min_select,
+      max_select: groupMap[groupId].max_select,
+      modifiers: []
+     }
+
+    }
+
+    itemGroups[groupId].modifiers.push({
+     id: mod.id,
+     name: mod.name,
+     price: mod.price
+    })
+
+   })
 
    return {
     id: item.id,
@@ -111,7 +135,7 @@ export default async function handler(req, res) {
     category_id: item.category_id || null,
     image: item.image_url || null,
     price: Number(price),
-    modifier_groups: itemGroups
+    modifier_groups: Object.values(itemGroups)
    }
 
   })
@@ -127,4 +151,4 @@ export default async function handler(req, res) {
 
  }
 
-    }
+}
