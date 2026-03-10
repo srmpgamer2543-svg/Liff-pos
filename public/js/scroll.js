@@ -1,7 +1,6 @@
 const logo = document.getElementById("logoArea")
 const topbar = document.querySelector(".topbar")
 const categories = document.getElementById("categories")
-const header = document.querySelector(".header-wrapper")
 
 let targetScroll = 0
 let currentScroll = 0
@@ -23,40 +22,34 @@ function animate(){
  const progress = Math.min(y / maxScroll, 1)
 
  /* ------------------- */
- /* HEADER HEIGHT */
+ /* LOGO AREA HEIGHT */
  /* ------------------- */
 
- const headerHeight = header.offsetHeight
- const move = -headerHeight * progress
-
- /* ------------------- */
- /* LOGO */
- /* ------------------- */
-
- const startHeight = 75
- const endHeight = 18
+ const startHeight = 320
+ const endHeight = 90
 
  const height =
  startHeight - ((startHeight - endHeight) * progress)
 
- logo.style.height = `${height}vh`
+ logo.style.height = height + "px"
 
- const logoOpacity = 1 - progress
+ /* ------------------- */
+ /* LOGO IMAGE SCALE */
+ /* ------------------- */
 
- logo.style.transform = `translate3d(0,${move}px,0)`
+ const logoImg = logo.querySelector("img")
+
+ const scale = 1 - (progress * 0.4)
+
+ logoImg.style.transform = `scale(${scale})`
+ logoImg.style.transition = "transform .25s"
+
+ /* ------------------- */
+ /* LOGO OPACITY */
+ /* ------------------- */
+
+ const logoOpacity = 1 - progress * 0.5
  logo.style.opacity = logoOpacity
-
- /* ------------------- */
- /* TOPBAR */
- /* ------------------- */
-
- topbar.style.transform = `translate3d(0,${move}px,0)`
-
- /* ------------------- */
- /* CATEGORIES */
- /* ------------------- */
-
- categories.style.transform = `translate3d(0,${move}px,0)`
 
  requestAnimationFrame(animate)
 
