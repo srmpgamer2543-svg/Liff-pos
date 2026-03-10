@@ -51,7 +51,7 @@ export async function loadMenu(){
 
  const allBtn = document.createElement("button")
  allBtn.className = "cat-btn"
- allBtn.innerText = "All"
+ allBtn.innerText = "ทั้งหมด"
 
  allBtn.onclick = ()=>{
   const sorted = [...menuData].sort(sortMenuItems)
@@ -94,21 +94,25 @@ function renderMenu(list){
  list.forEach(item=>{
 
   const card = document.createElement("div")
-  card.className = "menu-item"
+  card.className = "item"
 
   card.innerHTML = `
 
-   <div class="menu-image">
-    <img src="${item.image || ""}">
+   <img src="${item.image || ""}">
+
+   <div class="item-info">
+
+     <div class="item-name">
+       ${cleanName(item.name)}
+     </div>
+
+     <div class="item-price">
+       ${item.price} ฿
+     </div>
+
    </div>
 
-   <div class="menu-name">
-    ${cleanName(item.name)}
-   </div>
-
-   <div class="menu-price">
-    ${item.price} ฿
-   </div>
+   <div class="add-btn">+</div>
 
   `
 
