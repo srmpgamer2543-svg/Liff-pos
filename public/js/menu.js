@@ -4,18 +4,38 @@ import { getMenu, getCategories } from "./api.js"
 let menuData = []
 let categoriesData = []
 
+/* ------------------- */
+/* PREFIX NUMBER */
+/* ------------------- */
+
 function getPrefixNumber(name){
+
  if(!name) return 999
- const match = name.trim().match(/^(\d{1,3})/)
+
+ const match = name.trim().match(/^(\d{1,3})[\s_\-\.\)\:]*/)
+
  return match ? parseInt(match[1]) : 999
+
 }
+
+/* ------------------- */
+/* CLEAN NAME */
+/* ------------------- */
 
 function cleanName(name){
+
  if(!name) return ""
+
  return name.replace(/^\d{1,3}[\s_\-\.\)\:]*?/,"")
+
 }
+
+/* ------------------- */
+/* SORT MENU */
+/* ------------------- */
 
 function sortMenuItems(a,b){
+
  const pa = getPrefixNumber(a.name)
  const pb = getPrefixNumber(b.name)
 
@@ -24,9 +44,15 @@ function sortMenuItems(a,b){
  }
 
  return a.name.localeCompare(b.name,"th")
+
 }
+
+/* ------------------- */
+/* SORT CATEGORY */
+/* ------------------- */
 
 function sortCategories(a,b){
+
  const pa = getPrefixNumber(a.name)
  const pb = getPrefixNumber(b.name)
 
@@ -35,7 +61,12 @@ function sortCategories(a,b){
  }
 
  return a.name.localeCompare(b.name,"th")
+
 }
+
+/* ------------------- */
+/* LOAD MENU */
+/* ------------------- */
 
 export async function loadMenu(){
 
@@ -45,31 +76,51 @@ export async function loadMenu(){
  const categoryContainer = document.getElementById("categories")
 
  menuData = menu
+
  categoriesData = [...categories].sort(sortCategories)
 
  categoryContainer.innerHTML = ""
+
+ /* ALL BUTTON */
 
  const allBtn = document.createElement("button")
  allBtn.className = "cat-btn"
  allBtn.innerText = "ทั้งหมด"
 
  allBtn.onclick = ()=>{
-  const sorted = [...menuData].sort(sortMenuItems)
+
+  const sorted=[...menuData].sort(sortMenuItems)
+
   renderMenu(sorted)
+
  }
 
  categoryContainer.appendChild(allBtn)
 
+ /* CATEGORY BUTTONS */
+
  categoriesData.forEach(cat=>{
 
-  const btn = document.createElement("button")
-  btn.className = "cat-btn"
-  btn.innerText = cleanName(cat.name)
+  const btn=document.createElement("button")
 
-  btn.onclick = ()=>{
+  btn.className="cat-btn"
+
+  btn.innerText=cleanName(cat.name)
+
+  btn.onclick=()=>{
 
    const filtered = menuData
-   .filter(item => item.category_id === cat.id)
+   .filter(item => {
+
+    if(item.category_id === cat.id) return true
+
+    if(Array.isArray(item.category_ids)){
+     return item.category_ids.includes(cat.id)
+    }
+
+    return false
+
+   })
    .sort(sortMenuItems)
 
    renderMenu(filtered)
@@ -81,22 +132,28 @@ export async function loadMenu(){
  })
 
  const sorted=[...menuData].sort(sortMenuItems)
+
  renderMenu(sorted)
 
 }
 
+/* ------------------- */
+/* RENDER MENU */
+/* ------------------- */
+
 function renderMenu(list){
 
- const grid = document.getElementById("menuGrid")
+ const grid=document.getElementById("menuGrid")
 
- grid.innerHTML = ""
+ grid.innerHTML=""
 
  list.forEach(item=>{
 
-  const card = document.createElement("div")
-  card.className = "item"
+  const card=document.createElement("div")
 
-  card.innerHTML = `
+  card.className="item"
+
+  card.innerHTML=`
 
    <img src="${item.image || ""}">
 
@@ -116,18 +173,43 @@ function renderMenu(list){
 
   `
 
-  card.onclick = ()=>{
+  /* CLICK ITEM */
+
+  card.addEventListener("click",(e)=>{
+
+   e.stopPropagation()
 
    if(!item.modifier_groups || item.modifier_groups.length===0){
 
     addToCart(item)
+
     return
 
    }
 
    openModifier(item)
 
-  }
+  })
+
+  /* CLICK + BUTTON */
+
+  const addBtn=card.querySelector(".add-btn")
+
+  addBtn.addEventListener("click",(e)=>{
+
+   e.stopPropagation()
+
+   if(!item.modifier_groups || item.modifier_groups.length===0){
+
+    addToCart(item)
+
+    return
+
+   }
+
+   openModifier(item)
+
+  })
 
   grid.appendChild(card)
 
@@ -135,10 +217,14 @@ function renderMenu(list){
 
 }
 
+/* ------------------- */
+/* MODIFIER MODAL */
+/* ------------------- */
+
 function openModifier(item){
 
- const overlay = document.getElementById("modifierOverlay")
- const modal = document.getElementById("modifierModal")
+ const overlay=document.getElementById("modifierOverlay")
+ const modal=document.getElementById("modifierModal")
 
  let html=`<h2>${cleanName(item.name)}</h2>`
 
@@ -150,7 +236,8 @@ function openModifier(item){
 
   group.modifiers.forEach(mod=>{
 
-   const type = group.min_select === 1 && group.max_select === 1
+   const type =
+   group.min_select===1 && group.max_select===1
    ? "radio"
    : "checkbox"
 
@@ -178,14 +265,18 @@ function openModifier(item){
 
  html+=`<button class="confirm-btn">เพิ่มลงตะกร้า</button>`
 
- modal.innerHTML = html
+ modal.innerHTML=html
 
  overlay.classList.add("active")
 
- overlay.onclick = (e)=>{
-  if(e.target === overlay){
+ overlay.onclick=(e)=>{
+
+  if(e.target===overlay){
+
    overlay.classList.remove("active")
+
   }
+
  }
 
  setTimeout(()=>{
@@ -206,8 +297,10 @@ function openModifier(item){
    })
 
    addToCart({
+
     ...item,
     modifiers:selections
+
    })
 
    overlay.classList.remove("active")
