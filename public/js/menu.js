@@ -2,11 +2,11 @@ import { getMenu, getCategories } from "./api.js"
 import { addToCart } from "./cart.js"
 
 let MENU = []
+let CATEGORY_ORDER = {}
 
 export async function loadMenu(){
 
  const grid = document.getElementById("menuGrid")
- const catBar = document.getElementById("categories")
 
  grid.innerHTML = "Loading..."
 
@@ -17,11 +17,45 @@ export async function loadMenu(){
    getCategories()
   ])
 
+  /* ---------------------- */
+  /* SORT CATEGORIES BY NUMBER */
+  /* ---------------------- */
+
+  categories.sort((a,b)=>{
+
+   const na = parseInt(a.name) || 999
+   const nb = parseInt(b.name) || 999
+
+   return na - nb
+
+  })
+
+  categories.forEach((c,i)=>{
+
+   CATEGORY_ORDER[c.id] = i
+
+  })
+
   MENU = menu
+
+  /* ---------------------- */
+  /* SORT MENU BY CATEGORY */
+  /* ---------------------- */
+
+  MENU.sort((a,b)=>{
+
+   const ca = CATEGORY_ORDER[a.category_id] ?? 999
+   const cb = CATEGORY_ORDER[b.category_id] ?? 999
+
+   if(ca !== cb) return ca - cb
+
+   return cleanName(a.name).localeCompare(cleanName(b.name))
+
+  })
 
   renderCategories(categories)
 
-  renderMenu(menu)
+  renderMenu(MENU)
 
  }catch(err){
 
@@ -55,7 +89,7 @@ function renderCategories(categories){
 
   btn.className = "cat-btn"
 
-  btn.innerText = cat.name
+  btn.innerText = cleanName(cat.name)
 
   btn.onclick = ()=>{
 
@@ -94,7 +128,7 @@ function renderMenu(list){
    <div class="item-info">
 
     <div class="item-name">
-    ${item.name}
+    ${cleanName(item.name)}
     </div>
 
     <div class="item-price">
@@ -303,6 +337,6 @@ function openModifier(item){
 
 function cleanName(name){
 
- return name.split("|")[0]
+ return name.replace(/^\d+/, "").trim()
 
 }
