@@ -453,11 +453,13 @@ display:none;
 
 .sticky-cart-left{
 font-weight:600;
+font-size:32px;
 }
 
 .sticky-cart-total{
 color:#ff5722;
 font-weight:700;
+font-size:32px;
 }
 
 #confirm-order-btn{
@@ -466,11 +468,13 @@ background:#ff5722;
 color:white;
 
 border:none;
-border-radius:10px;
+border-radius:14px;
 
-padding:10px 18px;
+padding:16px 24px;
 
-font-weight:600;
+font-weight:700;
+font-size:28px;
+
 cursor:pointer;
 
 }
