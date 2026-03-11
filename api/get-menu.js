@@ -14,54 +14,66 @@ export default async function handler(req, res) {
    fetch(`${API}/categories`, { headers })
   ])
 
-  const items = (await itemsRes.json()).items || []
-  const modifiers = (await modifiersRes.json()).modifiers || []
-  const categories = (await categoriesRes.json()).categories || []
+  const itemsData = await itemsRes.json()
+  const modifiersData = await modifiersRes.json()
+  const categoriesData = await categoriesRes.json()
 
+  const items = itemsData.items || []
+  const modifiers = modifiersData.modifiers || []
+  const categories = categoriesData.categories || []
+
+  // map modifier groups
   const modifierMap = {}
-  modifiers.forEach(m=>{
-   modifierMap[m.id] = m
+  modifiers.forEach(group=>{
+   modifierMap[group.id] = {
+    id: group.id,
+    name: group.name,
+    modifiers: group.modifiers || []
+   }
   })
 
+  // map categories
   const categoryMap = {}
-  categories.forEach(c=>{
-   categoryMap[c.id] = c.name
+  categories.forEach(cat=>{
+   categoryMap[cat.id] = cat.name
   })
 
   const menu = items.map(item=>{
 
+   // price
+   const variant = item.variants?.[0] || {}
+
    const price =
-    item.variants?.[0]?.stores?.[0]?.price ||
-    item.variants?.[0]?.default_price ||
+    variant?.stores?.[0]?.price ||
+    variant?.default_price ||
+    item.price ||
     0
 
-   const modifierGroups = (item.modifier_ids || []).map(id=>{
-    const group = modifierMap[id]
-    if(!group) return null
-
-    return {
-     id: group.id,
-     name: group.name,
-     modifiers: group.options || []
-    }
-
-   }).filter(Boolean)
+   // modifier groups
+   const modifierGroups = (item.modifier_ids || [])
+    .map(id => modifierMap[id])
+    .filter(Boolean)
 
    return {
-    id:item.id,
-    name:item.item_name,
-    category:categoryMap[item.category_id] || "",
-    price,
-    image:item.image_url,
-    modifier_groups:modifierGroups
+    id: item.id,
+    name: item.item_name,
+    category: categoryMap[item.category_id] || "",
+    price: Number(price),
+    image: item.image_url || null,
+    modifier_groups: modifierGroups
    }
 
   })
 
-  res.json(menu)
+  res.status(200).json(menu)
 
- } catch(err){
-  res.status(500).json({error:err.message})
+ } catch(err) {
+
+  res.status(500).json({
+   error: "Failed to fetch menu",
+   message: err.message
+  })
+
  }
 
 }
