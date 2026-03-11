@@ -10,6 +10,14 @@ overflow-x:hidden;
 -webkit-tap-highlight-color: transparent;
 }
 
+/* 🔒 ล็อก scroll ตอน modal เปิด */
+
+body.modal-open{
+overflow:hidden;
+height:100vh;
+touch-action:none;
+}
+
 /* HEADER */
 
 .header-wrapper{
@@ -203,6 +211,14 @@ display:none;
 opacity:0;
 z-index:2000;
 transition:opacity .35s ease;
+
+/* 🔒 กัน scroll ทะลุ */
+touch-action:none;
+}
+
+#modifierOverlay.active{
+display:block;
+opacity:1;
 }
 
 /* MODIFIER SHEET */
@@ -229,19 +245,12 @@ transition:transform .35s cubic-bezier(.22,.61,.36,1);
 padding:30px;
 padding-bottom:0px;
 
-/* จุดแก้ที่ 1 */
 overflow-y:auto;
 overflow-x:hidden;
 
-/* จุดแก้ที่ 2 */
 -webkit-overflow-scrolling:touch;
 
 will-change:transform;
-}
-
-#modifierOverlay.active{
-display:block;
-opacity:1;
 }
 
 #modifierOverlay.active #modifierModal{
@@ -390,4 +399,4 @@ font-size:28px;
 width:60px;
 height:60px;
 font-size:35px;
-  }
+}
