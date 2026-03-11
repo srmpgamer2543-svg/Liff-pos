@@ -160,6 +160,23 @@ function openModifier(item){
  const overlay=document.getElementById("modifierOverlay")
  const modal=document.getElementById("modifierModal")
 
+ /* เรียง modifier */
+
+ const sortedGroups=[...item.modifier_groups].sort((a,b)=>{
+
+  const order=(name)=>{
+
+   if(name.includes("เย็น")) return 1
+   if(name.includes("หวาน")) return 2
+   if(name.includes("ท็อป")||name.includes("ท้อป")) return 3
+
+   return 99
+  }
+
+  return order(a.name)-order(b.name)
+
+ })
+
  let html=`
 
  <div class="mod-header">
@@ -176,9 +193,13 @@ function openModifier(item){
 
  </div>
 
+ <div style="text-align:right;font-size:35px;margin-bottom:10px;">
+  <button id="clearMods">🗑️</button>
+ </div>
+
  `
 
- item.modifier_groups.forEach(group=>{
+ sortedGroups.forEach(group=>{
 
   const name = group.name
 
@@ -210,9 +231,9 @@ function openModifier(item){
 
       <div class="qty-box">
 
-        <button class="top-minus">-</button>
+        <button class="top-minus">➖</button>
         <span class="top-qty">0</span>
-        <button class="top-plus">+</button>
+        <button class="top-plus">➕</button>
 
       </div>
 
@@ -256,9 +277,9 @@ function openModifier(item){
 
   <div class="qty-box">
 
-   <button id="qtyMinus">-</button>
+   <button id="qtyMinus">➖</button>
    <span id="qtyNum">1</span>
-   <button id="qtyPlus">+</button>
+   <button id="qtyPlus">➕</button>
 
   </div>
 
@@ -284,24 +305,37 @@ function openModifier(item){
 
  setTimeout(()=>{
 
-  /* qty product */
+  /* highlight selected */
 
-  let qty=1
-  const qtyNum=document.getElementById("qtyNum")
+  document.querySelectorAll(".mod-option input").forEach(input=>{
 
-  document.getElementById("qtyMinus").onclick=()=>{
+   input.addEventListener("change",()=>{
 
-   if(qty>1){
-    qty--
-    qtyNum.innerText=qty
-   }
+    const group=input.closest(".mod-group")
 
-  }
+    group.querySelectorAll(".mod-option").forEach(o=>{
+     o.classList.remove("selected")
+    })
 
-  document.getElementById("qtyPlus").onclick=()=>{
+    input.closest(".mod-option").classList.add("selected")
 
-   qty++
-   qtyNum.innerText=qty
+   })
+
+  })
+
+  /* clear modifiers */
+
+  document.getElementById("clearMods").onclick=()=>{
+
+   document.querySelectorAll("input").forEach(i=>i.checked=false)
+
+   document.querySelectorAll(".top-qty").forEach(q=>{
+    q.innerText="0"
+   })
+
+   document.querySelectorAll(".mod-option").forEach(o=>{
+    o.classList.remove("selected")
+   })
 
   }
 
@@ -332,96 +366,6 @@ function openModifier(item){
    }
 
   })
-
-  const btn=document.querySelector(".confirm-btn")
-
-  btn.onclick=()=>{
-
-   const selections={}
-   let extraPrice=0
-
-   /* VALIDATE REQUIRED */
-
-   const groups=document.querySelectorAll(".mod-group")
-
-   for(const g of groups){
-
-    if(g.dataset.required==="true"){
-
-     const checked=g.querySelector("input:checked")
-
-     if(!checked){
-
-      alert("กรุณาเลือก "+g.dataset.group)
-
-      return
-
-     }
-
-    }
-
-   }
-
-   /* COLLECT RADIO + CHECKBOX */
-
-   item.modifier_groups.forEach(group=>{
-
-    const checked=[...document.querySelectorAll(`input[name="${group.id}"]:checked`)]
-
-    selections[group.name]=checked.map(i=>{
-
-     const n=i.dataset.name
-     const price=Number(i.dataset.price||0)
-
-     extraPrice+=price
-
-     return n
-
-    })
-
-   })
-
-   /* COLLECT TOPPING */
-
-   document.querySelectorAll(".topping").forEach(el=>{
-
-    const qty=parseInt(el.querySelector(".top-qty").innerText)
-
-    if(qty>0){
-
-     const name=el.dataset.name
-     const price=Number(el.dataset.price)
-
-     if(!selections["ท็อปปิ้ง"])
-      selections["ท็อปปิ้ง"]=[]
-
-     for(let i=0;i<qty;i++){
-
-      selections["ท็อปปิ้ง"].push(name)
-
-      extraPrice+=price
-
-     }
-
-    }
-
-   })
-
-   for(let i=0;i<qty;i++){
-
-    addToCart({
-
-     ...item,
-     price:item.price + extraPrice,
-     modifiers:selections
-
-    })
-
-   }
-
-   overlay.classList.remove("active")
-
-  }
 
  },50)
 
