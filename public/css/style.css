@@ -588,11 +588,11 @@ font-weight:600;
 
 .mod-trash-box{
  text-align:right;
- margin-bottom:10px;
+ margin-bottom:100px;
 }
 
 #clearMods{
- font-size:200px;
+ font-size:500px;
  border:none;
  background:none;
  cursor:pointer;
