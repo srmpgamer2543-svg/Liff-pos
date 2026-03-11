@@ -231,7 +231,7 @@ position:absolute;
 bottom:0;
 left:50%;
 width:94%;
-height:60%;
+height:75%;
 
 transform:translateX(-50%) translateY(60%);
 
@@ -478,6 +478,7 @@ font-size:40px;
 #confirm-order-btn{
 
 margin-left:auto;
+margin-right:20px;   /* เพิ่มบรรทัดนี้ */
 
 background:#ff5722;
 color:white;
