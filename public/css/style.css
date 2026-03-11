@@ -227,7 +227,7 @@ box-shadow:
 transition:transform .35s cubic-bezier(.22,.61,.36,1);
 
 padding:30px;
-padding-bottom:140px;
+padding-bottom:200px;
 
 overflow:auto;
 
@@ -368,7 +368,7 @@ display:none;
 position:fixed;
 bottom:0;
 left:0;
-width:100%;
+right:0;
 
 background:white;
 
@@ -376,11 +376,13 @@ display:flex;
 align-items:center;
 gap:20px;
 
-padding:15px 15px 25px 15px;
+padding:15px 20px calc(25px + env(safe-area-inset-bottom));
 
 border-top:1px solid #eee;
 
 z-index:3000;
+
+transform:translateZ(0);
 }
 
 .qty-box{
