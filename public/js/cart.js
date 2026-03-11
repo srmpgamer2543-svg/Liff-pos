@@ -1,50 +1,50 @@
-let cart=[]
+let CART=[]
+
+export { CART }
 
 export function addToCart(item){
 
-cart.push(item)
+ CART.push(item)
 
-updateCart()
+ updateCart()
 
-updateStickyCart(cart)
+ updateStickyCart(CART)
 
 }
 
 export function updateCart(){
 
-const el=document.getElementById("cart-items")
+ const el=document.getElementById("cart-items")
 
-el.innerHTML=""
+ el.innerHTML=""
 
-cart.forEach(i=>{
+ CART.forEach(i=>{
 
-const div=document.createElement("div")
+  const div=document.createElement("div")
 
-div.innerText=
-`${i.name}
-${i.type||""}
-${i.sweet||""}
-${i.toppings?.join(",")||""}
-- ${i.price}`
+  div.innerText=
+  `${i.name}
+  ${i.type||""}
+  ${i.sweet||""}
+  ${i.toppings?.join(",")||""}
+  - ${i.price}`
 
-el.appendChild(div)
+  el.appendChild(div)
 
-})
+ })
 
 }
 
 export function getCart(){
-
-return cart
-
+ return CART
 }
 
 export function clearCart(){
 
-cart=[]
+ CART=[]
 
-updateCart()
+ updateCart()
 
-updateStickyCart(cart)
+ updateStickyCart(CART)
 
 }
