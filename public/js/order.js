@@ -51,5 +51,8 @@ export function openOrderScreen(){
  document.getElementById("orderTotal").innerText = total
 
  screen.classList.remove("hidden")
+ document.getElementById("backToMenu").onclick = ()=>{
+ document.getElementById("orderScreen").classList.add("hidden")
+}
 
 }
