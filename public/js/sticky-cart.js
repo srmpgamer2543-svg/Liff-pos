@@ -10,6 +10,14 @@ export function updateStickyCart(cart){
 
  if(!cart || cart.length === 0){
   bar.classList.add("hidden")
+
+  // sync header cart
+  const headerCount = document.getElementById("headerCartCount")
+  if(headerCount) headerCount.textContent = 0
+
+  const headerTotal = document.getElementById("headerCartTotal")
+  if(headerTotal) headerTotal.textContent = 0
+
   return
  }
 
@@ -27,6 +35,18 @@ export function updateStickyCart(cart){
 
  count.textContent = totalItems
  price.textContent = totalPrice
+
+
+ // ⭐ sync รถเข็นด้านบน
+ const headerCount = document.getElementById("headerCartCount")
+ if(headerCount){
+  headerCount.textContent = totalItems
+ }
+
+ const headerTotal = document.getElementById("headerCartTotal")
+ if(headerTotal){
+  headerTotal.textContent = totalPrice
+ }
 
 }
 
