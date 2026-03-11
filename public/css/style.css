@@ -308,7 +308,7 @@ margin-left:10px;
 /* CONFIRM */
 
 .confirm-btn{
-width:50%;
+width:70%;
 padding:28px;
 font-size:40px;
 font-weight:700;
@@ -364,7 +364,7 @@ display:none;
 /* FOOTER */
 
 .mod-footer{
-position:sticky;
+position:absolute;
 bottom:0;
 left:0;
 width:100%;
@@ -383,7 +383,7 @@ border-top:1px solid #eee;
 .qty-box{
 display:flex;
 align-items:center;
-gap:10px;
+gap:20px;
 font-size:28px;
 }
 
