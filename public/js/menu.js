@@ -17,10 +17,6 @@ export async function loadMenu(){
    getCategories()
   ])
 
-  /* ---------------------- */
-  /* SORT CATEGORIES BY NUMBER */
-  /* ---------------------- */
-
   categories.sort((a,b)=>{
 
    const na = parseInt(a.name) || 999
@@ -37,10 +33,6 @@ export async function loadMenu(){
   })
 
   MENU = menu
-
-  /* ---------------------- */
-  /* SORT MENU BY CATEGORY */
-  /* ---------------------- */
 
   MENU.sort((a,b)=>{
 
@@ -180,10 +172,6 @@ function openModifier(item){
    ${cleanName(item.name)}
    </div>
 
-   <div class="mod-product-sub">
-   ${item.name || ""}
-   </div>
-
   </div>
 
  </div>
@@ -192,42 +180,69 @@ function openModifier(item){
 
  item.modifier_groups.forEach(group=>{
 
-  const max = group.modifiers.length
+  const name = group.name
 
-  html+=`<div class="mod-group">`
+  const isRequired =
+   name.includes("เย็น") ||
+   name.includes("ความหวาน")
 
-  html+=`
-  <div class="mod-title">
-  ${group.name}
-  <div class="mod-rule">
-  เลือกสูงสุด ${max} ข้อ
-  </div>
-  </div>
-  `
+  const isRadio = isRequired
+
+  const isTopping =
+   name.includes("ท็อป") ||
+   name.includes("ท้อป")
+
+  html+=`<div class="mod-group" data-required="${isRequired}" data-group="${name}">`
+
+  html+=`<div class="mod-title">${name}</div>`
 
   group.modifiers.forEach(mod=>{
 
-   html+=`
+   if(isTopping){
 
-   <label class="mod-option">
+    html+=`
 
-    <span>${mod.name}</span>
+    <div class="mod-option topping" data-id="${mod.id}" data-price="${mod.price}" data-name="${mod.name}">
 
-    <span class="mod-price">
-    ฿${mod.price || 0}
-    </span>
+      <span>${mod.name}</span>
 
-    <input
-     type="checkbox"
-     name="${group.id}"
-     value="${mod.id}"
-     data-name="${mod.name}"
-     data-price="${mod.price}"
-    >
+      <span class="mod-price">฿${mod.price || 0}</span>
 
-   </label>
+      <div class="qty-box">
 
-   `
+        <button class="top-minus">-</button>
+        <span class="top-qty">0</span>
+        <button class="top-plus">+</button>
+
+      </div>
+
+    </div>
+
+    `
+
+   }else{
+
+    html+=`
+
+    <label class="mod-option">
+
+     <span>${mod.name}</span>
+
+     <span class="mod-price">฿${mod.price || 0}</span>
+
+     <input
+      type="${isRadio ? "radio" : "checkbox"}"
+      name="${group.id}"
+      value="${mod.id}"
+      data-name="${mod.name}"
+      data-price="${mod.price}"
+     >
+
+    </label>
+
+    `
+
+   }
 
   })
 
@@ -269,8 +284,9 @@ function openModifier(item){
 
  setTimeout(()=>{
 
-  let qty=1
+  /* qty product */
 
+  let qty=1
   const qtyNum=document.getElementById("qtyNum")
 
   document.getElementById("qtyMinus").onclick=()=>{
@@ -289,12 +305,64 @@ function openModifier(item){
 
   }
 
+  /* topping qty */
+
+  document.querySelectorAll(".topping").forEach(el=>{
+
+   const minus=el.querySelector(".top-minus")
+   const plus=el.querySelector(".top-plus")
+   const num=el.querySelector(".top-qty")
+
+   let q=0
+
+   minus.onclick=()=>{
+
+    if(q>0){
+     q--
+     num.innerText=q
+    }
+
+   }
+
+   plus.onclick=()=>{
+
+    q++
+    num.innerText=q
+
+   }
+
+  })
+
   const btn=document.querySelector(".confirm-btn")
 
   btn.onclick=()=>{
 
    const selections={}
    let extraPrice=0
+
+   /* VALIDATE REQUIRED */
+
+   const groups=document.querySelectorAll(".mod-group")
+
+   for(const g of groups){
+
+    if(g.dataset.required==="true"){
+
+     const checked=g.querySelector("input:checked")
+
+     if(!checked){
+
+      alert("กรุณาเลือก "+g.dataset.group)
+
+      return
+
+     }
+
+    }
+
+   }
+
+   /* COLLECT RADIO + CHECKBOX */
 
    item.modifier_groups.forEach(group=>{
 
@@ -310,6 +378,32 @@ function openModifier(item){
      return n
 
     })
+
+   })
+
+   /* COLLECT TOPPING */
+
+   document.querySelectorAll(".topping").forEach(el=>{
+
+    const qty=parseInt(el.querySelector(".top-qty").innerText)
+
+    if(qty>0){
+
+     const name=el.dataset.name
+     const price=Number(el.dataset.price)
+
+     if(!selections["ท็อปปิ้ง"])
+      selections["ท็อปปิ้ง"]=[]
+
+     for(let i=0;i<qty;i++){
+
+      selections["ท็อปปิ้ง"].push(name)
+
+      extraPrice+=price
+
+     }
+
+    }
 
    })
 
