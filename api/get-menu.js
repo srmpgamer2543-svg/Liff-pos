@@ -13,35 +13,33 @@ export default async function handler(req, res) {
   ])
 
   const items = (await itemsRes.json()).items || []
-  const modifiers = (await modifiersRes.json()).modifiers || []
+  const modifierLists = (await modifiersRes.json()).modifiers || []
   const categories = (await categoriesRes.json()).categories || []
 
-  // map category
+  // category map
   const categoryMap = {}
   categories.forEach(c=>{
    categoryMap[c.id] = c.name
   })
 
-  // group modifiers by modifier_list_id
-  const modifierGroupMap = {}
+  // modifier group map
+  const modifierMap = {}
 
-  modifiers.forEach(m => {
+  modifierLists.forEach(group=>{
 
-   const groupId = m.modifier_list_id
-
-   if(!modifierGroupMap[groupId]){
-    modifierGroupMap[groupId] = []
+   modifierMap[group.id] = {
+    id: group.id,
+    name: group.name,
+    modifiers: (group.modifier_options || []).map(o=>({
+     id: o.id,
+     name: o.name,
+     price: o.price || 0
+    }))
    }
-
-   modifierGroupMap[groupId].push({
-    id: m.id,
-    name: m.name,
-    price: m.price || 0
-   })
 
   })
 
-  const menu = items.map(item => {
+  const menu = items.map(item=>{
 
    const variant = item.variants?.[0] || {}
 
@@ -50,10 +48,9 @@ export default async function handler(req, res) {
     variant?.default_price ||
     0
 
-   const groups = (item.modifier_ids || []).map(id => ({
-    id,
-    modifiers: modifierGroupMap[id] || []
-   }))
+   const modifierGroups = (item.modifier_ids || [])
+    .map(id=>modifierMap[id])
+    .filter(Boolean)
 
    return {
     id: item.id,
@@ -61,7 +58,7 @@ export default async function handler(req, res) {
     category: categoryMap[item.category_id] || "",
     price: Number(price),
     image: item.image_url || null,
-    modifier_groups: groups
+    modifier_groups: modifierGroups
    }
 
   })
@@ -70,9 +67,7 @@ export default async function handler(req, res) {
 
  } catch(err) {
 
-  res.status(500).json({
-   error: err.message
-  })
+  res.status(500).json({ error: err.message })
 
  }
 
