@@ -237,7 +237,7 @@ box-shadow:
 transform:translateY(110%);
 
 transition:
-transform .65s cubic-bezier(.22,.61,.36,1);
+transform 3.25s cubic-bezier(.22,.61,.36,1);
 
 padding:30px;
 
