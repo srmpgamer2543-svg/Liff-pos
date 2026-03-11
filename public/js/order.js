@@ -1,31 +1,55 @@
-import { getCart, clearCart } from "./cart.js"
+import { CART } from "./cart.js"
 
-export async function checkout(){
+export function openOrderScreen(){
 
-const cart=getCart()
+ const screen = document.getElementById("orderScreen")
+ const list = document.getElementById("orderList")
 
-if(cart.length===0){
+ list.innerHTML = ""
 
-alert("cart empty")
+ let total = 0
 
-return
+ CART.forEach(item=>{
 
-}
+  const div = document.createElement("div")
+  div.className = "order-item"
 
-await fetch("/api/create-order",{
+  let mods = ""
 
-method:"POST",
+  if(item.modifiers){
 
-headers:{
-"Content-Type":"application/json"
-},
+   Object.values(item.modifiers).forEach(arr=>{
 
-body:JSON.stringify({items:cart})
+    arr.forEach(m=>{
+     mods += `<div class="order-mod">- ${m}</div>`
+    })
 
-})
+   })
 
-clearCart()
+  }
 
-alert("order sent")
+  div.innerHTML = `
+
+   <div class="order-name">
+    ${item.name}
+   </div>
+
+   ${mods}
+
+   <div>
+    ฿${item.price}
+   </div>
+
+  `
+
+  total += item.price
+
+  list.appendChild(div)
+
+ })
+
+ document.getElementById("orderTotal").innerText = total
+
+ screen.classList.remove("hidden")
 
 }
