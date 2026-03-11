@@ -227,7 +227,7 @@ box-shadow:
 transition:transform .35s cubic-bezier(.22,.61,.36,1);
 
 padding:30px;
-padding-bottom:200px;
+padding-bottom:40px;
 
 overflow:auto;
 
@@ -365,10 +365,8 @@ display:none;
 /* FOOTER */
 
 .mod-footer{
-position:fixed;
+position:sticky;
 bottom:0;
-left:0;
-right:0;
 
 background:white;
 
@@ -376,13 +374,11 @@ display:flex;
 align-items:center;
 gap:20px;
 
-padding:15px 20px calc(25px + env(safe-area-inset-bottom));
+padding:15px 20px;
 
 border-top:1px solid #eee;
 
-z-index:3000;
-
-transform:translateZ(0);
+z-index:10;
 }
 
 .qty-box{
