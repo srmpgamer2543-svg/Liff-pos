@@ -160,7 +160,8 @@ function openModifier(item){
  const overlay=document.getElementById("modifierOverlay")
  const modal=document.getElementById("modifierModal")
 
- /* เรียง modifier */
+ /* reset scroll position ทุกครั้ง */
+ modal.scrollTop = 0
 
  const sortedGroups=[...item.modifier_groups].sort((a,b)=>{
 
@@ -305,25 +306,36 @@ function openModifier(item){
 
  setTimeout(()=>{
 
-  /* highlight selected */
+  const btn=document.querySelector(".confirm-btn")
 
-  document.querySelectorAll(".mod-option input").forEach(input=>{
+  function updateTotalPrice(){
 
-   input.addEventListener("change",()=>{
+   let extraPrice=0
 
-    const group=input.closest(".mod-group")
+   document.querySelectorAll(".mod-option input:checked").forEach(i=>{
+    extraPrice+=Number(i.dataset.price||0)
+   })
 
-    group.querySelectorAll(".mod-option").forEach(o=>{
-     o.classList.remove("selected")
-    })
+   document.querySelectorAll(".topping").forEach(el=>{
 
-    input.closest(".mod-option").classList.add("selected")
+    const qty=parseInt(el.querySelector(".top-qty").innerText)
+    const price=Number(el.dataset.price)
+
+    extraPrice+=qty*price
 
    })
 
-  })
+   const qty=parseInt(document.getElementById("qtyNum").innerText)
 
-  /* clear modifiers */
+   const total=(item.price+extraPrice)*qty
+
+   btn.innerText=`ใส่ตะกร้า ฿${total}`
+
+  }
+
+  document.querySelectorAll(".mod-option input").forEach(input=>{
+   input.addEventListener("change",updateTotalPrice)
+  })
 
   document.getElementById("clearMods").onclick=()=>{
 
@@ -337,9 +349,9 @@ function openModifier(item){
     o.classList.remove("selected")
    })
 
-  }
+   updateTotalPrice()
 
-  /* qty product */
+  }
 
   let qty=1
   const qtyNum=document.getElementById("qtyNum")
@@ -349,6 +361,7 @@ function openModifier(item){
    if(qty>1){
     qty--
     qtyNum.innerText=qty
+    updateTotalPrice()
    }
 
   }
@@ -357,10 +370,9 @@ function openModifier(item){
 
    qty++
    qtyNum.innerText=qty
+   updateTotalPrice()
 
   }
-
-  /* topping qty */
 
   document.querySelectorAll(".topping").forEach(el=>{
 
@@ -375,6 +387,7 @@ function openModifier(item){
     if(q>0){
      q--
      num.innerText=q
+     updateTotalPrice()
     }
 
    }
@@ -383,21 +396,16 @@ function openModifier(item){
 
     q++
     num.innerText=q
+    updateTotalPrice()
 
    }
 
   })
 
-  /* CONFIRM BUTTON (คืนฟังก์ชัน required modifier) */
-
-  const btn=document.querySelector(".confirm-btn")
-
   btn.onclick=()=>{
 
    const selections={}
    let extraPrice=0
-
-   /* VALIDATE REQUIRED */
 
    const groups=document.querySelectorAll(".mod-group")
 
@@ -420,8 +428,6 @@ function openModifier(item){
 
    }
 
-   /* COLLECT RADIO + CHECKBOX */
-
    item.modifier_groups.forEach(group=>{
 
     const checked=[...document.querySelectorAll(`input[name="${group.id}"]:checked`)]
@@ -438,8 +444,6 @@ function openModifier(item){
     })
 
    })
-
-   /* COLLECT TOPPING */
 
    document.querySelectorAll(".topping").forEach(el=>{
 
@@ -491,4 +495,4 @@ function cleanName(name){
 
  return name.replace(/^\d+/, "").trim()
 
-       }
+}
