@@ -1,6 +1,6 @@
 import { openOrderScreen } from "./order.js"
 
-function updateStickyCart(cart){
+export function updateStickyCart(cart){
 
  const bar = document.getElementById("sticky-cart")
  const count = document.getElementById("sticky-cart-count")
