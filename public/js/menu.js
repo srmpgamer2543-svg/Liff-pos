@@ -213,7 +213,7 @@ function openModifier(item){
    name.includes("ท็อป") ||
    name.includes("ท้อป")
 
-  html+=`<div class="mod-group" data-required="${isRequired}" data-group="${name}">`
+  html+=`<div class="mod-group" data-required="${isRequired}" data-group="${name}" data-id="${group.id}">`
 
   html+=`<div class="mod-title">${name}</div>`
 
@@ -339,6 +339,27 @@ function openModifier(item){
 
   }
 
+  /* qty product */
+
+  let qty=1
+  const qtyNum=document.getElementById("qtyNum")
+
+  document.getElementById("qtyMinus").onclick=()=>{
+
+   if(qty>1){
+    qty--
+    qtyNum.innerText=qty
+   }
+
+  }
+
+  document.getElementById("qtyPlus").onclick=()=>{
+
+   qty++
+   qtyNum.innerText=qty
+
+  }
+
   /* topping qty */
 
   document.querySelectorAll(".topping").forEach(el=>{
@@ -367,6 +388,99 @@ function openModifier(item){
 
   })
 
+  /* CONFIRM BUTTON (คืนฟังก์ชัน required modifier) */
+
+  const btn=document.querySelector(".confirm-btn")
+
+  btn.onclick=()=>{
+
+   const selections={}
+   let extraPrice=0
+
+   /* VALIDATE REQUIRED */
+
+   const groups=document.querySelectorAll(".mod-group")
+
+   for(const g of groups){
+
+    if(g.dataset.required==="true"){
+
+     const groupId=g.dataset.id
+
+     const checked=document.querySelector(`input[name="${groupId}"]:checked`)
+
+     if(!checked){
+
+      alert("กรุณาเลือก "+g.dataset.group)
+      return
+
+     }
+
+    }
+
+   }
+
+   /* COLLECT RADIO + CHECKBOX */
+
+   item.modifier_groups.forEach(group=>{
+
+    const checked=[...document.querySelectorAll(`input[name="${group.id}"]:checked`)]
+
+    selections[group.name]=checked.map(i=>{
+
+     const n=i.dataset.name
+     const price=Number(i.dataset.price||0)
+
+     extraPrice+=price
+
+     return n
+
+    })
+
+   })
+
+   /* COLLECT TOPPING */
+
+   document.querySelectorAll(".topping").forEach(el=>{
+
+    const qty=parseInt(el.querySelector(".top-qty").innerText)
+
+    if(qty>0){
+
+     const name=el.dataset.name
+     const price=Number(el.dataset.price)
+
+     if(!selections["ท็อปปิ้ง"])
+      selections["ท็อปปิ้ง"]=[]
+
+     for(let i=0;i<qty;i++){
+
+      selections["ท็อปปิ้ง"].push(name)
+
+      extraPrice+=price
+
+     }
+
+    }
+
+   })
+
+   for(let i=0;i<qty;i++){
+
+    addToCart({
+
+     ...item,
+     price:item.price + extraPrice,
+     modifiers:selections
+
+    })
+
+   }
+
+   overlay.classList.remove("active")
+
+  }
+
  },50)
 
 }
@@ -377,4 +491,4 @@ function cleanName(name){
 
  return name.replace(/^\d+/, "").trim()
 
-}
+       }
