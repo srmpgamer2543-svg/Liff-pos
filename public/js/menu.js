@@ -194,10 +194,9 @@ function openModifier(item){
 
  </div>
 
- <div style="text-align:right;font-size:235px;margin-bottom:10px;">
+<div class="mod-trash-box">
   <button id="clearMods">🗑️</button>
- </div>
-
+</div>
  `
 
  sortedGroups.forEach(group=>{
