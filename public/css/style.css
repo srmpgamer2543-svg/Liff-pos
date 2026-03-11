@@ -405,3 +405,23 @@ width:60px;
 height:60px;
 font-size:35px;
 }
+
+.mod-option.selected{
+background:#ff5a3c;
+color:white;
+box-shadow:0 6px 16px rgba(255,90,60,.35);
+}
+
+.mod-option.selected .mod-price{
+color:white;
+}
+
+.top-minus,
+.top-plus{
+border:none;
+background:#f3f3f3;
+border-radius:12px;
+width:50px;
+height:50px;
+font-size:30px;
+}
