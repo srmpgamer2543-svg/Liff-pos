@@ -6,6 +6,8 @@ export function updateStickyCart(cart){
  const count = document.getElementById("sticky-cart-count")
  const price = document.getElementById("sticky-cart-price")
 
+ if(!bar || !count || !price) return
+
  if(!cart || cart.length === 0){
   bar.classList.add("hidden")
   return
@@ -28,12 +30,16 @@ export function updateStickyCart(cart){
 
 }
 
-const confirmBtn = document.getElementById("confirm-order-btn")
+document.addEventListener("DOMContentLoaded",()=>{
 
-if(confirmBtn){
+ const confirmBtn = document.getElementById("confirm-order-btn")
 
- confirmBtn.onclick = ()=>{
-  openOrderScreen()
+ if(confirmBtn){
+
+  confirmBtn.onclick = ()=>{
+   openOrderScreen()
+  }
+
  }
 
-}
+})
