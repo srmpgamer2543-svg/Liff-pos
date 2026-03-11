@@ -478,7 +478,7 @@ font-size:40px;
 #confirm-order-btn{
 
 margin-left:auto;
-margin-right:20px;   /* เพิ่มบรรทัดนี้ */
+margin-right:50px;   /* เพิ่มบรรทัดนี้ */
 
 background:#ff5722;
 color:white;
@@ -489,7 +489,7 @@ border-radius:14px;
 padding:16px 24px;
 
 font-weight:700;
-font-size:35px;
+font-size:45px;
 
 cursor:pointer;
 
