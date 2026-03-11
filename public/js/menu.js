@@ -194,7 +194,7 @@ function openModifier(item){
 
  </div>
 
- <div style="text-align:right;font-size:35px;margin-bottom:10px;">
+ <div style="text-align:right;font-size:235px;margin-bottom:10px;">
   <button id="clearMods">🗑️</button>
  </div>
 
