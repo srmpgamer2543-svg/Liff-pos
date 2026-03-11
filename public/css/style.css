@@ -189,9 +189,7 @@ box-shadow:-3px 0 10px rgba(0,0,0,.1);
 padding:10px;
 }
 
-/* ========================= */
 /* MODIFIER OVERLAY */
-/* ========================= */
 
 #modifierOverlay{
 position:fixed;
@@ -199,21 +197,15 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-
 background:rgba(0,0,0,.35);
 backdrop-filter:blur(6px);
-
 display:none;
 opacity:0;
-
 z-index:2000;
-
 transition:opacity .35s ease;
 }
 
-/* ========================= */
-/* iOS BOTTOM SHEET */
-/* ========================= */
+/* MODIFIER SHEET */
 
 #modifierModal{
 
@@ -221,8 +213,6 @@ position:absolute;
 bottom:0;
 left:0;
 width:100%;
-
-/* ⭐ 3/4 screen */
 height:75%;
 
 background:white;
@@ -233,7 +223,6 @@ box-shadow:
 0 -20px 60px rgba(0,0,0,.25),
 0 -5px 20px rgba(0,0,0,.15);
 
-/* start hidden */
 transform:translateY(60%);
 
 transition:
@@ -246,8 +235,6 @@ overflow:auto;
 will-change:transform;
 }
 
-/* overlay active */
-
 #modifierOverlay.active{
 display:block;
 opacity:1;
@@ -257,7 +244,7 @@ opacity:1;
 transform:translateY(0);
 }
 
-/* MODIFIER UI */
+/* MODIFIER GROUP */
 
 .mod-group{
 margin-bottom:35px;
@@ -270,17 +257,19 @@ margin-bottom:16px;
 color:#444;
 }
 
+/* OPTION */
+
 .mod-option{
 display:flex;
 align-items:center;
-justify-content:space-between;
+justify-content:center;
+gap:20px;
 background:#f7f7f7;
 padding:20px 24px;
 border-radius:18px;
 font-size:40px;
 margin-bottom:14px;
 cursor:pointer;
-
 transition:
 transform .18s cubic-bezier(.2,.8,.2,1),
 background .18s;
@@ -296,6 +285,15 @@ width:28px;
 height:28px;
 }
 
+/* PRICE */
+
+.mod-price{
+font-weight:bold;
+margin-left:10px;
+}
+
+/* CONFIRM */
+
 .confirm-btn{
 width:100%;
 padding:28px;
@@ -308,7 +306,6 @@ border-radius:22px;
 margin-top:20px;
 box-shadow:0 10px 25px rgba(0,0,0,.2);
 cursor:pointer;
-
 transition:
 transform .2s cubic-bezier(.2,.8,.2,1),
 box-shadow .2s;
@@ -339,22 +336,16 @@ font-size:60px;
 font-weight:700;
 }
 
+/* ซ่อนชื่อเมนูซ้ำ */
+
 .mod-product-sub{
-font-size:26px;
-color:#777;
-margin-top:5px;
+display:none;
 }
+
+/* ซ่อนข้อความเลือกสูงสุด */
 
 .mod-rule{
-font-size:22px;
-color:#999;
-margin-top:5px;
-}
-
-.mod-price{
-margin-left:auto;
-margin-right:20px;
-font-weight:bold;
+display:none;
 }
 
 /* FOOTER */
