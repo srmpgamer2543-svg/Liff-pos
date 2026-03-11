@@ -314,7 +314,7 @@ margin-left:10px;
 /* CONFIRM */
 
 .confirm-btn{
-width:40%;
+width:50%;
 padding:28px;
 font-size:40px;
 font-weight:700;
@@ -323,7 +323,6 @@ color:white;
 border:none;
 border-radius:22px;
 margin-top:20px;
-margin-left:-50px;
 box-shadow:0 10px 25px rgba(0,0,0,.2);
 cursor:pointer;
 transition:
@@ -375,8 +374,8 @@ position:sticky;
 bottom:0;
 background:white;
 display:flex;
-justify-content:space-between;
 align-items:center;
+gap:20px;
 padding:15px;
 border-top:1px solid #eee;
 }
