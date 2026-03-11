@@ -228,7 +228,7 @@ transition:transform .35s cubic-bezier(.22,.61,.36,1);
 
 padding:30px;
 padding-bottom:140px;
-}
+
 overflow:auto;
 
 will-change:transform;
