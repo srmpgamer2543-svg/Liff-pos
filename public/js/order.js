@@ -51,8 +51,17 @@ export function openOrderScreen(){
  document.getElementById("orderTotal").innerText = total
 
  screen.classList.remove("hidden")
+
  document.getElementById("backToMenu").onclick = ()=>{
- document.getElementById("orderScreen").classList.add("hidden")
-}
+
+  screen.classList.add("hidden")
+
+  /* 🔧 FIX: reset scroll */
+  window.scrollTo({
+   top:0,
+   behavior:"instant"
+  })
+
+ }
 
 }
