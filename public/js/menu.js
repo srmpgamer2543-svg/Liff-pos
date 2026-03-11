@@ -1,3 +1,134 @@
+import { getMenu, getCategories } from "./api.js"
+import { addToCart } from "./cart.js"
+
+let MENU = []
+
+export async function loadMenu(){
+
+ const grid = document.getElementById("menuGrid")
+ const catBar = document.getElementById("categories")
+
+ grid.innerHTML = "Loading..."
+
+ try{
+
+  const [menu,categories] = await Promise.all([
+   getMenu(),
+   getCategories()
+  ])
+
+  MENU = menu
+
+  renderCategories(categories)
+
+  renderMenu(menu)
+
+ }catch(err){
+
+  grid.innerHTML = "Load menu error"
+  console.error(err)
+
+ }
+
+}
+
+
+
+function renderCategories(categories){
+
+ const bar = document.getElementById("categories")
+
+ bar.innerHTML = ""
+
+ const allBtn = document.createElement("button")
+
+ allBtn.className = "cat-btn"
+ allBtn.innerText = "ทั้งหมด"
+
+ allBtn.onclick = ()=>renderMenu(MENU)
+
+ bar.appendChild(allBtn)
+
+ categories.forEach(cat=>{
+
+  const btn = document.createElement("button")
+
+  btn.className = "cat-btn"
+
+  btn.innerText = cat.name
+
+  btn.onclick = ()=>{
+
+   const filtered = MENU.filter(
+    m => m.category_id === cat.id
+   )
+
+   renderMenu(filtered)
+
+  }
+
+  bar.appendChild(btn)
+
+ })
+
+}
+
+
+
+function renderMenu(list){
+
+ const grid = document.getElementById("menuGrid")
+
+ grid.innerHTML = ""
+
+ list.forEach(item=>{
+
+  const card = document.createElement("div")
+
+  card.className = "item"
+
+  card.innerHTML = `
+
+   <img src="${item.image || ""}">
+
+   <div class="item-info">
+
+    <div class="item-name">
+    ${item.name}
+    </div>
+
+    <div class="item-price">
+    ฿${item.price}
+    </div>
+
+   </div>
+
+   <div class="add-btn">+</div>
+
+  `
+
+  card.onclick = ()=>{
+
+   if(item.modifier_groups && item.modifier_groups.length){
+
+    openModifier(item)
+
+   }else{
+
+    addToCart(item)
+
+   }
+
+  }
+
+  grid.appendChild(card)
+
+ })
+
+}
+
+
+
 function openModifier(item){
 
  const overlay=document.getElementById("modifierOverlay")
@@ -27,8 +158,7 @@ function openModifier(item){
 
  item.modifier_groups.forEach(group=>{
 
-  const min = group.min_select || 0
-  const max = group.max_select || group.modifiers.length
+  const max = group.modifiers.length
 
   html+=`<div class="mod-group">`
 
@@ -47,9 +177,7 @@ function openModifier(item){
 
    <label class="mod-option">
 
-    <span>
-    ${mod.name}
-    </span>
+    <span>${mod.name}</span>
 
     <span class="mod-price">
     ฿${mod.price || 0}
@@ -168,5 +296,13 @@ function openModifier(item){
   }
 
  },50)
+
+}
+
+
+
+function cleanName(name){
+
+ return name.split("|")[0]
 
 }
