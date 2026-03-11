@@ -52,9 +52,14 @@ export function openOrderScreen(){
 
  screen.classList.remove("hidden")
 
+ document.body.classList.add("modal-open")
+
  document.getElementById("backToMenu").onclick = ()=>{
 
   screen.classList.add("hidden")
+
+  document.body.classList.remove("modal-open")
+ 
 
   /* 🔧 FIX: reset scroll */
   window.scrollTo({
