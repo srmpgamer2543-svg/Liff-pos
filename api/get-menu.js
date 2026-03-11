@@ -55,7 +55,13 @@ export default async function handler(req, res) {
    return {
     id: item.id,
     name: item.item_name,
+
+    // ⭐ FIX สำคัญ
+    category_id: item.category_id,
+
+    // เก็บชื่อหมวดไว้ใช้ได้
     category: categoryMap[item.category_id] || "",
+
     price: Number(price),
     image: item.image_url || null,
     modifier_groups: modifierGroups
