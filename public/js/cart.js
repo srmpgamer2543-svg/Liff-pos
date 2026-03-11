@@ -1,3 +1,5 @@
+import { updateStickyCart } from "./sticky-cart.js"
+
 let CART=[]
 
 export { CART }
