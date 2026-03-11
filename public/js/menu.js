@@ -296,6 +296,8 @@ function openModifier(item){
 
  overlay.classList.add("active")
 
+ modal.scrollTop = 0
+
  overlay.onclick=(e)=>{
 
   if(e.target===overlay){
