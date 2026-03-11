@@ -6,6 +6,8 @@ cart.push(item)
 
 updateCart()
 
+updateStickyCart(cart)
+
 }
 
 export function updateCart(){
@@ -42,5 +44,7 @@ export function clearCart(){
 cart=[]
 
 updateCart()
+
+updateStickyCart(cart)
 
 }
