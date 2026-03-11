@@ -14,45 +14,51 @@ export default async function handler(req, res) {
    fetch(`${API}/categories`, { headers })
   ])
 
-  const itemsData = await itemsRes.json()
-  const modifiersData = await modifiersRes.json()
-  const categoriesData = await categoriesRes.json()
+  const items = (await itemsRes.json()).items || []
+  const modifiers = (await modifiersRes.json()).modifiers || []
+  const categories = (await categoriesRes.json()).categories || []
 
-  const items = itemsData.items || []
-  const modifiers = modifiersData.modifiers || []
-  const categories = categoriesData.categories || []
+  // group modifiers by modifier_list_id
+  const modifierGroupMap = {}
 
-  // map modifier groups
-  const modifierMap = {}
-  modifiers.forEach(group=>{
-   modifierMap[group.id] = {
-    id: group.id,
-    name: group.name,
-    modifiers: group.modifiers || []
+  modifiers.forEach(m => {
+
+   if(!modifierGroupMap[m.modifier_list_id]){
+    modifierGroupMap[m.modifier_list_id] = []
    }
+
+   modifierGroupMap[m.modifier_list_id].push({
+    id: m.id,
+    name: m.name,
+    price: m.price || 0
+   })
+
   })
 
-  // map categories
+  // map category
   const categoryMap = {}
-  categories.forEach(cat=>{
-   categoryMap[cat.id] = cat.name
+  categories.forEach(c=>{
+   categoryMap[c.id] = c.name
   })
 
-  const menu = items.map(item=>{
+  const menu = items.map(item => {
 
-   // price
    const variant = item.variants?.[0] || {}
 
    const price =
     variant?.stores?.[0]?.price ||
     variant?.default_price ||
-    item.price ||
     0
 
-   // modifier groups
-   const modifierGroups = (item.modifier_ids || [])
-    .map(id => modifierMap[id])
-    .filter(Boolean)
+   const modifierGroups = (item.modifier_ids || []).map(id => {
+
+    return {
+     id,
+     name: "",
+     modifiers: modifierGroupMap[id] || []
+    }
+
+   })
 
    return {
     id: item.id,
@@ -70,8 +76,7 @@ export default async function handler(req, res) {
  } catch(err) {
 
   res.status(500).json({
-   error: "Failed to fetch menu",
-   message: err.message
+   error: err.message
   })
 
  }
