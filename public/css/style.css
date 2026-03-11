@@ -437,9 +437,9 @@ background:white;
 
 display:flex;
 align-items:center;
-justify-content:space-between;
+gap:18px;
 
-padding:16px 20px;
+padding:16px 22px;
 
 box-shadow:0 -4px 15px rgba(0,0,0,.1);
 
@@ -454,6 +454,17 @@ display:none;
 .sticky-cart-left{
 font-weight:600;
 font-size:40px;
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+/* เส้นคั่น | */
+
+.sticky-cart-left::after{
+content:"|";
+opacity:.4;
+margin:0 10px;
 }
 
 .sticky-cart-total{
@@ -462,7 +473,11 @@ font-weight:700;
 font-size:40px;
 }
 
+/* ปุ่มยืนยัน */
+
 #confirm-order-btn{
+
+margin-left:auto;
 
 background:#ff5722;
 color:white;
