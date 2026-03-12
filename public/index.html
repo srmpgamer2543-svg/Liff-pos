@@ -3,6 +3,7 @@
 
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>POS</title>
 
 <link rel="stylesheet" href="/css/style.css">
@@ -94,6 +95,26 @@
 
 <!-- 🔧 FIX BUG -->
 <script type="module" src="/js/sticky-cart.js"></script>
+
+<script>
+
+window.showIOSAlert = function(message){
+
+ const alert = document.getElementById("iosAlert")
+ const text = document.getElementById("iosAlertText")
+ const btn = document.getElementById("iosAlertBtn")
+
+ text.innerText = message
+
+ alert.classList.remove("hidden")
+
+ btn.onclick = ()=>{
+  alert.classList.add("hidden")
+ }
+
+}
+
+</script>
 
 </body>
 </html>
