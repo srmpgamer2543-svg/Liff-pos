@@ -155,7 +155,7 @@ function renderMenu(list){
 
 
 
-function openModifier(item){
+export function openModifier(item){
 
  const overlay=document.getElementById("modifierOverlay")
  const modal=document.getElementById("modifierModal")
