@@ -60,18 +60,18 @@ height:auto;
 display:flex;
 align-items:center;
 justify-content:space-between;
-padding:10px 14px;
+padding:6px 12px;
 background:white;
 border-top:1px solid #eee;
 }
 
 .shop-name{
-font-size:35px;
+font-size:15px;
 font-weight:700;
 }
 
 .cart-btn{
-font-size:50px;
+font-size:20px;
 cursor:pointer;
 }
 
