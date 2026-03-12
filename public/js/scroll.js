@@ -29,8 +29,8 @@ function animate(){
  /* LOGO AREA HEIGHT */
  /* ------------------- */
 
- const startHeight = 400
- const endHeight = -600
+ const startHeight = 300
+ const endHeight = 80
 
  const height =
  startHeight - ((startHeight - endHeight) * progress)
