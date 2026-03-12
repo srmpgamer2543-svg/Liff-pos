@@ -50,18 +50,22 @@ export function openOrderScreen(){
 
  document.getElementById("orderTotal").innerText = total
 
+ /* เปิดหน้าตรวจสอบออเดอร์ */
+
  screen.classList.remove("hidden")
 
- document.body.classList.add("modal-open")
+ /* 🔧 FIX BUG iOS / LIFF freeze */
+
+ document.body.style.overflow = "hidden"
 
  document.getElementById("backToMenu").onclick = ()=>{
 
   screen.classList.add("hidden")
 
-  document.body.classList.remove("modal-open")
- 
+  /* คืนค่า scroll */
 
-  /* 🔧 FIX: reset scroll */
+  document.body.style.overflow = ""
+
   window.scrollTo({
    top:0,
    behavior:"instant"
