@@ -1,4 +1,5 @@
 import { CART } from "./cart.js"
+import { openModifier } from "./menu.js"
 
 export function openOrderScreen(){
 
@@ -9,7 +10,7 @@ export function openOrderScreen(){
 
  let total = 0
 
- CART.forEach(item=>{
+ CART.forEach((item,index)=>{
 
   const div = document.createElement("div")
   div.className = "order-item"
@@ -19,25 +20,34 @@ export function openOrderScreen(){
   if(item.modifiers){
 
    Object.values(item.modifiers).forEach(arr=>{
-
     arr.forEach(m=>{
      mods += `<div class="order-mod">- ${m}</div>`
     })
-
    })
 
   }
 
   div.innerHTML = `
 
-   <div class="order-name">
-    ${item.name}
-   </div>
+   <div class="order-row">
 
-   ${mods}
+    <div class="order-name">
+     ${item.name}
+     ${mods}
+    </div>
 
-   <div>
-    ฿${item.price}
+    <div class="order-right">
+
+      <div class="order-price">
+       ฿${item.price}
+      </div>
+
+      <button class="edit-btn" data-index="${index}">
+       แก้ไข
+      </button>
+
+    </div>
+
    </div>
 
   `
@@ -50,11 +60,7 @@ export function openOrderScreen(){
 
  document.getElementById("orderTotal").innerText = total
 
- /* เปิดหน้าตรวจสอบออเดอร์ */
-
  screen.classList.remove("hidden")
-
- /* 🔧 FIX BUG iOS / LIFF freeze */
 
  document.body.style.overflow = "hidden"
 
@@ -62,15 +68,25 @@ export function openOrderScreen(){
 
   screen.classList.add("hidden")
 
-  /* คืนค่า scroll */
-
   document.body.style.overflow = ""
 
-  window.scrollTo({
-   top:0,
-   behavior:"instant"
-  })
-
  }
+
+ document.querySelectorAll(".edit-btn").forEach(btn=>{
+
+  btn.onclick=()=>{
+
+   const index = btn.dataset.index
+   const item = CART[index]
+
+   screen.classList.add("hidden")
+
+   document.body.style.overflow = ""
+
+   openModifier(item)
+
+  }
+
+ })
 
 }
