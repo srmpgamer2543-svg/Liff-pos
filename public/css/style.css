@@ -38,8 +38,8 @@ display:flex;
 justify-content:center;
 align-items:center;
 background:#ffffff;
-padding:10px 0;
-max-height:130px;
+padding:20px 0;
+max-height:260px;
 transition:
 transform .55s cubic-bezier(.22,.61,.36,1),
 opacity .35s,
@@ -60,7 +60,7 @@ height:auto;
 display:flex;
 align-items:center;
 justify-content:space-between;
-padding:5px 7px;
+padding:10px 14px;
 background:white;
 border-top:1px solid #eee;
 }
