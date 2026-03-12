@@ -38,8 +38,8 @@ display:flex;
 justify-content:center;
 align-items:center;
 background:#ffffff;
-padding:40px 0;
-max-height:500px;
+padding:20px 0;
+max-height:260px;
 transition:
 transform .55s cubic-bezier(.22,.61,.36,1),
 opacity .35s,
@@ -60,7 +60,7 @@ height:auto;
 display:flex;
 align-items:center;
 justify-content:space-between;
-padding:16px 20px;
+padding:10px 14px;
 background:white;
 border-top:1px solid #eee;
 }
@@ -104,9 +104,9 @@ border:none;
 
 #menuGrid{
 display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:16px;
-padding:0 16px 16px 16px;
+grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+gap:12px;
+padding:0 12px 12px 12px;
 }
 
 /* ITEM CARD */
