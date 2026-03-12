@@ -182,7 +182,7 @@ function openModifier(item){
 
  <div class="mod-header">
 
-  <img class="mod-image" src="${item.image || ""}">
+  <img class="mod-image" src="${item.image || '/logo.png'}">
 
   <div class="mod-product">
 
