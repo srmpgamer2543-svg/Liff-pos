@@ -420,7 +420,7 @@ function openModifier(item){
 
      if(!checked){
 
-      alert("กรุณาเลือก "+g.dataset.group)
+      window.showIOSAlert("กรุณาเลือก "+g.dataset.group)
       return
 
      }
