@@ -310,12 +310,13 @@ height:22px;
 }
 
 /* CONFIRM */
-
 .confirm-btn{
-position:sticky;
-bottom:10px;
-width:90%;
-margin:20px auto;
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+width:88%;
+max-width:420px;
 padding:16px;
 font-size:18px;
 font-weight:700;
@@ -323,8 +324,8 @@ background:#22c55e;
 color:white;
 border:none;
 border-radius:20px;
-display:block;
 box-shadow:0 10px 25px rgba(0,0,0,.25);
+z-index:2100;
 cursor:pointer;
 }
 
