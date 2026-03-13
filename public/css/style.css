@@ -254,7 +254,7 @@ box-shadow:
 transition:transform .35s cubic-bezier(.22,.61,.36,1);
 
 padding:20px;
-padding-bottom:0px;
+padding-bottom:120px;
 
 overflow-y:auto;
 overflow-x:hidden;
@@ -312,17 +312,19 @@ height:22px;
 /* CONFIRM */
 
 .confirm-btn{
-width:85%;
-padding:14px;
-font-size:16px;
+position:sticky;
+bottom:10px;
+width:90%;
+margin:20px auto;
+padding:16px;
+font-size:18px;
 font-weight:700;
 background:#22c55e;
 color:white;
 border:none;
-border-radius:18px;
-margin:16px auto;
+border-radius:20px;
 display:block;
-box-shadow:0 10px 25px rgba(0,0,0,.2);
+box-shadow:0 10px 25px rgba(0,0,0,.25);
 cursor:pointer;
 }
 
