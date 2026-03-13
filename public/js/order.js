@@ -5,6 +5,8 @@ export function openOrderScreen(){
 
  const screen = document.getElementById("orderScreen")
  const list = document.getElementById("orderList")
+ const menu = document.getElementById("menuGrid")
+ const sticky = document.getElementById("sticky-cart")
 
  list.innerHTML = ""
 
@@ -60,17 +62,32 @@ export function openOrderScreen(){
 
  document.getElementById("orderTotal").innerText = total
 
+
+ /* ---------- UI STATE ---------- */
+
  screen.classList.remove("hidden")
 
+ if(menu) menu.style.display = "none"
+ if(sticky) sticky.style.display = "none"
+
  document.body.style.overflow = "hidden"
+
+
+ /* ---------- BACK BUTTON ---------- */
 
  document.getElementById("backToMenu").onclick = ()=>{
 
   screen.classList.add("hidden")
 
+  if(menu) menu.style.display = ""
+  if(sticky) sticky.style.display = "flex"
+
   document.body.style.overflow = ""
 
  }
+
+
+ /* ---------- EDIT ---------- */
 
  document.querySelectorAll(".edit-btn").forEach(btn=>{
 
@@ -80,6 +97,9 @@ export function openOrderScreen(){
    const item = CART[index]
 
    screen.classList.add("hidden")
+
+   if(menu) menu.style.display = ""
+   if(sticky) sticky.style.display = "flex"
 
    document.body.style.overflow = ""
 
