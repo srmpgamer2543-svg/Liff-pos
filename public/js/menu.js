@@ -275,19 +275,17 @@ export function openModifier(item){
 
  <div class="mod-footer">
 
-  <div class="qty-box">
+<div class="qty-row">
 
+ <span class="qty-label">จำนวนแก้ว</span>
+
+ <div class="qty-box">
    <button id="qtyMinus">➖</button>
    <span id="qtyNum">1</span>
    <button id="qtyPlus">➕</button>
-
-  </div>
-
-  <button class="confirm-btn">
-  ใส่ตะกร้า ฿${item.price}
-  </button>
-
  </div>
+
+</div>
 
  `
 
