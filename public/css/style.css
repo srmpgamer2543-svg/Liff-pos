@@ -41,7 +41,7 @@ background:#ffffff;
 padding:6px 0;
 max-height:180px;
 transition:
-transform .55s cubic-bezier(.22,.61,.36,1),
+transform .95s cubic-bezier(.22,.61,.36,1),
 opacity .35s,
 height .35s;
 will-change:transform,opacity;
