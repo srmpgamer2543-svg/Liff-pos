@@ -66,11 +66,12 @@ export function openOrderScreen(){
  /* ---------- UI STATE ---------- */
 
  screen.classList.remove("hidden")
+ screen.style.display = "flex"
 
  if(menu) menu.style.display = "none"
  if(sticky) sticky.style.display = "none"
 
- document.body.style.overflow = "hidden"
+ document.body.classList.add("order-open")
 
 
  /* ---------- BACK BUTTON ---------- */
@@ -78,11 +79,12 @@ export function openOrderScreen(){
  document.getElementById("backToMenu").onclick = ()=>{
 
   screen.classList.add("hidden")
+  screen.style.display = "none"
 
   if(menu) menu.style.display = ""
   if(sticky) sticky.style.display = "flex"
 
-  document.body.style.overflow = ""
+  document.body.classList.remove("order-open")
 
  }
 
@@ -97,11 +99,12 @@ export function openOrderScreen(){
    const item = CART[index]
 
    screen.classList.add("hidden")
+   screen.style.display = "none"
 
    if(menu) menu.style.display = ""
    if(sticky) sticky.style.display = "flex"
 
-   document.body.style.overflow = ""
+   document.body.classList.remove("order-open")
 
    openModifier(item)
 
@@ -119,6 +122,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
  if(screen){
   screen.classList.add("hidden")
+  screen.style.display = "none"
  }
 
 })
