@@ -287,13 +287,19 @@ export function openModifier(item){
 
 </div>
 
-<button class="confirm-btn">
-ใส่ตะกร้า ฿${item.price}
-</button>
-
 `
 
  modal.innerHTML=html
+
+let btn = document.querySelector(".confirm-btn")
+
+if(btn) btn.remove()
+
+btn = document.createElement("button")
+btn.className = "confirm-btn"
+btn.innerText = `ใส่ตะกร้า ฿${item.price}`
+
+overlay.appendChild(btn)
 
  overlay.classList.add("active")
 
