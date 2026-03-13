@@ -240,26 +240,17 @@ bottom:0;
 left:50%;
 width:94%;
 height:75%;
-
-position:relative;
-
 transform:translateX(-50%) translateY(60%);
-
 background:white;
 border-radius:40px 40px 0 0;
-
 box-shadow:
 0 -20px 60px rgba(0,0,0,.25),
 0 -5px 20px rgba(0,0,0,.15);
-
 transition:transform .35s cubic-bezier(.22,.61,.36,1);
-
 padding:20px;
 padding-bottom:120px;
-
 overflow-y:auto;
 overflow-x:hidden;
-
 -webkit-overflow-scrolling:touch;
 overscroll-behavior:contain;
 will-change:transform;
@@ -313,21 +304,19 @@ height:22px;
 /* CONFIRM */
 .confirm-btn{
 position:fixed;
-bottom:16px;
-left:50%;
-transform:translateX(-50%);
-width:90%;
-max-width:420px;
-padding:16px;
+bottom:0;
+left:0;
+width:100%;
+padding:18px;
 font-size:18px;
 font-weight:700;
 background:#22c55e;
 color:white;
 border:none;
-border-radius:20px;
-box-shadow:0 10px 25px rgba(0,0,0,.25);
+border-radius:18px 18px 0 0;
+box-shadow:0 -6px 25px rgba(0,0,0,.25);
 cursor:pointer;
-z-index:2100;
+z-index:3000;
 }
 
 /* PRODUCT HEADER */
