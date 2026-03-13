@@ -1,63 +1,15 @@
-import { openOrderScreen } from "./order.js"
-
-export function updateStickyCart(cart){
-
- const bar = document.getElementById("sticky-cart")
- const count = document.getElementById("sticky-cart-count")
- const price = document.getElementById("sticky-cart-price")
-
- if(!bar || !count || !price) return
-
- if(!cart || cart.length === 0){
-  bar.classList.add("hidden")
-
-  // sync header cart
-  const headerCount = document.getElementById("headerCartCount")
-  if(headerCount) headerCount.textContent = 0
-
-  const headerTotal = document.getElementById("headerCartTotal")
-  if(headerTotal) headerTotal.textContent = 0
-
-  return
- }
-
- bar.classList.remove("hidden")
-
- let totalItems = 0
- let totalPrice = 0
-
- cart.forEach(item => {
-
-  totalItems += item.qty || 1
-  totalPrice += item.totalPrice || item.price
-
- })
-
- count.textContent = totalItems
- price.textContent = totalPrice
-
-
- // ⭐ sync รถเข็นด้านบน
- const headerCount = document.getElementById("headerCartCount")
- if(headerCount){
-  headerCount.textContent = totalItems
- }
-
- const headerTotal = document.getElementById("headerCartTotal")
- if(headerTotal){
-  headerTotal.textContent = totalPrice
- }
-
-}
-
 document.addEventListener("DOMContentLoaded",()=>{
 
  const confirmBtn = document.getElementById("confirm-order-btn")
 
  if(confirmBtn){
 
-  confirmBtn.onclick = ()=>{
+  confirmBtn.onclick = (e)=>{
+
+   e.preventDefault()
+
    openOrderScreen()
+
   }
 
  }
