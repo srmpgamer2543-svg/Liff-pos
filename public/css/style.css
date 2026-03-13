@@ -312,27 +312,22 @@ height:22px;
 
 /* CONFIRM */
 .confirm-btn{
-
-position:sticky;
-bottom:0;
-
-width:100%;
-margin-top:20px;
-
+position:fixed;
+bottom:16px;
+left:50%;
+transform:translateX(-50%);
+width:90%;
+max-width:420px;
 padding:16px;
 font-size:18px;
 font-weight:700;
-
 background:#22c55e;
 color:white;
-
 border:none;
 border-radius:20px;
-
-box-shadow:0 -4px 15px rgba(0,0,0,.15);
-
+box-shadow:0 10px 25px rgba(0,0,0,.25);
 cursor:pointer;
-
+z-index:2100;
 }
 
 /* PRODUCT HEADER */
