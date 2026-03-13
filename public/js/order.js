@@ -1,6 +1,10 @@
 import { CART } from "./cart.js"
 import { openModifier } from "./menu.js"
 
+function cleanName(name){
+ return name.replace(/^\d+/, "").trim()
+}
+
 export function openOrderScreen(){
 
  const screen = document.getElementById("orderScreen")
@@ -15,40 +19,50 @@ export function openOrderScreen(){
  CART.forEach((item,index)=>{
 
   const div = document.createElement("div")
-  div.className = "order-item"
+  div.className = "receipt-item"
 
   let mods = ""
 
   if(item.modifiers){
 
-   Object.values(item.modifiers).forEach(arr=>{
+   Object.entries(item.modifiers).forEach(([group,arr])=>{
+
     arr.forEach(m=>{
-     mods += `<div class="order-mod">- ${m}</div>`
+
+     mods += `
+     <div class="receipt-mod">
+        <span class="mod-name">${m}</span>
+        <span class="mod-price"></span>
+     </div>
+     `
+
     })
+
    })
 
   }
 
   div.innerHTML = `
 
-   <div class="order-row">
+   <div class="receipt-product">
 
-    <div class="order-name">
-     ${item.name}
+     <div class="receipt-name">
+       ${cleanName(item.name)}
+     </div>
+
      ${mods}
-    </div>
 
-    <div class="order-right">
+     <div class="receipt-price-row">
 
-      <div class="order-price">
-       ฿${item.price}
-      </div>
+       <div class="receipt-price">
+         ฿${item.price}
+       </div>
 
-      <button class="edit-btn" data-index="${index}">
-       แก้ไข
-      </button>
+       <button class="edit-btn" data-index="${index}">
+         แก้ไข
+       </button>
 
-    </div>
+     </div>
 
    </div>
 
@@ -113,8 +127,6 @@ export function openOrderScreen(){
  })
 
 }
-
-/* ป้องกัน order screen เปิดตอนโหลดเว็บ */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
