@@ -761,3 +761,44 @@ font-weight:600;
 color:#444;
 
 }
+
+/* ===============================
+   IOS RECEIPT STYLE
+================================ */
+.receipt-item{
+padding:16px 6px;
+border-bottom:1px dashed #e5e5e5;
+}
+.receipt-product{
+display:flex;
+flex-direction:column;
+}
+.receipt-name{
+font-size:17px;
+font-weight:600;
+margin-bottom:6px;
+}
+.receipt-mod{
+display:flex;
+justify-content:space-between;
+font-size:14px;
+color:#666;
+padding-left:12px;
+margin-bottom:2px;
+}
+.mod-name{
+}
+.mod-price{
+color:#999;
+}
+.receipt-price-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-top:6px;
+}
+.receipt-price{
+font-size:16px;
+font-weight:700;
+color:#111;
+}
