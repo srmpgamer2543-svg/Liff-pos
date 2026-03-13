@@ -273,7 +273,7 @@ export function openModifier(item){
 
  html+=`
 
- <div class="mod-footer">
+<div class="mod-footer">
 
 <div class="qty-row">
 
@@ -287,7 +287,11 @@ export function openModifier(item){
 
 </div>
 
- `
+<button class="confirm-btn">
+ใส่ตะกร้า ฿${item.price}
+</button>
+
+`
 
  modal.innerHTML=html
 
