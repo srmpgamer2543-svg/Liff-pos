@@ -110,3 +110,15 @@ export function openOrderScreen(){
  })
 
 }
+
+/* ป้องกัน order screen เปิดตอนโหลดเว็บ */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+ const screen = document.getElementById("orderScreen")
+
+ if(screen){
+  screen.classList.add("hidden")
+ }
+
+})
