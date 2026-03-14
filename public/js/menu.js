@@ -322,14 +322,15 @@ if(previousSelections){
   })
 
  })
-
+ 
+updateTotalPrice()
+ 
 }
 
-let btn = document.querySelector(".confirm-btn")
+let oldBtn = document.querySelector(".confirm-btn")
+if(oldBtn) oldBtn.remove()
 
-if(btn) btn.remove()
-
-btn = document.createElement("button")
+const btn = document.createElement("button")
 btn.className = "confirm-btn"
 btn.innerText = `ใส่ตะกร้า ฿${item.price}`
 
@@ -375,6 +376,7 @@ overlay.appendChild(btn)
    btn.innerText=`ใส่ตะกร้า ฿${total}`
 
   }
+  updateTotalPrice()
 
   document.querySelectorAll(".mod-option input").forEach(input=>{
    input.addEventListener("change",updateTotalPrice)
@@ -419,31 +421,35 @@ overlay.appendChild(btn)
 
   document.querySelectorAll(".topping").forEach(el=>{
 
-   const minus=el.querySelector(".top-minus")
-   const plus=el.querySelector(".top-plus")
-   const num=el.querySelector(".top-qty")
+ const minus=el.querySelector(".top-minus")
+ const plus=el.querySelector(".top-plus")
+ const num=el.querySelector(".top-qty")
 
-   let q=0
+ minus.onclick=()=>{
 
-   minus.onclick=()=>{
+  let q=parseInt(num.innerText)
 
-    if(q>0){
-     q--
-     num.innerText=q
-     updateTotalPrice()
-    }
+  if(q>0){
+   q--
+   num.innerText=q
+   updateTotalPrice()
+  }
 
-   }
+ }
 
-   plus.onclick=()=>{
+ plus.onclick=()=>{
 
-    q++
-    num.innerText=q
-    updateTotalPrice()
+  let q=parseInt(num.innerText)
 
-   }
+  q++
+  num.innerText=q
 
-  })
+  updateTotalPrice()
+
+ }
+
+})
+
 
   btn.onclick=()=>{
 
