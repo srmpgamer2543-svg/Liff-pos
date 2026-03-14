@@ -155,7 +155,7 @@ function renderMenu(list){
 
 
 
-export function openModifier(item){
+export function openModifier(item, previousSelections=null){
 
  const overlay=document.getElementById("modifierOverlay")
  const modal=document.getElementById("modifierModal")
@@ -290,6 +290,37 @@ export function openModifier(item){
 `
 
  modal.innerHTML=html
+
+ /* restore modifier selections */
+
+if(previousSelections){
+
+ Object.entries(previousSelections).forEach(([group,values])=>{
+
+  values.forEach(val=>{
+
+   const radio=document.querySelector(`input[data-name="${val}"]`)
+
+   if(radio){
+    radio.checked=true
+   }
+
+   const topping=document.querySelector(`.topping[data-name="${val}"]`)
+
+   if(topping){
+
+    const qtyEl=topping.querySelector(".top-qty")
+    let current=parseInt(qtyEl.innerText)
+
+    qtyEl.innerText=current+1
+
+   }
+
+  })
+
+ })
+
+}
 
 let btn = document.querySelector(".confirm-btn")
 
