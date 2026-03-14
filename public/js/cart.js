@@ -50,3 +50,13 @@ export function clearCart(){
  updateStickyCart(CART)
 
 }
+
+export function updateCartItem(index,newItem){
+
+ CART[index] = newItem
+
+ updateCart()
+
+ updateStickyCart(CART)
+
+}
