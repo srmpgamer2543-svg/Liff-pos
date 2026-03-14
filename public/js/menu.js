@@ -3,6 +3,7 @@ import { addToCart } from "./cart.js"
 
 let MENU = []
 let CATEGORY_ORDER = {}
+let editIndex = null
 
 export async function loadMenu(){
 
@@ -155,7 +156,9 @@ function renderMenu(list){
 
 
 
-export function openModifier(item, previousSelections=null){
+export function openModifier(item, previousSelections=null, index=null){
+
+ editIndex = index
 
  const overlay=document.getElementById("modifierOverlay")
  const modal=document.getElementById("modifierModal")
@@ -509,17 +512,27 @@ overlay.appendChild(btn)
 
    })
 
-   for(let i=0;i<qty;i++){
+   const newItem = {
 
-    addToCart({
+ ...item,
+ price:item.price + extraPrice,
+ modifiers:selections
 
-     ...item,
-     price:item.price + extraPrice,
-     modifiers:selections
+}
 
-    })
+if(editIndex !== null){
 
-   }
+ updateCartItem(editIndex,newItem)
+
+}else{
+
+ for(let i=0;i<qty;i++){
+  addToCart(newItem)
+ }
+
+}
+
+editIndex = null
 
    overlay.classList.remove("active")
 
