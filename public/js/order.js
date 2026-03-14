@@ -112,7 +112,7 @@ export function openOrderScreen(){
    document.body.classList.remove("order-open")
 
    // ⭐ ส่ง modifiers เดิมไปด้วย
-   openModifier(item, item.modifiers)
+   openModifier(item, item.modifiers, index)
 
   }
 
