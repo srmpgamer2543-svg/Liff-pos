@@ -38,6 +38,10 @@ div.innerText =
 `${i.name}
 ${mods}
 - ${i.price}`
+  
+el.appendChild(div)
+})
+}
 
 export function getCart(){
  return CART
