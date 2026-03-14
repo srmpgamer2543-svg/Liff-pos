@@ -512,11 +512,14 @@ overlay.appendChild(btn)
 
    })
 
-   const newItem = {
+   const basePrice = item.basePrice || item.price
+
+const newItem = {
 
  ...item,
- price:item.price + extraPrice,
- modifiers:selections
+ basePrice: basePrice,
+ price: basePrice + extraPrice,
+ modifiers: selections
 
 }
 
