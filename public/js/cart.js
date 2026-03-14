@@ -24,18 +24,20 @@ export function updateCart(){
 
   const div=document.createElement("div")
 
-  div.innerText=
-  `${i.name}
-  ${i.type||""}
-  ${i.sweet||""}
-  ${i.toppings?.join(",")||""}
-  - ${i.price}`
+  let mods=""
 
-  el.appendChild(div)
+if(i.modifiers){
 
+ Object.values(i.modifiers).forEach(arr=>{
+  mods += arr.join(", ") + " "
  })
 
 }
+
+div.innerText =
+`${i.name}
+${mods}
+- ${i.price}`
 
 export function getCart(){
  return CART
