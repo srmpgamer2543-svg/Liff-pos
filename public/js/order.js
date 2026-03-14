@@ -76,9 +76,6 @@ export function openOrderScreen(){
 
  document.getElementById("orderTotal").innerText = total
 
-
- /* ---------- UI STATE ---------- */
-
  screen.classList.remove("hidden")
  screen.style.display = "flex"
 
@@ -86,9 +83,6 @@ export function openOrderScreen(){
  if(sticky) sticky.style.display = "none"
 
  document.body.classList.add("order-open")
-
-
- /* ---------- BACK BUTTON ---------- */
 
  document.getElementById("backToMenu").onclick = ()=>{
 
@@ -101,9 +95,6 @@ export function openOrderScreen(){
   document.body.classList.remove("order-open")
 
  }
-
-
- /* ---------- EDIT ---------- */
 
  document.querySelectorAll(".edit-btn").forEach(btn=>{
 
@@ -120,7 +111,8 @@ export function openOrderScreen(){
 
    document.body.classList.remove("order-open")
 
-   openModifier(item)
+   // ⭐ ส่ง modifiers เดิมไปด้วย
+   openModifier(item, item.modifiers)
 
   }
 
