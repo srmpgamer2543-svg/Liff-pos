@@ -1,5 +1,5 @@
 import { getMenu, getCategories } from "./api.js"
-import { addToCart } from "./cart.js"
+import { addToCart, updateCartItem } from "./cart.js"
 
 let MENU = []
 let CATEGORY_ORDER = {}
