@@ -323,7 +323,6 @@ if(previousSelections){
 
  })
  
-updateTotalPrice()
  
 }
 
