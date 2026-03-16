@@ -87,7 +87,7 @@ export function openOrderScreen(){
          ฿${item.price * item.qty}
        </div>
 
-       <button class="edit-btn" data-index="${item.indexes[0]}">
+       <button class="edit-btn" data-indexes="${item.indexes.join(",")}">
          แก้ไข
        </button>
 
@@ -129,8 +129,7 @@ export function openOrderScreen(){
 
   btn.onclick=()=>{
 
-   const index = btn.dataset.index
-   const item = CART[index]
+   const indexes = btn.dataset.indexes.split(",")
 
    screen.classList.add("hidden")
    screen.style.display = "none"
@@ -140,8 +139,62 @@ export function openOrderScreen(){
 
    document.body.classList.remove("order-open")
 
-   // ⭐ ส่ง modifiers เดิมไปด้วย
-   openModifier(item, item.modifiers, index)
+   if(indexes.length === 1){
+
+    const index = indexes[0]
+    const item = CART[index]
+
+    openModifier(item, item.modifiers, index)
+
+   }else{
+
+    showSelectCup(indexes)
+
+   }
+
+  }
+
+ })
+
+}
+
+/* ⭐ ฟังก์ชันเลือกแก้วเมื่อมีรายการซ้ำ */
+
+function showSelectCup(indexes){
+
+ let html = `
+ <div class="cup-picker">
+ <div class="cup-title">เลือกแก้วที่ต้องการแก้ไข</div>
+ `
+
+ indexes.forEach((i,idx)=>{
+
+  html += `
+  <button class="cup-btn" data-index="${i}">
+   แก้วที่ ${idx+1}
+  </button>
+  `
+
+ })
+
+ html += `</div>`
+
+ const picker = document.createElement("div")
+ picker.className="cup-overlay"
+ picker.innerHTML = html
+
+ document.body.appendChild(picker)
+
+ document.querySelectorAll(".cup-btn").forEach(btn=>{
+
+  btn.onclick=()=>{
+
+   const index = btn.dataset.index
+   const item = CART[index]
+
+   picker.remove()
+
+   openModifier(item,item.modifiers,index)
 
   }
 
