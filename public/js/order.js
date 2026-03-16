@@ -22,7 +22,13 @@ export function openOrderScreen(){
 
  CART.forEach((item,index)=>{
 
-  const key = item.name + JSON.stringify(item.modifiers || {})
+  const key = item.name + JSON.stringify(
+ Object.fromEntries(
+  Object.entries(item.modifiers||{}).map(
+   ([k,v])=>[k,[...v].sort()]
+  )
+ )
+)
 
   if(!mergedMap[key]){
 
