@@ -10,7 +10,7 @@ overflow-x:hidden;
 -webkit-tap-highlight-color: transparent;
 }
 
-/* 🔒 ล็อก scroll ตอน modal เปิด */
+/* lock scroll */
 
 body.modal-open{
 overflow:hidden;
@@ -27,8 +27,6 @@ top:0;
 z-index:1000;
 background:white;
 box-shadow:0 2px 6px rgba(0,0,0,.1);
-transform:translateZ(0);
-will-change:transform;
 }
 
 /* LOGO */
@@ -40,12 +38,7 @@ align-items:center;
 background:#ffffff;
 padding:6px 0;
 max-height:180px;
-transition:
-transform .95s cubic-bezier(.22,.61,.36,1),
-opacity .35s,
-height .35s;
-will-change:transform,opacity;
-transform:translateZ(0);
+transition:transform .95s cubic-bezier(.22,.61,.36,1),opacity .35s,height .35s;
 overflow:hidden;
 }
 
@@ -134,10 +127,7 @@ position:relative;
 cursor:pointer;
 display:flex;
 flex-direction:column;
-transition:
-transform .25s cubic-bezier(.2,.8,.2,1),
-box-shadow .25s cubic-bezier(.2,.8,.2,1),
-filter .25s;
+transition:transform .25s,box-shadow .25s,filter .25s;
 }
 
 .item:active{
@@ -145,8 +135,6 @@ transform:scale(.97);
 box-shadow:0 6px 18px rgba(0,0,0,0.18);
 filter:brightness(.98);
 }
-
-/* IMAGE */
 
 .item img{
 width:100%;
@@ -188,14 +176,13 @@ justify-content:center;
 font-size:20px;
 font-weight:bold;
 box-shadow:0 4px 10px rgba(0,0,0,0.2);
-transition:transform .2s cubic-bezier(.2,.8,.2,1);
 }
 
 .add-btn:active{
 transform:scale(.9);
 }
 
-/* CART */
+/* CART PANEL */
 
 #cart{
 position:fixed;
@@ -222,9 +209,7 @@ backdrop-filter:blur(6px);
 display:none;
 opacity:0;
 z-index:2000;
-transition:opacity .35s ease;
-touch-action:none;
-overscroll-behavior:none;
+transition:opacity .35s;
 }
 
 #modifierOverlay.active{
@@ -232,7 +217,7 @@ display:block;
 opacity:1;
 }
 
-/* MODIFIER SHEET */
+/* MODIFIER MODAL */
 
 #modifierModal{
 position:absolute;
@@ -243,17 +228,11 @@ height:75%;
 transform:translateX(-50%) translateY(60%);
 background:white;
 border-radius:40px 40px 0 0;
-box-shadow:
-0 -20px 60px rgba(0,0,0,.25),
-0 -5px 20px rgba(0,0,0,.15);
+box-shadow:0 -20px 60px rgba(0,0,0,.25);
 transition:transform .35s cubic-bezier(.22,.61,.36,1);
 padding:20px;
 padding-bottom:120px;
 overflow-y:auto;
-overflow-x:hidden;
--webkit-overflow-scrolling:touch;
-overscroll-behavior:contain;
-will-change:transform;
 }
 
 #modifierOverlay.active #modifierModal{
@@ -276,7 +255,7 @@ padding-left:5px;
 
 .mod-option{
 display:grid;
-grid-template-columns: 1fr auto auto;
+grid-template-columns:1fr auto auto;
 align-items:center;
 gap:10px;
 background:#f7f7f7;
@@ -287,7 +266,6 @@ margin-bottom:10px;
 cursor:pointer;
 max-width:92%;
 margin:auto;
-box-shadow:0 2px 6px rgba(0,0,0,.05);
 }
 
 .mod-price{
@@ -301,7 +279,8 @@ width:22px;
 height:22px;
 }
 
-/* CONFIRM */
+/* CONFIRM BUTTON */
+
 .confirm-btn{
 position:fixed;
 bottom:0;
@@ -315,7 +294,6 @@ color:white;
 border:none;
 border-radius:18px 18px 0 0;
 box-shadow:0 -6px 25px rgba(0,0,0,.25);
-cursor:pointer;
 z-index:3000;
 }
 
@@ -342,24 +320,17 @@ font-weight:700;
 /* STICKY CART */
 
 .sticky-cart{
-
 position:fixed;
 bottom:0;
 left:0;
 width:100%;
-
 background:white;
-
 display:flex;
 align-items:center;
 gap:8px;
-
 padding:10px 12px;
-
 box-shadow:0 -4px 15px rgba(0,0,0,.1);
-
 z-index:999;
-
 }
 
 .sticky-cart-left{
@@ -377,43 +348,30 @@ font-size:16px;
 }
 
 #confirm-order-btn{
-
 margin-left:40px;
-
 background:#ff5722;
 color:white;
-
 border:none;
 border-radius:12px;
-
 padding:8px 12px;
-
 font-weight:700;
 font-size:16px;
-
-cursor:pointer;
-
 }
 
 /* IOS ALERT */
 
 .ios-alert{
-
 position:fixed;
 top:0;
 left:0;
 width:100%;
 height:100%;
-
 background:rgba(0,0,0,0.35);
 backdrop-filter:blur(10px);
-
 display:flex;
 align-items:center;
 justify-content:center;
-
 z-index:9999;
-
 }
 
 .ios-alert.hidden{
@@ -421,635 +379,170 @@ display:none;
 }
 
 .ios-alert-box{
-
 background:white;
-
 width:70%;
 max-width:420px;
-
 border-radius:28px;
-
 padding:30px 20px;
-
 text-align:center;
-
-box-shadow:0 20px 60px rgba(0,0,0,.25);
-
 }
 
 .ios-alert-text{
-
 font-size:18px;
 font-weight:600;
-
 margin-bottom:20px;
-
 }
 
 #iosAlertBtn{
-
 background:#007aff;
-
 color:white;
-
 border:none;
-
 border-radius:16px;
-
 padding:10px 20px;
-
 font-size:16px;
 font-weight:600;
-
 }
 
 .hidden{
 display:none;
 }
-.order-item{
-padding:12px;
-border-bottom:1px solid #eee;
-}
 
-.order-row{
-display:flex;
-justify-content:space-between;
-align-items:flex-start;
-}
-
-.order-name{
-font-weight:600;
-}
-
-.order-mod{
-font-size:13px;
-color:#666;
-}
-
-.order-right{
-text-align:right;
-}
-
-.edit-btn{
-
-margin-top:6px;
-
-background:#f59e0b;
-color:white;
-
-border:none;
-border-radius:10px;
-
-padding:6px 10px;
-
-font-size:13px;
-font-weight:600;
-
-cursor:pointer;
-
-}
+/* ORDER SCREEN */
 
 .order-screen{
-
 position:fixed;
 top:0;
 left:0;
-
 width:100%;
 height:100%;
-
-background:white;
-
+background:#f2f2f7;
 z-index:2000;
-
 display:none;
 flex-direction:column;
-
 overflow-y:auto;
-
 }
 
 /* HEADER */
 
 .order-header{
-
 display:flex;
 align-items:center;
 gap:10px;
-
-padding:14px;
-
-border-bottom:1px solid #eee;
-
-background:white;
-
-position:sticky;
-top:0;
-
-z-index:5;
-
+padding:16px;
+background:#f2f2f7;
 }
 
 .order-header h2{
 margin:0;
-font-size:18px;
-}
-
-/* LIST */
-
-#orderList{
-
-flex:1;
-
-padding:10px;
-
-overflow-y:auto;
-
-}
-
-/* FOOTER */
-
-.order-footer{
-
-position:sticky;
-
-bottom:0;
-
-background:white;
-
-border-top:1px solid #eee;
-
-padding:14px;
-
-display:flex;
-flex-direction:column;
-align-items:center;
-
-gap:10px;
-
-}
-
-.order-total{
-
-font-size:18px;
-font-weight:700;
-
-}
-
-#sendOrderBtn{
-
-background:#22c55e;
-color:white;
-
-border:none;
-
-border-radius:16px;
-
-padding:14px 30px;
-
-font-size:18px;
-font-weight:700;
-
-cursor:pointer;
-
-}
-
-body.order-open{
-overflow:hidden;
-}
-
-/* ===== QTY CONTROL (➖ 0 ➕) ===== */
-
-.qty-box{
-
-display:flex;
-align-items:center;
-gap:10px;
-
-background:#f3f4f6;
-border-radius:12px;
-
-padding:4px 8px;
-
-}
-
-/* ปุ่ม - + */
-
-.top-minus,
-.top-plus,
-#qtyMinus,
-#qtyPlus{
-
-width:32px;
-height:32px;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-border:none;
-outline:none;
-background:white;
-
-border-radius:8px;
-
-font-size:18px;
-font-weight:bold;
-
-cursor:pointer;
-
-box-shadow:0 2px 4px rgba(0,0,0,.15);
-
-}
-
-/* ตัวเลข */
-
-.qty-box span{
-
-min-width:20px;
-text-align:center;
-
-font-weight:700;
-font-size:16px;
-
-}
-
-/* ปุ่มถังขยะ */
-
-#clearMods{
-
-margin-left:auto;
-
-width:34px;
-height:34px;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-border:none;
-outline:none;
-
-background:#fee2e2;
-
-border-radius:10px;
-
-font-size:16px;
-
-cursor:pointer;
-
-}
-
-/* กันกรอบ Android */
-
-button:focus{
-outline:none;
-box-shadow:none;
-}
-
-button:active{
-outline:none;
-}
-
-/* BUTTON ANIMATION */
-
-.top-minus,
-.top-plus,
-#qtyMinus,
-#qtyPlus,
-#clearMods{
-
-transition: transform .15s ease, box-shadow .15s ease;
-
-}
-
-/* ตอนกด */
-
-.top-minus:active,
-.top-plus:active,
-#qtyMinus:active,
-#qtyPlus:active,
-#clearMods:active{
-
-transform:scale(.2);
-box-shadow:0 1px 2px rgba(2,8,2,.1);
-
-}
-
-/* ===== QTY ROW ===== */
-
-.qty-row{
-
-display:flex;
-align-items:center;
-justify-content:space-between;
-
-background:#f3f4f6;
-
-padding:10px 14px;
-
-border-radius:14px;
-
-margin-top:10px;
-
-}
-
-.qty-label{
-
-font-size:15px;
-font-weight:600;
-color:#444;
-
-}
-
-/* ===============================
-   IOS RECEIPT STYLE
-================================ */
-.receipt-item{
-padding:16px 6px;
-border-bottom:1px dashed #e5e5e5;
-}
-.receipt-product{
-display:flex;
-flex-direction:column;
-}
-.receipt-name{
-font-size:17px;
-font-weight:600;
-margin-bottom:6px;
-}
-.receipt-mod{
-display:flex;
-justify-content:space-between;
-font-size:14px;
-color:#666;
-padding-left:12px;
-margin-bottom:2px;
-}
-.mod-name{
-}
-.mod-price{
-color:#999;
-}
-.receipt-price-row{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-top:6px;
-}
-.receipt-price{
-font-size:16px;
-font-weight:700;
-color:#111;
-}
-
-/* ===============================
-   IOS ORDER REVIEW STYLE
-================================ */
-
-/* SCREEN */
-
-.order-screen{
-
-background:#f2f2f7;
-
-}
-
-/* HEADER */
-
-.order-header{
-
-background:#f2f2f7;
-
-border-bottom:0;
-
-padding:16px;
-
-}
-
-.order-header h2{
-
 font-size:20px;
 font-weight:700;
-color:#000;
-
 }
 
 /* LIST */
 
 #orderList{
-
+flex:1;
 padding:12px;
-
+overflow-y:auto;
 }
 
-/* CARD */
+/* RECEIPT CARD */
 
 .receipt-item{
-
 background:white;
-
 border-radius:18px;
-
 padding:16px;
-
 margin-bottom:12px;
-
-border:none;
-
 box-shadow:0 4px 14px rgba(0,0,0,.06);
-
 }
-
-/* PRODUCT */
 
 .receipt-name{
-
 font-size:17px;
-
 font-weight:600;
-
-color:#000;
-
 margin-bottom:6px;
-
 }
-
-/* MODIFIERS */
 
 .receipt-mod{
-
 display:flex;
-
 justify-content:space-between;
-
 font-size:14px;
-
 color:#8e8e93;
-
 padding-left:6px;
-
 margin-bottom:2px;
-
 }
-
-/* NOTE */
-
-.receipt-note{
-
-font-size:13px;
-
-color:#8e8e93;
-
-margin-top:4px;
-
-padding-left:6px;
-
-}
-
-/* PRICE ROW */
 
 .receipt-price-row{
-
 display:flex;
-
 justify-content:space-between;
-
 align-items:center;
-
 margin-top:10px;
-
 }
-
-/* PRICE */
 
 .receipt-price{
-
 font-size:17px;
-
 font-weight:600;
-
-color:#000;
-
 }
 
-/* ACTION BUTTON AREA */
+/* ACTION BUTTONS */
 
 .receipt-actions{
-
 display:flex;
-
 gap:8px;
-
 }
-
-/* EDIT BUTTON */
 
 .edit-btn{
-
 background:#007aff;
-
 color:white;
-
 border:none;
-
 border-radius:12px;
-
 padding:6px 14px;
-
 font-size:14px;
-
 font-weight:600;
-
-box-shadow:0 2px 6px rgba(0,122,255,.3);
-
 }
-
-/* DELETE BUTTON */
 
 .delete-btn{
-
 background:#ff3b30;
-
 color:white;
-
 border:none;
-
 border-radius:12px;
-
 padding:6px 14px;
-
 font-size:14px;
-
 font-weight:600;
-
-box-shadow:0 2px 6px rgba(255,59,48,.3);
-
 }
-
-/* BUTTON PRESS */
 
 .edit-btn:active,
 .delete-btn:active{
-
 transform:scale(.95);
-
 }
 
 /* FOOTER */
 
 .order-footer{
-
 background:white;
-
-border-top:none;
-
 padding:18px;
-
 box-shadow:0 -4px 20px rgba(0,0,0,.08);
-
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:10px;
 }
-
-/* TOTAL */
 
 .order-total{
-
 font-size:20px;
-
 font-weight:700;
-
-color:#000;
-
 }
-
-/* SEND BUTTON */
 
 #sendOrderBtn{
-
 background:#007aff;
-
 color:white;
-
 border:none;
-
 border-radius:18px;
-
 padding:16px 28px;
-
 font-size:18px;
-
 font-weight:700;
-
 width:100%;
-
-box-shadow:0 8px 18px rgba(0,122,255,.35);
-
 }
 
-/* BUTTON PRESS */
-
 #sendOrderBtn:active{
-
 transform:scale(.97);
-
 }
