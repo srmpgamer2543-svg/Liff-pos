@@ -1,5 +1,6 @@
 import { CART } from "./cart.js"
 import { openModifier } from "./menu.js"
+import { updateStickyCart } from "./sticky-cart.js"
 
 function cleanName(name){
  return name.replace(/^\d+/, "").trim()
@@ -148,13 +149,7 @@ export function openOrderScreen(){
 
  document.getElementById("backToMenu").onclick = ()=>{
 
-  screen.classList.add("hidden")
-  screen.style.display = "none"
-
-  if(menu) menu.style.display = ""
-  if(sticky) sticky.style.display = "flex"
-
-  document.body.classList.remove("order-open")
+  closeOrderScreen()
 
  }
 
@@ -166,7 +161,7 @@ export function openOrderScreen(){
 
   btn.onclick=()=>{
 
-   const indexes = btn.dataset.indexes.split(",")
+   const indexes = btn.dataset.indexes.split(",").map(Number)
 
    if(indexes.length === 1){
 
@@ -195,13 +190,16 @@ export function openOrderScreen(){
 
   btn.onclick=()=>{
 
-   const indexes = btn.dataset.indexes.split(",")
+   const indexes = btn.dataset.indexes.split(",").map(Number)
 
    if(indexes.length === 1){
 
     if(confirm("ลบรายการนี้?")){
 
      CART.splice(indexes[0],1)
+
+     updateStickyCart(CART)
+
      openOrderScreen()
 
     }
@@ -270,11 +268,11 @@ function openCupSelector(indexes,mode){
  modal.innerHTML = html
  document.body.appendChild(modal)
 
- document.querySelectorAll(".cup-btn").forEach(btn=>{
+ modal.querySelectorAll(".cup-btn").forEach(btn=>{
 
   btn.onclick=()=>{
 
-   const index = btn.dataset.index
+   const index = Number(btn.dataset.index)
    const item = CART[index]
 
    modal.remove()
@@ -291,6 +289,9 @@ function openCupSelector(indexes,mode){
     if(confirm("ลบแก้วนี้?")){
 
      CART.splice(index,1)
+
+     updateStickyCart(CART)
+
      openOrderScreen()
 
     }
