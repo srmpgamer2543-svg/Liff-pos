@@ -105,13 +105,36 @@ export function openOrderScreen(){
 
  document.getElementById("orderTotal").innerText = total
 
- screen.classList.remove("hidden")
- screen.style.display = "flex"
+ document.querySelectorAll(".edit-btn").forEach(btn=>{
 
- if(menu) menu.style.display = "none"
- if(sticky) sticky.style.display = "none"
+  btn.onclick=()=>{
 
- document.body.classList.add("order-open")
+   const indexes = btn.dataset.indexes.split(",")
+
+   if(indexes.length === 1){
+
+    const index = indexes[0]
+    const item = CART[index]
+
+    screen.classList.add("hidden")
+    screen.style.display = "none"
+
+    if(menu) menu.style.display = ""
+    if(sticky) sticky.style.display = "flex"
+
+    document.body.classList.remove("order-open")
+
+    openModifier(item,item.modifiers,index)
+
+   }else{
+
+    showSelectCup(indexes)
+
+   }
+
+  }
+
+})
 
  document.getElementById("backToMenu").onclick = ()=>{
 
