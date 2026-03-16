@@ -16,10 +16,6 @@ export function openOrderScreen(){
 
  let total = 0
 
- /* ===============================
-    รวมรายการที่เหมือนกัน
-  =============================== */
-
  const mergedMap = {}
 
  CART.forEach((item,index)=>{
@@ -45,11 +41,7 @@ export function openOrderScreen(){
 
  const mergedItems = Object.values(mergedMap)
 
- /* ===============================
-    render รายการ
-  =============================== */
-
- mergedItems.forEach((item,mergedIndex)=>{
+ mergedItems.forEach((item)=>{
 
   const div = document.createElement("div")
   div.className = "receipt-item"
@@ -64,29 +56,24 @@ export function openOrderScreen(){
 
     arr.forEach(m=>{
 
-     if(typeof m === "object"){
+     const name = typeof m === "object" ? m.name : m
+     const price = typeof m === "object" ? m.price || 0 : 0
 
-      modCount[m.name] = modCount[m.name] || {count:0,price:m.price || 0}
-      modCount[m.name].count++
+     if(!modCount[name]) modCount[name] = {count:0,price}
 
-     }else{
-
-      modCount[m] = modCount[m] || {count:0,price:0}
-      modCount[m].count++
-
-     }
+     modCount[name].count++
 
     })
 
     Object.entries(modCount).forEach(([name,data])=>{
 
-     const qtyText = data.count > 1 ? ` x${data.count}` : ""
-     const priceText = data.price ? ` +฿${data.price*data.count}` : ""
+     const qty = data.count > 1 ? ` x${data.count}` : ""
+     const price = data.price ? ` +฿${data.price*data.count}` : ""
 
      mods += `
      <div class="receipt-mod">
-        <span class="mod-name">${name}${qtyText}</span>
-        <span class="mod-price">${priceText}</span>
+        <span class="mod-name">${name}${qty}</span>
+        <span class="mod-price">${price}</span>
      </div>
      `
 
@@ -96,17 +83,13 @@ export function openOrderScreen(){
 
   }
 
-  /* ===============================
-     note
-  =============================== */
-
   let noteHTML = ""
 
   if(item.note){
 
    noteHTML = `
    <div class="receipt-note">
-      หมายเหตุ: ${item.note}
+     หมายเหตุ: ${item.note}
    </div>
    `
 
@@ -121,7 +104,6 @@ export function openOrderScreen(){
      </div>
 
      ${mods}
-
      ${noteHTML}
 
      <div class="receipt-price-row">
@@ -133,11 +115,11 @@ export function openOrderScreen(){
        <div class="receipt-actions">
 
         <button class="edit-btn" data-indexes="${item.indexes.join(",")}">
-          แก้ไข
+         แก้ไข
         </button>
 
         <button class="delete-btn" data-indexes="${item.indexes.join(",")}">
-          ลบ
+         ลบ
         </button>
 
        </div>
@@ -154,10 +136,6 @@ export function openOrderScreen(){
 
  })
 
- /* ===============================
-    total
-  =============================== */
-
  document.getElementById("orderTotal").innerText = total
 
  screen.classList.remove("hidden")
@@ -167,10 +145,6 @@ export function openOrderScreen(){
  if(sticky) sticky.style.display = "none"
 
  document.body.classList.add("order-open")
-
- /* ===============================
-    กลับหน้า menu
-  =============================== */
 
  document.getElementById("backToMenu").onclick = ()=>{
 
@@ -199,19 +173,13 @@ export function openOrderScreen(){
     const index = indexes[0]
     const item = CART[index]
 
-    screen.classList.add("hidden")
-    screen.style.display = "none"
+    closeOrderScreen()
 
-    if(menu) menu.style.display = ""
-    if(sticky) sticky.style.display = "flex"
-
-    document.body.classList.remove("order-open")
-
-    openModifier(item, item.modifiers, index)
+    openModifier(item,item.modifiers,index)
 
    }else{
 
-    openCupSelector(indexes)
+    openCupSelector(indexes,"edit")
 
    }
 
@@ -229,13 +197,18 @@ export function openOrderScreen(){
 
    const indexes = btn.dataset.indexes.split(",")
 
-   if(confirm("ลบรายการนี้?")){
+   if(indexes.length === 1){
 
-    indexes.reverse().forEach(i=>{
-     CART.splice(i,1)
-    })
+    if(confirm("ลบรายการนี้?")){
 
-    openOrderScreen()
+     CART.splice(indexes[0],1)
+     openOrderScreen()
+
+    }
+
+   }else{
+
+    openCupSelector(indexes,"delete")
 
    }
 
@@ -246,10 +219,30 @@ export function openOrderScreen(){
 }
 
 /* ===============================
-   เลือกแก้วที่จะแก้
+   ปิดหน้า order
 ================================ */
 
-function openCupSelector(indexes){
+function closeOrderScreen(){
+
+ const screen = document.getElementById("orderScreen")
+ const menu = document.getElementById("menuGrid")
+ const sticky = document.getElementById("sticky-cart")
+
+ screen.classList.add("hidden")
+ screen.style.display = "none"
+
+ if(menu) menu.style.display = ""
+ if(sticky) sticky.style.display = "flex"
+
+ document.body.classList.remove("order-open")
+
+}
+
+/* ===============================
+   modal เลือกแก้ว
+================================ */
+
+function openCupSelector(indexes,mode){
 
  const modal = document.createElement("div")
  modal.className = "cup-selector-modal"
@@ -258,7 +251,7 @@ function openCupSelector(indexes){
  <div class="cup-selector-box">
 
    <div class="cup-selector-title">
-     เลือกแก้วที่ต้องการแก้ไข
+     เลือกแก้ว
    </div>
  `
 
@@ -266,15 +259,13 @@ function openCupSelector(indexes){
 
   html += `
   <button class="cup-btn" data-index="${i}">
-    แก้วที่ ${idx+1}
+   แก้วที่ ${idx+1}
   </button>
   `
 
  })
 
- html += `
- </div>
- `
+ html += `</div>`
 
  modal.innerHTML = html
  document.body.appendChild(modal)
@@ -288,7 +279,23 @@ function openCupSelector(indexes){
 
    modal.remove()
 
-   openModifier(item, item.modifiers, index)
+   if(mode==="edit"){
+
+    closeOrderScreen()
+    openModifier(item,item.modifiers,index)
+
+   }
+
+   if(mode==="delete"){
+
+    if(confirm("ลบแก้วนี้?")){
+
+     CART.splice(index,1)
+     openOrderScreen()
+
+    }
+
+   }
 
   }
 
