@@ -16,19 +16,15 @@ export function openOrderScreen(){
 
  let total = 0
 
- /* ⭐ รวมรายการที่เหมือนกัน */
+ /* ===============================
+    รวมรายการที่เหมือนกัน
+  =============================== */
 
  const mergedMap = {}
 
  CART.forEach((item,index)=>{
 
-  const key = item.name + JSON.stringify(
- Object.fromEntries(
-  Object.entries(item.modifiers||{}).map(
-   ([k,v])=>[k,[...v].sort()]
-  )
- )
-)
+  const key = item.name + JSON.stringify(item.modifiers || {})
 
   if(!mergedMap[key]){
 
@@ -49,7 +45,9 @@ export function openOrderScreen(){
 
  const mergedItems = Object.values(mergedMap)
 
- /* ⭐ render รายการ */
+ /* ===============================
+    render รายการ
+  =============================== */
 
  mergedItems.forEach((item,mergedIndex)=>{
 
@@ -62,18 +60,55 @@ export function openOrderScreen(){
 
    Object.entries(item.modifiers).forEach(([group,arr])=>{
 
+    const modCount = {}
+
     arr.forEach(m=>{
+
+     if(typeof m === "object"){
+
+      modCount[m.name] = modCount[m.name] || {count:0,price:m.price || 0}
+      modCount[m.name].count++
+
+     }else{
+
+      modCount[m] = modCount[m] || {count:0,price:0}
+      modCount[m].count++
+
+     }
+
+    })
+
+    Object.entries(modCount).forEach(([name,data])=>{
+
+     const qtyText = data.count > 1 ? ` x${data.count}` : ""
+     const priceText = data.price ? ` +฿${data.price*data.count}` : ""
 
      mods += `
      <div class="receipt-mod">
-        <span class="mod-name">${m}</span>
-        <span class="mod-price"></span>
+        <span class="mod-name">${name}${qtyText}</span>
+        <span class="mod-price">${priceText}</span>
      </div>
      `
 
     })
 
    })
+
+  }
+
+  /* ===============================
+     note
+  =============================== */
+
+  let noteHTML = ""
+
+  if(item.note){
+
+   noteHTML = `
+   <div class="receipt-note">
+      หมายเหตุ: ${item.note}
+   </div>
+   `
 
   }
 
@@ -87,15 +122,25 @@ export function openOrderScreen(){
 
      ${mods}
 
+     ${noteHTML}
+
      <div class="receipt-price-row">
 
        <div class="receipt-price">
          ฿${item.price * item.qty}
        </div>
 
-       <button class="edit-btn" data-indexes="${item.indexes.join(",")}">
-         แก้ไข
-       </button>
+       <div class="receipt-actions">
+
+        <button class="edit-btn" data-indexes="${item.indexes.join(",")}">
+          แก้ไข
+        </button>
+
+        <button class="delete-btn" data-indexes="${item.indexes.join(",")}">
+          ลบ
+        </button>
+
+       </div>
 
      </div>
 
@@ -109,6 +154,10 @@ export function openOrderScreen(){
 
  })
 
+ /* ===============================
+    total
+  =============================== */
+
  document.getElementById("orderTotal").innerText = total
 
  screen.classList.remove("hidden")
@@ -118,6 +167,10 @@ export function openOrderScreen(){
  if(sticky) sticky.style.display = "none"
 
  document.body.classList.add("order-open")
+
+ /* ===============================
+    กลับหน้า menu
+  =============================== */
 
  document.getElementById("backToMenu").onclick = ()=>{
 
@@ -130,6 +183,10 @@ export function openOrderScreen(){
   document.body.classList.remove("order-open")
 
  }
+
+ /* ===============================
+    ปุ่มแก้ไข
+  =============================== */
 
  document.querySelectorAll(".edit-btn").forEach(btn=>{
 
@@ -150,11 +207,35 @@ export function openOrderScreen(){
 
     document.body.classList.remove("order-open")
 
-    openModifier(item,item.modifiers,index)
+    openModifier(item, item.modifiers, index)
 
    }else{
 
-    showSelectCup(indexes)
+    openCupSelector(indexes)
+
+   }
+
+  }
+
+ })
+
+ /* ===============================
+    ปุ่มลบ
+  =============================== */
+
+ document.querySelectorAll(".delete-btn").forEach(btn=>{
+
+  btn.onclick=()=>{
+
+   const indexes = btn.dataset.indexes.split(",")
+
+   if(confirm("ลบรายการนี้?")){
+
+    indexes.reverse().forEach(i=>{
+     CART.splice(i,1)
+    })
+
+    openOrderScreen()
 
    }
 
@@ -164,63 +245,60 @@ export function openOrderScreen(){
 
 }
 
-/* ⭐ ฟังก์ชันเลือกแก้วเมื่อมีรายการซ้ำ */
+/* ===============================
+   เลือกแก้วที่จะแก้
+================================ */
 
-function showSelectCup(indexes){
+function openCupSelector(indexes){
+
+ const modal = document.createElement("div")
+ modal.className = "cup-selector-modal"
 
  let html = `
- <div class="cup-picker">
- <div class="cup-title">เลือกแก้วที่ต้องการแก้ไข</div>
+ <div class="cup-selector-box">
+
+   <div class="cup-selector-title">
+     เลือกแก้วที่ต้องการแก้ไข
+   </div>
  `
 
  indexes.forEach((i,idx)=>{
 
   html += `
   <button class="cup-btn" data-index="${i}">
-   แก้วที่ ${idx+1}
+    แก้วที่ ${idx+1}
   </button>
   `
 
  })
 
- html += `</div>`
+ html += `
+ </div>
+ `
 
- const picker = document.createElement("div")
- picker.className="cup-overlay"
- picker.innerHTML = html
-
- document.body.appendChild(picker)
+ modal.innerHTML = html
+ document.body.appendChild(modal)
 
  document.querySelectorAll(".cup-btn").forEach(btn=>{
 
   btn.onclick=()=>{
 
-   const index = Number(btn.dataset.index)
+   const index = btn.dataset.index
    const item = CART[index]
 
-   picker.remove()
+   modal.remove()
 
-   /* ปิด order screen ก่อน */
-   const screen = document.getElementById("orderScreen")
-   const menu = document.getElementById("menuGrid")
-   const sticky = document.getElementById("sticky-cart")
-
-   screen.classList.add("hidden")
-   screen.style.display = "none"
-
-   if(menu) menu.style.display = ""
-   if(sticky) sticky.style.display = "flex"
-
-   document.body.classList.remove("order-open")
-
-   /* เปิด modifier */
-   openModifier(item,item.modifiers,index)
+   openModifier(item, item.modifiers, index)
 
   }
 
-})
+ })
 
 }
+
+/* ===============================
+   init
+================================ */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
