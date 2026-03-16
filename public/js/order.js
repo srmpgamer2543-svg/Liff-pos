@@ -16,7 +16,36 @@ export function openOrderScreen(){
 
  let total = 0
 
+ /* ⭐ รวมรายการที่เหมือนกัน */
+
+ const mergedMap = {}
+
  CART.forEach((item,index)=>{
+
+  const key = item.name + JSON.stringify(item.modifiers || {})
+
+  if(!mergedMap[key]){
+
+   mergedMap[key] = {
+    ...item,
+    qty:1,
+    indexes:[index]
+   }
+
+  }else{
+
+   mergedMap[key].qty++
+   mergedMap[key].indexes.push(index)
+
+  }
+
+ })
+
+ const mergedItems = Object.values(mergedMap)
+
+ /* ⭐ render รายการ */
+
+ mergedItems.forEach((item,mergedIndex)=>{
 
   const div = document.createElement("div")
   div.className = "receipt-item"
@@ -47,7 +76,7 @@ export function openOrderScreen(){
    <div class="receipt-product">
 
      <div class="receipt-name">
-       ${cleanName(item.name)}
+       ${cleanName(item.name)} x${item.qty}
      </div>
 
      ${mods}
@@ -55,10 +84,10 @@ export function openOrderScreen(){
      <div class="receipt-price-row">
 
        <div class="receipt-price">
-         ฿${item.price}
+         ฿${item.price * item.qty}
        </div>
 
-       <button class="edit-btn" data-index="${index}">
+       <button class="edit-btn" data-index="${item.indexes[0]}">
          แก้ไข
        </button>
 
@@ -68,7 +97,7 @@ export function openOrderScreen(){
 
   `
 
-  total += item.price
+  total += item.price * item.qty
 
   list.appendChild(div)
 
