@@ -194,11 +194,25 @@ function showSelectCup(indexes){
 
    picker.remove()
 
+   /* ปิด order screen ก่อน */
+   const screen = document.getElementById("orderScreen")
+   const menu = document.getElementById("menuGrid")
+   const sticky = document.getElementById("sticky-cart")
+
+   screen.classList.add("hidden")
+   screen.style.display = "none"
+
+   if(menu) menu.style.display = ""
+   if(sticky) sticky.style.display = "flex"
+
+   document.body.classList.remove("order-open")
+
+   /* เปิด modifier */
    openModifier(item,item.modifiers,index)
 
   }
 
- })
+})
 
 }
 
