@@ -105,6 +105,26 @@ export function openOrderScreen(){
 
  document.getElementById("orderTotal").innerText = total
 
+ screen.classList.remove("hidden")
+ screen.style.display = "flex"
+
+ if(menu) menu.style.display = "none"
+ if(sticky) sticky.style.display = "none"
+
+ document.body.classList.add("order-open")
+
+ document.getElementById("backToMenu").onclick = ()=>{
+
+  screen.classList.add("hidden")
+  screen.style.display = "none"
+
+  if(menu) menu.style.display = ""
+  if(sticky) sticky.style.display = "flex"
+
+  document.body.classList.remove("order-open")
+
+ }
+
  document.querySelectorAll(".edit-btn").forEach(btn=>{
 
   btn.onclick=()=>{
@@ -125,49 +145,6 @@ export function openOrderScreen(){
     document.body.classList.remove("order-open")
 
     openModifier(item,item.modifiers,index)
-
-   }else{
-
-    showSelectCup(indexes)
-
-   }
-
-  }
-
-})
-
- document.getElementById("backToMenu").onclick = ()=>{
-
-  screen.classList.add("hidden")
-  screen.style.display = "none"
-
-  if(menu) menu.style.display = ""
-  if(sticky) sticky.style.display = "flex"
-
-  document.body.classList.remove("order-open")
-
- }
-
- document.querySelectorAll(".edit-btn").forEach(btn=>{
-
-  btn.onclick=()=>{
-
-   const indexes = btn.dataset.indexes.split(",")
-
-   screen.classList.add("hidden")
-   screen.style.display = "none"
-
-   if(menu) menu.style.display = ""
-   if(sticky) sticky.style.display = "flex"
-
-   document.body.classList.remove("order-open")
-
-   if(indexes.length === 1){
-
-    const index = indexes[0]
-    const item = CART[index]
-
-    openModifier(item, item.modifiers, index)
 
    }else{
 
