@@ -189,7 +189,7 @@ function showSelectCup(indexes){
 
   btn.onclick=()=>{
 
-   const index = btn.dataset.index
+   const index = Number(btn.dataset.index)
    const item = CART[index]
 
    picker.remove()
