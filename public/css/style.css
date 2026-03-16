@@ -803,3 +803,253 @@ font-weight:700;
 color:#111;
 }
 
+/* ===============================
+   IOS ORDER REVIEW STYLE
+================================ */
+
+/* SCREEN */
+
+.order-screen{
+
+background:#f2f2f7;
+
+}
+
+/* HEADER */
+
+.order-header{
+
+background:#f2f2f7;
+
+border-bottom:0;
+
+padding:16px;
+
+}
+
+.order-header h2{
+
+font-size:20px;
+font-weight:700;
+color:#000;
+
+}
+
+/* LIST */
+
+#orderList{
+
+padding:12px;
+
+}
+
+/* CARD */
+
+.receipt-item{
+
+background:white;
+
+border-radius:18px;
+
+padding:16px;
+
+margin-bottom:12px;
+
+border:none;
+
+box-shadow:0 4px 14px rgba(0,0,0,.06);
+
+}
+
+/* PRODUCT */
+
+.receipt-name{
+
+font-size:17px;
+
+font-weight:600;
+
+color:#000;
+
+margin-bottom:6px;
+
+}
+
+/* MODIFIERS */
+
+.receipt-mod{
+
+display:flex;
+
+justify-content:space-between;
+
+font-size:14px;
+
+color:#8e8e93;
+
+padding-left:6px;
+
+margin-bottom:2px;
+
+}
+
+/* NOTE */
+
+.receipt-note{
+
+font-size:13px;
+
+color:#8e8e93;
+
+margin-top:4px;
+
+padding-left:6px;
+
+}
+
+/* PRICE ROW */
+
+.receipt-price-row{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-top:10px;
+
+}
+
+/* PRICE */
+
+.receipt-price{
+
+font-size:17px;
+
+font-weight:600;
+
+color:#000;
+
+}
+
+/* ACTION BUTTON AREA */
+
+.receipt-actions{
+
+display:flex;
+
+gap:8px;
+
+}
+
+/* EDIT BUTTON */
+
+.edit-btn{
+
+background:#007aff;
+
+color:white;
+
+border:none;
+
+border-radius:12px;
+
+padding:6px 14px;
+
+font-size:14px;
+
+font-weight:600;
+
+box-shadow:0 2px 6px rgba(0,122,255,.3);
+
+}
+
+/* DELETE BUTTON */
+
+.delete-btn{
+
+background:#ff3b30;
+
+color:white;
+
+border:none;
+
+border-radius:12px;
+
+padding:6px 14px;
+
+font-size:14px;
+
+font-weight:600;
+
+box-shadow:0 2px 6px rgba(255,59,48,.3);
+
+}
+
+/* BUTTON PRESS */
+
+.edit-btn:active,
+.delete-btn:active{
+
+transform:scale(.95);
+
+}
+
+/* FOOTER */
+
+.order-footer{
+
+background:white;
+
+border-top:none;
+
+padding:18px;
+
+box-shadow:0 -4px 20px rgba(0,0,0,.08);
+
+}
+
+/* TOTAL */
+
+.order-total{
+
+font-size:20px;
+
+font-weight:700;
+
+color:#000;
+
+}
+
+/* SEND BUTTON */
+
+#sendOrderBtn{
+
+background:#007aff;
+
+color:white;
+
+border:none;
+
+border-radius:18px;
+
+padding:16px 28px;
+
+font-size:18px;
+
+font-weight:700;
+
+width:100%;
+
+box-shadow:0 8px 18px rgba(0,122,255,.35);
+
+}
+
+/* BUTTON PRESS */
+
+#sendOrderBtn:active{
+
+transform:scale(.97);
+
+}
