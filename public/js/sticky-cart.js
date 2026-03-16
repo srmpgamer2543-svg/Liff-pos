@@ -26,7 +26,7 @@ export function updateStickyCart(cart){
  cart.forEach(item=>{
 
   totalItems += item.qty || 1
-  totalPrice += item.totalPrice || item.price
+  totalPrice += item.price
 
  })
 
