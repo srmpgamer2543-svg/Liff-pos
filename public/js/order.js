@@ -163,20 +163,12 @@ export function openOrderScreen(){
 
    const indexes = btn.dataset.indexes.split(",").map(Number)
 
-   if(indexes.length === 1){
+   const index = indexes[0]
+   const item = CART[index]
 
-    const index = indexes[0]
-    const item = CART[index]
+   closeOrderScreen()
 
-    closeOrderScreen()
-
-    openModifier(item,item.modifiers,index)
-
-   }else{
-
-    openCupSelector(indexes,"edit")
-
-   }
+   openModifier(item,item.modifiers,index)
 
   }
 
@@ -192,21 +184,17 @@ export function openOrderScreen(){
 
    const indexes = btn.dataset.indexes.split(",").map(Number)
 
-   if(indexes.length === 1){
+   if(confirm("ลบรายการนี้ทั้งหมด?")){
 
-    if(confirm("ลบรายการนี้?")){
+    indexes.sort((a,b)=>b-a).forEach(i=>{
 
-     CART.splice(indexes[0],1)
+     CART.splice(i,1)
 
-     updateStickyCart(CART)
+    })
 
-     openOrderScreen()
+    updateStickyCart(CART)
 
-    }
-
-   }else{
-
-    openCupSelector(indexes,"delete")
+    openOrderScreen()
 
    }
 
@@ -233,74 +221,6 @@ function closeOrderScreen(){
  if(sticky) sticky.style.display = "flex"
 
  document.body.classList.remove("order-open")
-
-}
-
-/* ===============================
-   modal เลือกแก้ว
-================================ */
-
-function openCupSelector(indexes,mode){
-
- const modal = document.createElement("div")
- modal.className = "cup-selector-modal"
-
- let html = `
- <div class="cup-selector-box">
-
-   <div class="cup-selector-title">
-     เลือกแก้ว
-   </div>
- `
-
- indexes.forEach((i,idx)=>{
-
-  html += `
-  <button class="cup-btn" data-index="${i}">
-   แก้วที่ ${idx+1}
-  </button>
-  `
-
- })
-
- html += `</div>`
-
- modal.innerHTML = html
- document.body.appendChild(modal)
-
- modal.querySelectorAll(".cup-btn").forEach(btn=>{
-
-  btn.onclick=()=>{
-
-   const index = Number(btn.dataset.index)
-   const item = CART[index]
-
-   modal.remove()
-
-   if(mode==="edit"){
-
-    closeOrderScreen()
-    openModifier(item,item.modifiers,index)
-
-   }
-
-   if(mode==="delete"){
-
-    if(confirm("ลบแก้วนี้?")){
-
-     CART.splice(index,1)
-
-     updateStickyCart(CART)
-
-     openOrderScreen()
-
-    }
-
-   }
-
-  }
-
- })
 
 }
 
