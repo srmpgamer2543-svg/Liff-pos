@@ -312,10 +312,8 @@ if(previousSelections){
 
    if(topping){
 
-    const qtyEl=topping.querySelector(".top-qty")
-    let current=parseInt(qtyEl.innerText)
-
-    qtyEl.innerText=current+1
+    const qtyEl = topping.querySelector(".top-qty")
+qtyEl.innerText = 1
 
    }
 
@@ -331,7 +329,8 @@ if(oldBtn) oldBtn.remove()
 
 const btn = document.createElement("button")
 btn.className = "confirm-btn"
-btn.innerText = `ใส่ตะกร้า ฿${item.price}`
+const basePrice = item.basePrice || item.price
+btn.innerText = `ใส่ตะกร้า ฿${basePrice}`
 
 overlay.appendChild(btn)
 
@@ -368,11 +367,14 @@ overlay.appendChild(btn)
 
    })
 
-   const qty=parseInt(document.getElementById("qtyNum").innerText)
+   const qty = parseInt(document.getElementById("qtyNum").innerText)
 
-   const total=(item.price+extraPrice)*qty
+// ใช้ basePrice เพื่อไม่ให้บวก modifier ซ้ำ
+const basePrice = item.basePrice || item.price
 
-   btn.innerText=`ใส่ตะกร้า ฿${total}`
+const total = (basePrice + extraPrice) * qty
+
+btn.innerText = `ใส่ตะกร้า ฿${total}`
 
   }
   updateTotalPrice()
@@ -397,8 +399,10 @@ overlay.appendChild(btn)
 
   }
 
-  let qty=1
-  const qtyNum=document.getElementById("qtyNum")
+  let qty = item.qty || 1
+const qtyNum = document.getElementById("qtyNum")
+
+qtyNum.innerText = qty
 
   document.getElementById("qtyMinus").onclick=()=>{
 
