@@ -7,6 +7,8 @@ function cleanName(name){
  return name.replace(/^\d+/, "").trim()
 }
 
+let isSending = false // 👈 lock ยิงซ้ำ
+
 export function openOrderScreen(){
 
  const screen = document.getElementById("orderScreen")
@@ -154,10 +156,6 @@ export function openOrderScreen(){
 
  }
 
- /* ===============================
-    ปุ่มแก้ไข
-  =============================== */
-
  document.querySelectorAll(".edit-btn").forEach(btn=>{
 
   btn.onclick=()=>{
@@ -175,10 +173,6 @@ export function openOrderScreen(){
 
  })
 
- /* ===============================
-    ปุ่มลบ
-  =============================== */
-
  document.querySelectorAll(".delete-btn").forEach(btn=>{
 
   btn.onclick=()=>{
@@ -188,9 +182,7 @@ export function openOrderScreen(){
    if(confirm("ลบรายการนี้ทั้งหมด?")){
 
     indexes.sort((a,b)=>b-a).forEach(i=>{
-
      CART.splice(i,1)
-
     })
 
     updateStickyCart(CART)
@@ -204,10 +196,6 @@ export function openOrderScreen(){
  })
 
 }
-
-/* ===============================
-   ปิดหน้า order
-================================ */
 
 function closeOrderScreen(){
 
@@ -224,10 +212,6 @@ function closeOrderScreen(){
  document.body.classList.remove("order-open")
 
 }
-
-/* ===============================
-   init
-================================ */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
@@ -248,41 +232,46 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 async function sendOrder(){
 
- if(CART.length===0){
+ if(isSending) return // 👈 กันกดรัว
 
+ if(CART.length===0){
   window.showIOSAlert("ไม่มีสินค้า")
   return
+ }
 
+ const btn = document.getElementById("sendOrderBtn")
+ isSending = true
+
+ if(btn){
+  btn.disabled = true
+  btn.innerText = "กำลังส่ง..."
  }
 
  try{
 
-  /* รวมราคา */
-
   let total = 0
-
   CART.forEach(i=>{
    total += i.price
   })
-
-  /* สร้าง order */
 
   const order = await createOrder({
    table_id:1,
    total:total
   })
 
+  console.log("ORDER:", order) // 👈 debug
+
+  if(!order || !order.id){
+   throw new Error("create order failed")
+  }
+
   const orderId = order.id
 
-  /* เตรียม order items */
-
   const items = CART.map(i=>({
-
    order_id: orderId,
    name: i.name,
    price: i.price,
    modifiers: i.modifiers || {}
-
   }))
 
   await createOrderItems(items)
@@ -296,6 +285,13 @@ async function sendOrder(){
   console.error(err)
 
   window.showIOSAlert("ส่งออเดอร์ไม่สำเร็จ")
+
+  isSending = false
+
+  if(btn){
+   btn.disabled = false
+   btn.innerText = "ส่งออเดอร์"
+  }
 
  }
 
