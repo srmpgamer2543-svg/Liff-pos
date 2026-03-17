@@ -40,88 +40,119 @@ export default async function handler(req,res){
   const data = JSON.parse(text)
 
   // =========================
-  // ✅ BUILD LINE MESSAGE
-  // =========================
+// ✅ BUILD FLEX MESSAGE
+// =========================
 
-  let message = "🧾 ออเดอร์ใหม่\n\n"
+const orderId = body[0]?.order_id || ""
 
-  let total = 0
+// รวมรายการ
+let itemsText = ""
+let total = 0
 
-  body.forEach((item,index)=>{
+body.forEach(item=>{
 
-   const name = item.name
-   const price = Number(item.price || 0)
+ const price = Number(item.price || 0)
+ total += price
 
-   total += price
+ itemsText += `• ${item.name} (฿${price})\n`
 
-   message += `${index+1}. ${name}\n`
+ if(item.modifiers){
 
-   // 👉 modifiers
-   if(item.modifiers){
-
-    Object.entries(item.modifiers).forEach(([group,arr])=>{
-
-     const modCount = {}
-
-     arr.forEach(m=>{
-      const modName = typeof m === "object" ? m.name : m
-      if(!modCount[modName]) modCount[modName] = 0
-      modCount[modName]++
-     })
-
-     Object.entries(modCount).forEach(([modName,count])=>{
-      const qty = count > 1 ? ` x${count}` : ""
-      message += `   - ${modName}${qty}\n`
-     })
-
-    })
-
-   }
-
-   message += `   ฿${price}\n\n`
-
-  })
-
-  message += `💰 รวม ${total} บาท`
-
-  // =========================
-  // ✅ SEND LINE
-  // =========================
-
-  try{
-
-   await fetch("https://api.line.me/v2/bot/message/push", {
-    method: "POST",
-    headers: {
-     "Content-Type": "application/json",
-     "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
-    },
-    body: JSON.stringify({
-     to: "Cc6a14d049cf48d283d33bb8ee1b3873c",
-     messages: [
-      {
-       type: "text",
-       text: message
-      }
-     ]
-    })
+  Object.values(item.modifiers).forEach(arr=>{
+   arr.forEach(m=>{
+    const name = typeof m === "object" ? m.name : m
+    itemsText += `   - ${name}\n`
    })
-
-   console.log("✅ LINE SENT")
-
-  }catch(lineErr){
-
-   console.log("⚠️ LINE ERROR:", lineErr.message)
-
-  }
-
-  res.json(data)
-
- }catch(err){
-
-  console.log("🔥 ERROR:", err)
-  res.status(500).json({error:err.message})
+  })
 
  }
 
+})
+
+// FLEX
+const flex = {
+ type: "flex",
+ altText: "มีออเดอร์ใหม่",
+ contents: {
+  type: "bubble",
+  size: "mega",
+  body: {
+   type: "box",
+   layout: "vertical",
+   contents: [
+
+    {
+     type: "text",
+     text: "🧾 ออเดอร์ใหม่",
+     weight: "bold",
+     size: "xl"
+    },
+
+    {
+     type: "text",
+     text: `Order ID: ${orderId}`,
+     size: "sm",
+     color: "#888888"
+    },
+
+    {
+     type: "separator",
+     margin: "md"
+    },
+
+    {
+     type: "text",
+     text: itemsText,
+     wrap: true,
+     size: "sm",
+     margin: "md"
+    },
+
+    {
+     type: "separator",
+     margin: "md"
+    },
+
+    {
+     type: "text",
+     text: `รวม ${total} บาท`,
+     weight: "bold",
+     size: "lg",
+     margin: "md"
+    }
+
+   ]
+  },
+
+  footer: {
+   type: "box",
+   layout: "vertical",
+   spacing: "sm",
+   contents: [
+
+    {
+     type: "button",
+     style: "primary",
+     color: "#16a34a",
+     action: {
+      type: "postback",
+      label: "รับออเดอร์",
+      data: `action=accept&order_id=${orderId}`
+     }
+    },
+
+    {
+     type: "button",
+     style: "secondary",
+     action: {
+      type: "postback",
+      label: "ทำเสร็จแล้ว",
+      data: `action=done&order_id=${orderId}`
+     }
+    }
+
+   ]
+  }
+
+ }
 }
