@@ -52,7 +52,32 @@ export default async function handler(req,res){
    return res.status(500).json({error:"No order returned"})
   }
 
-  res.json(data[0])
+  const order = data[0]
+
+  // ✅ ส่ง LINE แจ้งเตือน
+  try{
+   await fetch("https://api.line.me/v2/bot/message/push", {
+    method: "POST",
+    headers: {
+     "Content-Type": "application/json",
+     "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+    },
+    body: JSON.stringify({
+     to: "Cc6a14d049cf48d283d33bb8ee1b3873c",
+     messages: [
+      {
+       type: "text",
+       text: `🧾 ออเดอร์ใหม่\nโต๊ะ: ${order.table_id}\nยอด: ${order.total} บาท`
+      }
+     ]
+    })
+   })
+   console.log("✅ LINE SENT")
+  }catch(lineErr){
+   console.log("⚠️ LINE ERROR:", lineErr.message)
+  }
+
+  res.json(order)
 
  }catch(err){
 
