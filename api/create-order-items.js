@@ -11,7 +11,12 @@ export default async function handler(req,res){
 
   const body = req.body
 
-  console.log("📦 BODY:", JSON.stringify(body))
+  console.log("📦 BODY:", JSON.stringify(body,null,2))
+
+  if(!Array.isArray(body) || body.length===0){
+   console.log("❌ INVALID BODY")
+   return res.status(400).json({error:"invalid body"})
+  }
 
   // =========================
   // ✅ INSERT ITEMS
@@ -47,7 +52,35 @@ export default async function handler(req,res){
   // =========================
 
   const orderId = body[0]?.order_id || ""
-  const customerId = body[0]?.line_user_id || ""
+  let customerId = body[0]?.line_user_id || ""
+
+  console.log("🧾 ORDER ID:", orderId)
+  console.log("👤 CUSTOMER ID (from items):", customerId)
+
+  // =========================
+  // ✅ FALLBACK USER ID
+  // =========================
+
+  if(!customerId && orderId){
+
+   console.log("⚠️ TRY FETCH USER ID FROM ORDER")
+
+   const orderRes = await fetch(
+    `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=line_user_id`,
+    {
+     headers:{
+      apikey:process.env.SUPABASE_KEY,
+      Authorization:`Bearer ${process.env.SUPABASE_KEY}`
+     }
+    }
+   )
+
+   const orderData = await orderRes.json()
+
+   customerId = orderData?.[0]?.line_user_id || ""
+
+   console.log("🔁 FETCHED USER ID:", customerId)
+  }
 
   let itemsText = ""
   let total = 0
@@ -141,7 +174,7 @@ export default async function handler(req,res){
        action: {
         type: "postback",
         label: "รับออเดอร์",
-        data: `action=accept&order_id=${orderId}&user_id=${customerId}`
+        data: `action=accept&order_id=${orderId}&user_id=${customerId || "none"}`
        }
       },
 
@@ -151,7 +184,7 @@ export default async function handler(req,res){
        action: {
         type: "postback",
         label: "ทำเสร็จแล้ว",
-        data: `action=done&order_id=${orderId}&user_id=${customerId}`
+        data: `action=done&order_id=${orderId}&user_id=${customerId || "none"}`
        }
       }
 
@@ -168,9 +201,12 @@ export default async function handler(req,res){
 
    const shopId = process.env.LINE_GROUP_ID
 
+   console.log("🏪 SHOP ID:", shopId)
+
    // 🏪 ส่งให้ร้าน
    if(shopId){
-    await fetch("https://api.line.me/v2/bot/message/push", {
+
+    const r = await fetch("https://api.line.me/v2/bot/message/push", {
      method: "POST",
      headers: {
       "Content-Type": "application/json",
@@ -181,12 +217,20 @@ export default async function handler(req,res){
       messages: [flex]
      })
     })
-    console.log("🏪 SENT TO SHOP")
+
+    const txt = await r.text()
+
+    console.log("📨 SHOP STATUS:", r.status)
+    console.log("📨 SHOP RESPONSE:", txt)
+
+   }else{
+    console.log("❌ NO LINE_GROUP_ID")
    }
 
    // 👤 ส่งให้ลูกค้า
    if(customerId){
-    await fetch("https://api.line.me/v2/bot/message/push", {
+
+    const r = await fetch("https://api.line.me/v2/bot/message/push", {
      method: "POST",
      headers: {
       "Content-Type": "application/json",
@@ -202,7 +246,14 @@ export default async function handler(req,res){
       ]
      })
     })
-    console.log("👤 SENT TO CUSTOMER")
+
+    const txt = await r.text()
+
+    console.log("👤 CUSTOMER STATUS:", r.status)
+    console.log("👤 CUSTOMER RESPONSE:", txt)
+
+   }else{
+    console.log("❌ NO CUSTOMER ID")
    }
 
   }catch(lineErr){
@@ -218,4 +269,4 @@ export default async function handler(req,res){
 
  }
 
-             }
+}
