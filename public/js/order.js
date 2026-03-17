@@ -269,11 +269,12 @@ async function sendOrder(){
   const orderId = order.id
 
   const items = CART.map(i=>({
-   order_id: orderId,
-   name: i.name,
-   price: i.price,
-   modifiers: i.modifiers || {}
-  }))
+ order_id: orderId,
+ name: i.name,
+ price: i.price,
+ modifiers: i.modifiers || {},
+ line_user_id: window.lineUserId // 🔥 เพิ่มบรรทัดนี้
+}))
 
   await createOrderItems(items)
 
