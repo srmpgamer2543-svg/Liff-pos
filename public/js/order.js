@@ -238,7 +238,15 @@ document.addEventListener("DOMContentLoaded",()=>{
   screen.style.display = "none"
  }
 
- async function sendOrder(){
+ const sendBtn = document.getElementById("sendOrderBtn")
+
+ if(sendBtn){
+  sendBtn.onclick = sendOrder
+ }
+
+})
+
+async function sendOrder(){
 
  if(CART.length===0){
 
@@ -275,18 +283,6 @@ document.addEventListener("DOMContentLoaded",()=>{
    price: i.price,
    modifiers: i.modifiers || {}
 
-   document.addEventListener("DOMContentLoaded",()=>{
-
- const sendBtn = document.getElementById("sendOrderBtn")
-
- if(sendBtn){
-
-  sendBtn.onclick = sendOrder
-
- }
-
-})
-
   }))
 
   await createOrderItems(items)
@@ -304,4 +300,3 @@ document.addEventListener("DOMContentLoaded",()=>{
  }
 
 }
-})
