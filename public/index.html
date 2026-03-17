@@ -113,5 +113,30 @@ window.showIOSAlert = function(message){
 
 </script>
 
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<script>
+window.lineUserId = null
+
+async function initLiff(){
+
+ await liff.init({ liffId: "2009308319-2r10XrGl" })
+
+ if(!liff.isLoggedIn()){
+  liff.login()
+  return
+ }
+
+ const profile = await liff.getProfile()
+
+ window.lineUserId = profile.userId
+
+ console.log("✅ USER ID:", window.lineUserId)
+
+}
+
+initLiff()
+</script>
+  
 </body>
 </html>
