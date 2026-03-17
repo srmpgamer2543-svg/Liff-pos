@@ -16,27 +16,30 @@ export default async function handler(req, res) {
    if (event.type === "postback") {
 
     const data = event.postback.data
+
     const params = new URLSearchParams(data)
 
     const action = params.get("action")
     const orderId = params.get("order_id")
 
-    console.log("👉 action:", action)
+    console.log("ACTION:", action)
+    console.log("ORDER:", orderId)
 
     let newStatus = "pending"
     let statusText = ""
 
     if (action === "accept") {
       newStatus = "preparing"
-      statusText = "🧑‍🍳 กำลังเตรียมอาหาร"
+      statusText = "🧑‍🍳 ร้านกำลังเตรียมเครื่องดื่มของคุณ"
     }
 
     if (action === "done") {
       newStatus = "completed"
-      statusText = "🎉 ออเดอร์เสร็จแล้ว"
+      statusText = "🎉 เครื่องดื่มของคุณเสร็จแล้ว"
     }
 
-    // update DB
+    // update status
+
     await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
       {
@@ -53,6 +56,7 @@ export default async function handler(req, res) {
     )
 
     // get customer id
+
     const orderRes = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=line_user_id`,
       {
@@ -64,69 +68,89 @@ export default async function handler(req, res) {
     )
 
     const orderData = await orderRes.json()
+
     const customerId = orderData?.[0]?.line_user_id
 
-    // =========================
-    // ✅ FLEX ลูกค้า (อัปเดตสถานะ)
-    // =========================
     if (customerId) {
 
       const flex = {
+
         type: "flex",
+
         altText: `อัปเดตออเดอร์ #${orderId}`,
+
         contents: {
+
           type: "bubble",
+
           body: {
+
             type: "box",
+
             layout: "vertical",
+
             contents: [
+
               {
                 type: "text",
                 text: statusText,
                 weight: "bold",
                 size: "xl"
               },
+
               {
                 type: "text",
                 text: `ออเดอร์ #${orderId}`,
                 size: "sm",
                 color: "#999"
               }
+
             ]
+
           }
+
         }
+
       }
 
-      await fetch("https://api.line.me/v2/bot/message/push", {
+      await fetch(
+        "https://api.line.me/v2/bot/message/push",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+          },
+          body: JSON.stringify({
+            to: customerId,
+            messages: [flex]
+          })
+        }
+      )
+
+    }
+
+    // reply กลุ่ม
+
+    await fetch(
+      "https://api.line.me/v2/bot/message/reply",
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
         },
         body: JSON.stringify({
-          to: customerId,
-          messages: [flex]
+          replyToken: event.replyToken,
+          messages: [
+            {
+              type: "text",
+              text: `สถานะออเดอร์ ${orderId} → ${newStatus}`
+            }
+          ]
         })
-      })
-    }
-
-    // reply ร้าน
-    await fetch("https://api.line.me/v2/bot/message/reply", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
-      },
-      body: JSON.stringify({
-        replyToken: event.replyToken,
-        messages: [
-          {
-            type: "text",
-            text: `อัปเดตเป็น ${newStatus}`
-          }
-        ]
-      })
-    })
+      }
+    )
 
    }
 
@@ -135,7 +159,11 @@ export default async function handler(req, res) {
   res.status(200).end()
 
  } catch (err) {
+
   console.log("🔥 ERROR:", err)
+
   res.status(500).end()
+
  }
+
 }
