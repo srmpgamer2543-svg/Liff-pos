@@ -8,8 +8,27 @@ export default async function handler(req, res) {
 
   try {
 
-    const body = req.body
+    // 🔥 FIX: parse raw body (ของเดิมพังตรงนี้)
+    const raw = await new Promise((resolve) => {
+      let data = ""
+      req.on("data", chunk => data += chunk)
+      req.on("end", () => resolve(data))
+    })
+
+    console.log("RAW:", raw)
+
+    let body = {}
+
+    try {
+      body = JSON.parse(raw || "{}")
+    } catch (e) {
+      console.log("❌ JSON PARSE ERROR:", e)
+      body = {}
+    }
+
     const events = body.events || []
+
+    console.log("EVENTS:", events)
 
     for (const event of events) {
 
