@@ -13,7 +13,10 @@ export default async function handler(req,res){
 
   console.log("📦 BODY:", JSON.stringify(body))
 
+  // =========================
   // ✅ insert items ลง supabase
+  // =========================
+
   const response = await fetch(
    process.env.SUPABASE_URL + "/rest/v1/order_items",
    {
@@ -40,7 +43,7 @@ export default async function handler(req,res){
   const data = JSON.parse(text)
 
   // =========================
-  // ✅ BUILD FLEX MESSAGE ก่อน
+  // ✅ BUILD FLEX MESSAGE
   // =========================
 
   const orderId = body[0]?.order_id || ""
@@ -56,14 +59,12 @@ export default async function handler(req,res){
    itemsText += `• ${item.name} (฿${price})\n`
 
    if(item.modifiers){
-
     Object.values(item.modifiers).forEach(arr=>{
      arr.forEach(m=>{
       const name = typeof m === "object" ? m.name : m
       itemsText += `   - ${name}\n`
      })
     })
-
    }
 
   })
@@ -156,10 +157,40 @@ export default async function handler(req,res){
   }
 
   // =========================
-  // ✅ SEND LINE หลัง build
+  // ✅ ดึง line_user_id จาก orders
+  // =========================
+
+  let customerId = null
+
+  try{
+
+   const orderRes = await fetch(
+    `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=line_user_id`,
+    {
+     headers:{
+      apikey:process.env.SUPABASE_KEY,
+      Authorization:`Bearer ${process.env.SUPABASE_KEY}`
+     }
+    }
+   )
+
+   const orderData = await orderRes.json()
+   customerId = orderData?.[0]?.line_user_id
+
+   console.log("👤 CUSTOMER ID:", customerId)
+
+  }catch(err){
+   console.log("⚠️ FETCH ORDER ERROR:", err.message)
+  }
+
+  // =========================
+  // ✅ SEND LINE
   // =========================
 
   try{
+
+   // ❗ fallback: ถ้าไม่มี user → ส่งหาร้าน
+   const targetId = customerId || "Cc6a14d049cf48d283d33bb8ee1b3873c"
 
    await fetch("https://api.line.me/v2/bot/message/push", {
     method: "POST",
@@ -168,12 +199,12 @@ export default async function handler(req,res){
      "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
     },
     body: JSON.stringify({
-     to: "Cc6a14d049cf48d283d33bb8ee1b3873c",
+     to: targetId,
      messages: [flex]
     })
    })
 
-   console.log("✅ LINE SENT")
+   console.log("✅ LINE SENT TO:", targetId)
 
   }catch(lineErr){
    console.log("⚠️ LINE ERROR:", lineErr.message)
