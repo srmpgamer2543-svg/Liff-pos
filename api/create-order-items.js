@@ -14,7 +14,7 @@ export default async function handler(req,res){
   console.log("📦 BODY:", JSON.stringify(body))
 
   // =========================
-  // ✅ insert items ลง supabase
+  // ✅ INSERT ITEMS
   // =========================
 
   const response = await fetch(
@@ -27,7 +27,7 @@ export default async function handler(req,res){
      "Content-Type":"application/json",
      Prefer:"return=representation"
     },
-    body:JSON.stringify(body)
+    body: JSON.stringify(body)
    }
   )
 
@@ -43,15 +43,16 @@ export default async function handler(req,res){
   const data = JSON.parse(text)
 
   // =========================
-  // ✅ BUILD FLEX MESSAGE
+  // ✅ PREPARE DATA
   // =========================
 
   const orderId = body[0]?.order_id || ""
+  const customerId = body[0]?.line_user_id || ""
 
   let itemsText = ""
   let total = 0
 
-  body.forEach(item=>{
+  body.forEach(item => {
 
    const price = Number(item.price || 0)
    total += price
@@ -68,6 +69,10 @@ export default async function handler(req,res){
    }
 
   })
+
+  // =========================
+  // ✅ FLEX (ส่งให้ร้าน)
+  // =========================
 
   const flex = {
    type: "flex",
@@ -136,7 +141,7 @@ export default async function handler(req,res){
        action: {
         type: "postback",
         label: "รับออเดอร์",
-        data: `action=accept&order_id=${orderId}`
+        data: `action=accept&order_id=${orderId}&user_id=${customerId}`
        }
       },
 
@@ -146,41 +151,13 @@ export default async function handler(req,res){
        action: {
         type: "postback",
         label: "ทำเสร็จแล้ว",
-        data: `action=done&order_id=${orderId}`
+        data: `action=done&order_id=${orderId}&user_id=${customerId}`
        }
       }
 
      ]
     }
-
    }
-  }
-
-  // =========================
-  // ✅ ดึง line_user_id จาก orders
-  // =========================
-
-  let customerId = null
-
-  try{
-
-   const orderRes = await fetch(
-    `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=line_user_id`,
-    {
-     headers:{
-      apikey:process.env.SUPABASE_KEY,
-      Authorization:`Bearer ${process.env.SUPABASE_KEY}`
-     }
-    }
-   )
-
-   const orderData = await orderRes.json()
-   customerId = orderData?.[0]?.line_user_id
-
-   console.log("👤 CUSTOMER ID:", customerId)
-
-  }catch(err){
-   console.log("⚠️ FETCH ORDER ERROR:", err.message)
   }
 
   // =========================
@@ -189,22 +166,44 @@ export default async function handler(req,res){
 
   try{
 
-   // ❗ fallback: ถ้าไม่มี user → ส่งหาร้าน
-   const targetId = customerId || "Cc6a14d049cf48d283d33bb8ee1b3873c"
+   const shopId = process.env.LINE_GROUP_ID
 
-   await fetch("https://api.line.me/v2/bot/message/push", {
-    method: "POST",
-    headers: {
-     "Content-Type": "application/json",
-     "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
-    },
-    body: JSON.stringify({
-     to: targetId,
-     messages: [flex]
+   // 🏪 ส่งให้ร้าน
+   if(shopId){
+    await fetch("https://api.line.me/v2/bot/message/push", {
+     method: "POST",
+     headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+     },
+     body: JSON.stringify({
+      to: shopId,
+      messages: [flex]
+     })
     })
-   })
+    console.log("🏪 SENT TO SHOP")
+   }
 
-   console.log("✅ LINE SENT TO:", targetId)
+   // 👤 ส่งให้ลูกค้า
+   if(customerId){
+    await fetch("https://api.line.me/v2/bot/message/push", {
+     method: "POST",
+     headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+     },
+     body: JSON.stringify({
+      to: customerId,
+      messages: [
+       {
+        type: "text",
+        text: `✅ รับออเดอร์แล้ว\nเลขที่: ${orderId}\nรอสักครู่ครับ`
+       }
+      ]
+     })
+    })
+    console.log("👤 SENT TO CUSTOMER")
+   }
 
   }catch(lineErr){
    console.log("⚠️ LINE ERROR:", lineErr.message)
@@ -219,4 +218,4 @@ export default async function handler(req,res){
 
  }
 
-}
+             }
