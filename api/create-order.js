@@ -28,12 +28,12 @@ export default async function handler(req,res){
      "Content-Type":"application/json",
      Prefer:"return=representation"
     },
-    body:JSON.stringify({
- table_id: body.table_id || 1,
- total: body.total,
- status:"pending",
- line_user_id: body.line_user_id || null // 🔥 เพิ่ม
-})
+    body: JSON.stringify({
+     table_id: body.table_id || 1,
+     total: body.total,
+     status: "pending",
+     line_user_id: body.line_user_id || null
+    })
    }
   )
 
@@ -55,28 +55,7 @@ export default async function handler(req,res){
 
   const order = data[0]
 
-  // ✅ ส่ง LINE แจ้งเตือน
-  try{
-   await fetch("https://api.line.me/v2/bot/message/push", {
-    method: "POST",
-    headers: {
-     "Content-Type": "application/json",
-     "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
-    },
-    body: JSON.stringify({
-     to: data[0].line_user_id,
-     messages: [
-      {
-       type: "text",
-       text: `🧾 ออเดอร์ใหม่\nโต๊ะ: ${order.table_id}\nยอด: ${order.total} บาท`
-      }
-     ]
-    })
-   })
-   console.log("✅ LINE SENT")
-  }catch(lineErr){
-   console.log("⚠️ LINE ERROR:", lineErr.message)
-  }
+  // ❌ ห้ามยิง LINE ที่ไฟล์นี้ (ย้ายไป items แล้ว)
 
   res.json(order)
 
