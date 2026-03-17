@@ -1,12 +1,22 @@
 export default async function handler(req,res){
 
+ console.log("=== START create-order ===")
+
  if(req.method!=="POST"){
+  console.log("❌ METHOD:", req.method)
   return res.status(405).end()
  }
 
  try{
 
   const body = req.body
+
+  console.log("📦 BODY:", JSON.stringify(body))
+
+  if(!body.total){
+   console.log("❌ total missing")
+   return res.status(400).json({error:"total is required"})
+  }
 
   const response = await fetch(
    process.env.SUPABASE_URL + "/rest/v1/orders",
@@ -26,18 +36,27 @@ export default async function handler(req,res){
    }
   )
 
-  // 👇 เพิ่มตรงนี้
+  console.log("📡 STATUS:", response.status)
+
+  const text = await response.text()
+  console.log("📡 RESPONSE:", text)
+
   if(!response.ok){
-   const text = await response.text()
    return res.status(500).json({error:text})
   }
 
-  const data = await response.json()
+  const data = JSON.parse(text)
+
+  if(!data || !data[0]){
+   console.log("❌ NO DATA RETURNED")
+   return res.status(500).json({error:"No order returned"})
+  }
 
   res.json(data[0])
 
  }catch(err){
 
+  console.log("🔥 ERROR:", err)
   res.status(500).json({error:err.message})
 
  }
