@@ -232,7 +232,15 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 async function sendOrder(){
 
- if(isSending) return // 👈 กันกดรัว
+ if(isSending) return
+
+ if(!window.lineUserId){
+  console.log("❌ USER ID NULL")
+  window.showIOSAlert("กรุณาเปิดผ่าน LINE ใหม่")
+  return
+ }
+
+ console.log("👤 USER ID:", window.lineUserId)
 
  if(CART.length===0){
   window.showIOSAlert("ไม่มีสินค้า")
@@ -255,12 +263,12 @@ async function sendOrder(){
   })
 
   const order = await createOrder({
- table_id:1,
- total:total,
- line_user_id: window.lineUserId // 🔥 เพิ่มบรรทัดนี้
-})
+   table_id:1,
+   total:total,
+   line_user_id: window.lineUserId
+  })
 
-  console.log("ORDER:", order) // 👈 debug
+  console.log("📦 ORDER:", order)
 
   if(!order || !order.id){
    throw new Error("create order failed")
@@ -269,14 +277,18 @@ async function sendOrder(){
   const orderId = order.id
 
   const items = CART.map(i=>({
- order_id: orderId,
- name: i.name,
- price: i.price,
- modifiers: i.modifiers || {},
- line_user_id: window.lineUserId // 🔥 เพิ่มบรรทัดนี้
-}))
+   order_id: orderId,
+   name: i.name,
+   price: i.price,
+   modifiers: i.modifiers || {},
+   line_user_id: window.lineUserId
+  }))
 
-  await createOrderItems(items)
+  console.log("📦 ITEMS:", items)
+
+  const res = await createOrderItems(items)
+
+  console.log("📡 ITEMS RESPONSE:", res)
 
   window.showIOSAlert("ส่งออเดอร์สำเร็จ")
 
@@ -284,7 +296,7 @@ async function sendOrder(){
 
  }catch(err){
 
-  console.error(err)
+  console.error("🔥 ERROR:", err)
 
   window.showIOSAlert("ส่งออเดอร์ไม่สำเร็จ")
 
