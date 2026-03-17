@@ -71,7 +71,12 @@ export default async function handler(req, res) {
         )
 
         const orderData = await orderRes.json()
+
+        console.log("📦 ORDER DATA:", orderData)
+
         const customerId = orderData?.[0]?.line_user_id
+
+        console.log("👤 CUSTOMER ID:", customerId)
 
         // ======================
         // ดึงรายการสินค้า
@@ -101,13 +106,11 @@ export default async function handler(req, res) {
           return `• ${i.name}\n${mod}`
         }).join("\n")
 
-        console.log("👤 CUSTOMER:", customerId)
-
         // ======================
         // push ลูกค้า
         // ======================
 
-        if (customerId) {
+        if (customerId && typeof customerId === "string") {
 
           const flex = {
             type: "flex",
@@ -147,31 +150,6 @@ export default async function handler(req, res) {
                     color: action === "done" ? "#34C759" : "#FF9500"
                   },
 
-                  // progress bar
-                  {
-                    type: "box",
-                    layout: "horizontal",
-                    margin: "md",
-                    contents: [
-                      {
-                        type: "box",
-                        layout: "vertical",
-                        flex: action === "done" ? 3 : 2,
-                        contents: [],
-                        backgroundColor: "#34C759",
-                        height: "6px"
-                      },
-                      {
-                        type: "box",
-                        layout: "vertical",
-                        flex: action === "done" ? 0 : 1,
-                        contents: [],
-                        backgroundColor: "#dddddd",
-                        height: "6px"
-                      }
-                    ]
-                  },
-
                   {
                     type: "separator",
                     margin: "md"
@@ -197,6 +175,8 @@ export default async function handler(req, res) {
             }
           }
 
+          console.log("📤 SENDING TO LINE USER:", customerId)
+
           const lineRes = await fetch(
             "https://api.line.me/v2/bot/message/push",
             {
@@ -207,14 +187,25 @@ export default async function handler(req, res) {
               },
               body: JSON.stringify({
                 to: customerId,
-                messages: [flex]
+                messages: [
+                  flex,
+                  {
+                    type: "text",
+                    text: `สถานะออเดอร์ #${orderId} → ${newStatus}`
+                  }
+                ]
               })
             }
           )
 
           const lineText = await lineRes.text()
+
           console.log("📨 LINE STATUS:", lineRes.status)
           console.log("📨 LINE RESPONSE:", lineText)
+
+        } else {
+
+          console.log("❌ ไม่พบ customerId → ไม่สามารถ push ได้")
 
         }
 
