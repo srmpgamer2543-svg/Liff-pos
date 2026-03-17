@@ -16,7 +16,6 @@ export default async function handler(req, res) {
     console.log("🧾 ORDER ID:", orderId)
     console.log("👤 CUSTOMER ID:", customerId)
 
-    // ✅ FIX: ตัด line_user_id ออกจาก insert
     const insertData = body.map(i => ({
       order_id: i.order_id,
       name: i.name,
@@ -24,7 +23,6 @@ export default async function handler(req, res) {
       modifiers: i.modifiers
     }))
 
-    // 👉 INSERT order_items
     const r = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/order_items`,
       {
@@ -46,10 +44,8 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: txt })
     }
 
-    // ✅ fallback ไปดึง user จาก orders
+    // fallback user id
     if (!customerId) {
-      console.log("⚠️ NO USER ID → FETCH FROM ORDER")
-
       const orderRes = await fetch(
         `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=line_user_id`,
         {
@@ -62,32 +58,84 @@ export default async function handler(req, res) {
 
       const orderData = await orderRes.json()
       customerId = orderData?.[0]?.line_user_id || ""
-
-      console.log("🔁 FETCHED USER ID:", customerId)
     }
 
-    // 🧾 สร้างข้อความ
+    // =========================
+    // 🧾 TEXT รายการสินค้า
+    // =========================
     const itemsText = body
       .map(i => `• ${i.name} - ${i.price}฿`)
       .join("\n")
 
+    // =========================
+    // 🍏 FLEX STYLE IOS + BUTTON
+    // =========================
     const flex = {
       type: "flex",
       altText: `ออเดอร์ #${orderId}`,
       contents: {
         type: "bubble",
+        size: "mega",
         body: {
           type: "box",
           layout: "vertical",
+          spacing: "md",
           contents: [
-            { type: "text", text: `ออเดอร์ #${orderId}`, weight: "bold", size: "lg" },
-            { type: "text", text: itemsText, wrap: true }
+            {
+              type: "text",
+              text: "🧾 ออเดอร์ใหม่",
+              weight: "bold",
+              size: "xl"
+            },
+            {
+              type: "text",
+              text: `#${orderId}`,
+              size: "sm",
+              color: "#999999"
+            },
+            {
+              type: "separator"
+            },
+            {
+              type: "text",
+              text: itemsText,
+              wrap: true,
+              size: "md"
+            }
+          ]
+        },
+        footer: {
+          type: "box",
+          layout: "vertical",
+          spacing: "sm",
+          contents: [
+            {
+              type: "button",
+              style: "primary",
+              height: "md",
+              color: "#007AFF",
+              action: {
+                type: "postback",
+                label: "✅ รับออเดอร์",
+                data: `action=accept&order_id=${orderId}`
+              }
+            },
+            {
+              type: "button",
+              style: "secondary",
+              height: "md",
+              action: {
+                type: "postback",
+                label: "🎉 เสร็จแล้ว",
+                data: `action=done&order_id=${orderId}`
+              }
+            }
           ]
         }
       }
     }
 
-    // 👉 ส่งร้าน
+    // 👉 ส่งไป "กลุ่มร้าน"
     const shopId = process.env.SHOP_LINE_USER_ID
 
     const r1 = await fetch("https://api.line.me/v2/bot/message/push", {
@@ -105,7 +153,7 @@ export default async function handler(req, res) {
     console.log("📨 SHOP STATUS:", r1.status)
     console.log("📨 SHOP RESP:", await r1.text())
 
-    // 👉 ส่งลูกค้า
+    // 👉 ส่งลูกค้า (เหมือนเดิม)
     if (customerId) {
       const r2 = await fetch("https://api.line.me/v2/bot/message/push", {
         method: "POST",
@@ -115,7 +163,12 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           to: customerId,
-          messages: [{ type: "text", text: `รับออเดอร์ #${orderId} แล้ว` }]
+          messages: [
+            {
+              type: "text",
+              text: `รับออเดอร์ #${orderId} แล้ว`
+            }
+          ]
         })
       })
 
@@ -124,6 +177,7 @@ export default async function handler(req, res) {
     }
 
     res.status(200).json({ ok: true })
+
   } catch (err) {
     console.log("❌ ERROR:", err)
     res.status(500).json({ error: err.message })
