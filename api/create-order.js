@@ -64,7 +64,7 @@ export default async function handler(req,res){
      "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
     },
     body: JSON.stringify({
-     to: "Cc6a14d049cf48d283d33bb8ee1b3873c",
+     to: to: data[0].line_user_id,
      messages: [
       {
        type: "text",
