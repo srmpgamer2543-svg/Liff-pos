@@ -255,9 +255,10 @@ async function sendOrder(){
   })
 
   const order = await createOrder({
-   table_id:1,
-   total:total
-  })
+ table_id:1,
+ total:total,
+ line_user_id: window.lineUserId // 🔥 เพิ่มบรรทัดนี้
+})
 
   console.log("ORDER:", order) // 👈 debug
 
