@@ -9,40 +9,34 @@ export default async function handler(req, res) {
  try {
 
   const body = req.body
-
-  console.log("📩 BODY:", JSON.stringify(body))
-
   const events = body.events || []
 
   for (const event of events) {
 
-   // =========================
-   // ✅ กรณีกดปุ่ม (postback)
-   // =========================
    if (event.type === "postback") {
 
     const data = event.postback.data
-    const userId = event.source.userId
-
-    console.log("👉 POSTBACK:", data)
-
-    // parse data
     const params = new URLSearchParams(data)
+
     const action = params.get("action")
     const orderId = params.get("order_id")
 
     console.log("👉 action:", action)
-    console.log("👉 orderId:", orderId)
-
-    // =========================
-    // ✅ อัปเดตสถานะใน Supabase
-    // =========================
 
     let newStatus = "pending"
+    let statusText = ""
 
-    if (action === "accept") newStatus = "accepted"
-    if (action === "done") newStatus = "done"
+    if (action === "accept") {
+      newStatus = "preparing"
+      statusText = "🧑‍🍳 กำลังเตรียมอาหาร"
+    }
 
+    if (action === "done") {
+      newStatus = "completed"
+      statusText = "🎉 ออเดอร์เสร็จแล้ว"
+    }
+
+    // update DB
     await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
       {
@@ -58,12 +52,7 @@ export default async function handler(req, res) {
       }
     )
 
-    console.log("✅ UPDATED STATUS:", newStatus)
-
-    // =========================
-    // ✅ ดึง line_user_id ของลูกค้า
-    // =========================
-
+    // get customer id
     const orderRes = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=line_user_id`,
       {
@@ -75,25 +64,37 @@ export default async function handler(req, res) {
     )
 
     const orderData = await orderRes.json()
-
     const customerId = orderData?.[0]?.line_user_id
 
-    console.log("👤 customerId:", customerId)
-
     // =========================
-    // ✅ ยิงกลับลูกค้า
+    // ✅ FLEX ลูกค้า (อัปเดตสถานะ)
     // =========================
-
     if (customerId) {
 
-      let msg = "📦 อัปเดตออเดอร์"
-
-      if (action === "accept") {
-        msg = "✅ ร้านรับออเดอร์แล้ว กำลังทำให้ครับ"
-      }
-
-      if (action === "done") {
-        msg = "🎉 ออเดอร์เสร็จแล้ว มารับได้เลยครับ"
+      const flex = {
+        type: "flex",
+        altText: `อัปเดตออเดอร์ #${orderId}`,
+        contents: {
+          type: "bubble",
+          body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: statusText,
+                weight: "bold",
+                size: "xl"
+              },
+              {
+                type: "text",
+                text: `ออเดอร์ #${orderId}`,
+                size: "sm",
+                color: "#999"
+              }
+            ]
+          }
+        }
       }
 
       await fetch("https://api.line.me/v2/bot/message/push", {
@@ -104,22 +105,12 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           to: customerId,
-          messages: [
-            {
-              type: "text",
-              text: msg
-            }
-          ]
+          messages: [flex]
         })
       })
-
-      console.log("📤 SENT TO CUSTOMER")
     }
 
-    // =========================
-    // ✅ ตอบกลับร้าน (reply)
-    // =========================
-
+    // reply ร้าน
     await fetch("https://api.line.me/v2/bot/message/reply", {
       method: "POST",
       headers: {
@@ -131,23 +122,20 @@ export default async function handler(req, res) {
         messages: [
           {
             type: "text",
-            text: `อัปเดตสถานะเป็น ${newStatus} แล้ว`
+            text: `อัปเดตเป็น ${newStatus}`
           }
         ]
       })
     })
 
+   }
+
   }
 
- }
-
- res.status(200).end()
+  res.status(200).end()
 
  } catch (err) {
-
   console.log("🔥 ERROR:", err)
   res.status(500).end()
-
  }
-
 }
