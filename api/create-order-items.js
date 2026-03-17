@@ -1,7 +1,9 @@
 export default async function handler(req, res) {
+
   console.log("=== START create-order-items ===")
 
   try {
+
     const body = req.body
 
     console.log("📦 BODY:", JSON.stringify(body, null, 2))
@@ -35,6 +37,7 @@ export default async function handler(req, res) {
     )
 
     const txt = await r.text()
+
     console.log("📥 INSERT STATUS:", r.status)
     console.log("📥 INSERT RESPONSE:", txt)
 
@@ -42,79 +45,141 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: txt })
     }
 
-    // =========================
-    // 🧾 TEXT รายการสินค้า
-    // =========================
+    // ======================
+    // รายการสินค้า
+    // ======================
+
     const itemsText = body
       .map(i => `• ${i.name} - ${i.price}฿`)
       .join("\n")
 
-    // =========================
-    // 🍏 FLEX ร้าน (มีปุ่ม)
-    // =========================
+    // ======================
+    // FLEX ร้าน (iOS style)
+    // ======================
+
     const shopFlex = {
+
       type: "flex",
-      altText: `ออเดอร์ #${orderId}`,
+
+      altText: `ออเดอร์ใหม่ #${orderId}`,
+
       contents: {
+
         type: "bubble",
+
         size: "mega",
+
         body: {
+
           type: "box",
+
           layout: "vertical",
+
           spacing: "md",
+
           contents: [
-            { type: "text", text: "🧾 ออเดอร์ใหม่", weight: "bold", size: "xl" },
-            { type: "text", text: `#${orderId}`, size: "sm", color: "#999" },
-            { type: "separator" },
-            { type: "text", text: itemsText, wrap: true }
+
+            {
+              type: "text",
+              text: "🧾 ออเดอร์ใหม่",
+              weight: "bold",
+              size: "xl"
+            },
+
+            {
+              type: "text",
+              text: `#${orderId}`,
+              size: "sm",
+              color: "#aaaaaa"
+            },
+
+            {
+              type: "separator"
+            },
+
+            {
+              type: "text",
+              text: itemsText,
+              wrap: true
+            }
+
           ]
+
         },
+
         footer: {
+
           type: "box",
+
           layout: "vertical",
+
           spacing: "sm",
+
           contents: [
+
             {
               type: "button",
               style: "primary",
+              color: "#34C759",
               action: {
                 type: "postback",
-                label: "✅ รับออเดอร์",
+                label: "รับออเดอร์",
                 data: `action=accept&order_id=${orderId}`
               }
             },
+
             {
               type: "button",
               style: "secondary",
               action: {
                 type: "postback",
-                label: "🎉 เสร็จแล้ว",
+                label: "ทำเสร็จแล้ว",
                 data: `action=done&order_id=${orderId}`
               }
             }
+
           ]
+
         }
+
       }
+
     }
 
-    const shopId = process.env.SHOP_LINE_USER_ID
+    const groupId = process.env.SHOP_LINE_GROUP_ID
 
-    await fetch("https://api.line.me/v2/bot/message/push", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
-      },
-      body: JSON.stringify({
-        to: shopId,
-        messages: [shopFlex]
-      })
-    })
+    console.log("👥 GROUP ID:", groupId)
+
+    const lineRes = await fetch(
+      "https://api.line.me/v2/bot/message/push",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({
+          to: groupId,
+          messages: [shopFlex]
+        })
+      }
+    )
+
+    const lineText = await lineRes.text()
+
+    console.log("📨 LINE STATUS:", lineRes.status)
+    console.log("📨 LINE RESPONSE:", lineText)
 
     res.status(200).json({ ok: true })
 
   } catch (err) {
+
     console.log("❌ ERROR:", err)
-    res.status(500).json({ error: err.message })
+
+    res.status(500).json({
+      error: err.message
+    })
+
   }
+
 }
