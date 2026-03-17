@@ -8,7 +8,6 @@ export default async function handler(req, res) {
 
   try {
 
-    // 🔥 FIX: parse raw body (ของเดิมพังตรงนี้)
     const raw = await new Promise((resolve) => {
       let data = ""
       req.on("data", chunk => data += chunk)
@@ -38,10 +37,19 @@ export default async function handler(req, res) {
         const params = new URLSearchParams(data)
 
         const action = params.get("action")
-        const orderId = params.get("order_id")
+        const orderIdRaw = params.get("order_id")
+
+        // 🔥 FIX สำคัญ
+        const orderId = Number(orderIdRaw)
 
         console.log("ACTION:", action)
-        console.log("ORDER:", orderId)
+        console.log("ORDER RAW:", orderIdRaw)
+        console.log("ORDER NUMBER:", orderId)
+
+        if (!orderId) {
+          console.log("❌ orderId ไม่ถูกต้อง")
+          continue
+        }
 
         let newStatus = "pending"
         let statusText = ""
@@ -57,23 +65,29 @@ export default async function handler(req, res) {
         }
 
         // ======================
-        // update status
+        // 🔥 UPDATE STATUS (แก้แล้ว)
         // ======================
 
-        await fetch(
+        const updateRes = await fetch(
           `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
           {
             method: "PATCH",
             headers: {
               apikey: process.env.SUPABASE_KEY,
               Authorization: `Bearer ${process.env.SUPABASE_KEY}`,
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              Prefer: "return=representation"
             },
             body: JSON.stringify({
               status: newStatus
             })
           }
         )
+
+        const updateData = await updateRes.json()
+
+        console.log("🛠 UPDATE STATUS:", updateRes.status)
+        console.log("🛠 UPDATE DATA:", updateData)
 
         // ======================
         // get customer id
