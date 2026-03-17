@@ -120,7 +120,7 @@ window.lineUserId = null
 
 async function initLiff(){
 
- await liff.init({ liffId: "2009308319-2r10XrGl" })
+ await liff.init({ liffId: "2009308319-2r1OXrGl" })
 
  if(!liff.isLoggedIn()){
   liff.login()
@@ -130,8 +130,6 @@ async function initLiff(){
  const profile = await liff.getProfile()
 
  window.lineUserId = profile.userId
-
- alert("USER ID: " + window.lineUserId)
 
  console.log("✅ USER ID:", window.lineUserId)
 
