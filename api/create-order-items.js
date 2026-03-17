@@ -67,10 +67,12 @@ export default async function handler(req, res) {
       .map(i => `• ${i.name} - ${i.price}฿`)
       .join("\n")
 
+    const total = body.reduce((sum, i) => sum + Number(i.price || 0), 0)
+
     // =========================
-    // 🍏 FLEX STYLE IOS + BUTTON
+    // 🍏 FLEX ร้าน (มีปุ่ม)
     // =========================
-    const flex = {
+    const shopFlex = {
       type: "flex",
       altText: `ออเดอร์ #${orderId}`,
       contents: {
@@ -81,27 +83,10 @@ export default async function handler(req, res) {
           layout: "vertical",
           spacing: "md",
           contents: [
-            {
-              type: "text",
-              text: "🧾 ออเดอร์ใหม่",
-              weight: "bold",
-              size: "xl"
-            },
-            {
-              type: "text",
-              text: `#${orderId}`,
-              size: "sm",
-              color: "#999999"
-            },
-            {
-              type: "separator"
-            },
-            {
-              type: "text",
-              text: itemsText,
-              wrap: true,
-              size: "md"
-            }
+            { type: "text", text: "🧾 ออเดอร์ใหม่", weight: "bold", size: "xl" },
+            { type: "text", text: `#${orderId}`, size: "sm", color: "#999" },
+            { type: "separator" },
+            { type: "text", text: itemsText, wrap: true }
           ]
         },
         footer: {
@@ -112,7 +97,6 @@ export default async function handler(req, res) {
             {
               type: "button",
               style: "primary",
-              height: "md",
               color: "#007AFF",
               action: {
                 type: "postback",
@@ -123,7 +107,6 @@ export default async function handler(req, res) {
             {
               type: "button",
               style: "secondary",
-              height: "md",
               action: {
                 type: "postback",
                 label: "🎉 เสร็จแล้ว",
@@ -135,10 +118,77 @@ export default async function handler(req, res) {
       }
     }
 
-    // 👉 ส่งไป "กลุ่มร้าน"
+    // =========================
+    // 🍏 FLEX ลูกค้า (ใหม่)
+    // =========================
+    const customerFlex = {
+      type: "flex",
+      altText: `ออเดอร์ของคุณ #${orderId}`,
+      contents: {
+        type: "bubble",
+        size: "mega",
+        body: {
+          type: "box",
+          layout: "vertical",
+          spacing: "md",
+          contents: [
+            {
+              type: "text",
+              text: "📦 รับออเดอร์แล้ว",
+              weight: "bold",
+              size: "xl",
+              color: "#007AFF"
+            },
+            {
+              type: "text",
+              text: `เลขออเดอร์ #${orderId}`,
+              size: "sm",
+              color: "#999"
+            },
+            {
+              type: "separator"
+            },
+            {
+              type: "text",
+              text: itemsText,
+              wrap: true
+            },
+            {
+              type: "separator"
+            },
+            {
+              type: "box",
+              layout: "horizontal",
+              contents: [
+                {
+                  type: "text",
+                  text: "รวม",
+                  size: "md"
+                },
+                {
+                  type: "text",
+                  text: `${total} บาท`,
+                  size: "md",
+                  align: "end",
+                  weight: "bold"
+                }
+              ]
+            },
+            {
+              type: "text",
+              text: "สถานะ: รอร้านรับออเดอร์",
+              size: "sm",
+              color: "#ff9500"
+            }
+          ]
+        }
+      }
+    }
+
+    // 👉 ส่งร้าน
     const shopId = process.env.SHOP_LINE_USER_ID
 
-    const r1 = await fetch("https://api.line.me/v2/bot/message/push", {
+    await fetch("https://api.line.me/v2/bot/message/push", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -146,16 +196,13 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         to: shopId,
-        messages: [flex]
+        messages: [shopFlex]
       })
     })
 
-    console.log("📨 SHOP STATUS:", r1.status)
-    console.log("📨 SHOP RESP:", await r1.text())
-
-    // 👉 ส่งลูกค้า (เหมือนเดิม)
+    // 👉 ส่งลูกค้า (ใช้ flex ใหม่)
     if (customerId) {
-      const r2 = await fetch("https://api.line.me/v2/bot/message/push", {
+      await fetch("https://api.line.me/v2/bot/message/push", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -163,17 +210,9 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           to: customerId,
-          messages: [
-            {
-              type: "text",
-              text: `รับออเดอร์ #${orderId} แล้ว`
-            }
-          ]
+          messages: [customerFlex]
         })
       })
-
-      console.log("📨 CUSTOMER STATUS:", r2.status)
-      console.log("📨 CUSTOMER RESP:", await r2.text())
     }
 
     res.status(200).json({ ok: true })
