@@ -1,6 +1,7 @@
 import { CART } from "./cart.js"
 import { openModifier } from "./menu.js"
 import { updateStickyCart } from "./sticky-cart.js"
+import { createOrder, createOrderItems } from "./api.js"
 
 function cleanName(name){
  return name.replace(/^\d+/, "").trim()
@@ -237,4 +238,70 @@ document.addEventListener("DOMContentLoaded",()=>{
   screen.style.display = "none"
  }
 
+ async function sendOrder(){
+
+ if(CART.length===0){
+
+  window.showIOSAlert("ไม่มีสินค้า")
+  return
+
+ }
+
+ try{
+
+  /* รวมราคา */
+
+  let total = 0
+
+  CART.forEach(i=>{
+   total += i.price
+  })
+
+  /* สร้าง order */
+
+  const order = await createOrder({
+   table_id:1,
+   total:total
+  })
+
+  const orderId = order.id
+
+  /* เตรียม order items */
+
+  const items = CART.map(i=>({
+
+   order_id: orderId,
+   name: i.name,
+   price: i.price,
+   modifiers: i.modifiers || {}
+
+   document.addEventListener("DOMContentLoaded",()=>{
+
+ const sendBtn = document.getElementById("sendOrderBtn")
+
+ if(sendBtn){
+
+  sendBtn.onclick = sendOrder
+
+ }
+
+})
+
+  }))
+
+  await createOrderItems(items)
+
+  window.showIOSAlert("ส่งออเดอร์สำเร็จ")
+
+  location.reload()
+
+ }catch(err){
+
+  console.error(err)
+
+  window.showIOSAlert("ส่งออเดอร์ไม่สำเร็จ")
+
+ }
+
+}
 })
