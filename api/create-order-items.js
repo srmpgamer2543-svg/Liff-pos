@@ -1,272 +1,131 @@
-export default async function handler(req,res){
+export default async function handler(req, res) {
+  console.log("=== START create-order-items ===")
 
- console.log("=== START create-order-items ===")
+  try {
+    const body = req.body
 
- if(req.method!=="POST"){
-  console.log("❌ METHOD NOT ALLOWED:", req.method)
-  return res.status(405).end()
- }
+    console.log("📦 BODY:", JSON.stringify(body, null, 2))
 
- try{
-
-  const body = req.body
-
-  console.log("📦 BODY:", JSON.stringify(body,null,2))
-
-  if(!Array.isArray(body) || body.length===0){
-   console.log("❌ INVALID BODY")
-   return res.status(400).json({error:"invalid body"})
-  }
-
-  // =========================
-  // ✅ INSERT ITEMS
-  // =========================
-
-  const response = await fetch(
-   process.env.SUPABASE_URL + "/rest/v1/order_items",
-   {
-    method:"POST",
-    headers:{
-     apikey:process.env.SUPABASE_KEY,
-     Authorization:`Bearer ${process.env.SUPABASE_KEY}`,
-     "Content-Type":"application/json",
-     Prefer:"return=representation"
-    },
-    body: JSON.stringify(body)
-   }
-  )
-
-  console.log("📡 STATUS:", response.status)
-
-  const text = await response.text()
-  console.log("📡 RESPONSE:", text)
-
-  if(!response.ok){
-   return res.status(500).json({error:text})
-  }
-
-  const data = JSON.parse(text)
-
-  // =========================
-  // ✅ PREPARE DATA
-  // =========================
-
-  const orderId = body[0]?.order_id || ""
-  let customerId = body[0]?.line_user_id || ""
-
-  console.log("🧾 ORDER ID:", orderId)
-  console.log("👤 CUSTOMER ID (from items):", customerId)
-
-  // =========================
-  // ✅ FALLBACK USER ID
-  // =========================
-
-  if(!customerId && orderId){
-
-   console.log("⚠️ TRY FETCH USER ID FROM ORDER")
-
-   const orderRes = await fetch(
-    `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=line_user_id`,
-    {
-     headers:{
-      apikey:process.env.SUPABASE_KEY,
-      Authorization:`Bearer ${process.env.SUPABASE_KEY}`
-     }
+    if (!Array.isArray(body) || body.length === 0) {
+      return res.status(400).json({ error: "No items" })
     }
-   )
 
-   const orderData = await orderRes.json()
+    const orderId = body[0].order_id
+    let customerId = body[0].line_user_id || ""
 
-   customerId = orderData?.[0]?.line_user_id || ""
+    console.log("🧾 ORDER ID:", orderId)
+    console.log("👤 CUSTOMER ID:", customerId)
 
-   console.log("🔁 FETCHED USER ID:", customerId)
-  }
+    // ✅ FIX: ตัด line_user_id ออกจาก insert
+    const insertData = body.map(i => ({
+      order_id: i.order_id,
+      name: i.name,
+      price: i.price,
+      modifiers: i.modifiers
+    }))
 
-  let itemsText = ""
-  let total = 0
-
-  body.forEach(item => {
-
-   const price = Number(item.price || 0)
-   total += price
-
-   itemsText += `• ${item.name} (฿${price})\n`
-
-   if(item.modifiers){
-    Object.values(item.modifiers).forEach(arr=>{
-     arr.forEach(m=>{
-      const name = typeof m === "object" ? m.name : m
-      itemsText += `   - ${name}\n`
-     })
-    })
-   }
-
-  })
-
-  // =========================
-  // ✅ FLEX (ส่งให้ร้าน)
-  // =========================
-
-  const flex = {
-   type: "flex",
-   altText: "มีออเดอร์ใหม่",
-   contents: {
-    type: "bubble",
-    size: "mega",
-    body: {
-     type: "box",
-     layout: "vertical",
-     contents: [
-
+    // 👉 INSERT order_items
+    const r = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/order_items`,
       {
-       type: "text",
-       text: "🧾 ออเดอร์ใหม่",
-       weight: "bold",
-       size: "xl"
-      },
-
-      {
-       type: "text",
-       text: `Order ID: ${orderId}`,
-       size: "sm",
-       color: "#888888"
-      },
-
-      {
-       type: "separator",
-       margin: "md"
-      },
-
-      {
-       type: "text",
-       text: itemsText,
-       wrap: true,
-       size: "sm",
-       margin: "md"
-      },
-
-      {
-       type: "separator",
-       margin: "md"
-      },
-
-      {
-       type: "text",
-       text: `รวม ${total} บาท`,
-       weight: "bold",
-       size: "lg",
-       margin: "md"
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: process.env.SUPABASE_KEY,
+          Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+        },
+        body: JSON.stringify(insertData)
       }
-
-     ]
-    },
-
-    footer: {
-     type: "box",
-     layout: "vertical",
-     spacing: "sm",
-     contents: [
-
-      {
-       type: "button",
-       style: "primary",
-       color: "#16a34a",
-       action: {
-        type: "postback",
-        label: "รับออเดอร์",
-        data: `action=accept&order_id=${orderId}&user_id=${customerId || "none"}`
-       }
-      },
-
-      {
-       type: "button",
-       style: "secondary",
-       action: {
-        type: "postback",
-        label: "ทำเสร็จแล้ว",
-        data: `action=done&order_id=${orderId}&user_id=${customerId || "none"}`
-       }
-      }
-
-     ]
-    }
-   }
-  }
-
-  // =========================
-  // ✅ SEND LINE
-  // =========================
-
-  try{
-
-   const shopId = process.env.LINE_GROUP_ID
-
-   console.log("🏪 SHOP ID:", shopId)
-
-   // 🏪 ส่งให้ร้าน
-   if(shopId){
-
-    const r = await fetch("https://api.line.me/v2/bot/message/push", {
-     method: "POST",
-     headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
-     },
-     body: JSON.stringify({
-      to: shopId,
-      messages: [flex]
-     })
-    })
+    )
 
     const txt = await r.text()
+    console.log("📥 INSERT STATUS:", r.status)
+    console.log("📥 INSERT RESPONSE:", txt)
 
-    console.log("📨 SHOP STATUS:", r.status)
-    console.log("📨 SHOP RESPONSE:", txt)
+    if (r.status >= 400) {
+      return res.status(500).json({ error: txt })
+    }
 
-   }else{
-    console.log("❌ NO LINE_GROUP_ID")
-   }
+    // ✅ fallback ไปดึง user จาก orders
+    if (!customerId) {
+      console.log("⚠️ NO USER ID → FETCH FROM ORDER")
 
-   // 👤 ส่งให้ลูกค้า
-   if(customerId){
+      const orderRes = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=line_user_id`,
+        {
+          headers: {
+            apikey: process.env.SUPABASE_KEY,
+            Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+          }
+        }
+      )
 
-    const r = await fetch("https://api.line.me/v2/bot/message/push", {
-     method: "POST",
-     headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
-     },
-     body: JSON.stringify({
-      to: customerId,
-      messages: [
-       {
-        type: "text",
-        text: `✅ รับออเดอร์แล้ว\nเลขที่: ${orderId}\nรอสักครู่ครับ`
-       }
-      ]
-     })
+      const orderData = await orderRes.json()
+      customerId = orderData?.[0]?.line_user_id || ""
+
+      console.log("🔁 FETCHED USER ID:", customerId)
+    }
+
+    // 🧾 สร้างข้อความ
+    const itemsText = body
+      .map(i => `• ${i.name} - ${i.price}฿`)
+      .join("\n")
+
+    const flex = {
+      type: "flex",
+      altText: `ออเดอร์ #${orderId}`,
+      contents: {
+        type: "bubble",
+        body: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            { type: "text", text: `ออเดอร์ #${orderId}`, weight: "bold", size: "lg" },
+            { type: "text", text: itemsText, wrap: true }
+          ]
+        }
+      }
+    }
+
+    // 👉 ส่งร้าน
+    const shopId = process.env.SHOP_LINE_USER_ID
+
+    const r1 = await fetch("https://api.line.me/v2/bot/message/push", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+      },
+      body: JSON.stringify({
+        to: shopId,
+        messages: [flex]
+      })
     })
 
-    const txt = await r.text()
+    console.log("📨 SHOP STATUS:", r1.status)
+    console.log("📨 SHOP RESP:", await r1.text())
 
-    console.log("👤 CUSTOMER STATUS:", r.status)
-    console.log("👤 CUSTOMER RESPONSE:", txt)
+    // 👉 ส่งลูกค้า
+    if (customerId) {
+      const r2 = await fetch("https://api.line.me/v2/bot/message/push", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({
+          to: customerId,
+          messages: [{ type: "text", text: `รับออเดอร์ #${orderId} แล้ว` }]
+        })
+      })
 
-   }else{
-    console.log("❌ NO CUSTOMER ID")
-   }
+      console.log("📨 CUSTOMER STATUS:", r2.status)
+      console.log("📨 CUSTOMER RESP:", await r2.text())
+    }
 
-  }catch(lineErr){
-   console.log("⚠️ LINE ERROR:", lineErr.message)
+    res.status(200).json({ ok: true })
+  } catch (err) {
+    console.log("❌ ERROR:", err)
+    res.status(500).json({ error: err.message })
   }
-
-  res.json(data)
-
- }catch(err){
-
-  console.log("🔥 ERROR:", err)
-  res.status(500).json({error:err.message})
-
- }
-
 }
