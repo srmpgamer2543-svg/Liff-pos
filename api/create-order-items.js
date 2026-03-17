@@ -13,6 +13,7 @@ export default async function handler(req,res){
 
   console.log("📦 BODY:", JSON.stringify(body))
 
+  // ✅ insert items ลง supabase
   const response = await fetch(
    process.env.SUPABASE_URL + "/rest/v1/order_items",
    {
@@ -37,6 +38,82 @@ export default async function handler(req,res){
   }
 
   const data = JSON.parse(text)
+
+  // =========================
+  // ✅ BUILD LINE MESSAGE
+  // =========================
+
+  let message = "🧾 ออเดอร์ใหม่\n\n"
+
+  let total = 0
+
+  body.forEach((item,index)=>{
+
+   const name = item.name
+   const price = Number(item.price || 0)
+
+   total += price
+
+   message += `${index+1}. ${name}\n`
+
+   // 👉 modifiers
+   if(item.modifiers){
+
+    Object.entries(item.modifiers).forEach(([group,arr])=>{
+
+     const modCount = {}
+
+     arr.forEach(m=>{
+      const modName = typeof m === "object" ? m.name : m
+      if(!modCount[modName]) modCount[modName] = 0
+      modCount[modName]++
+     })
+
+     Object.entries(modCount).forEach(([modName,count])=>{
+      const qty = count > 1 ? ` x${count}` : ""
+      message += `   - ${modName}${qty}\n`
+     })
+
+    })
+
+   }
+
+   message += `   ฿${price}\n\n`
+
+  })
+
+  message += `💰 รวม ${total} บาท`
+
+  // =========================
+  // ✅ SEND LINE
+  // =========================
+
+  try{
+
+   await fetch("https://api.line.me/v2/bot/message/push", {
+    method: "POST",
+    headers: {
+     "Content-Type": "application/json",
+     "Authorization": `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+    },
+    body: JSON.stringify({
+     to: "Cc6a14d049cf48d283d33bb8ee1b3873c",
+     messages: [
+      {
+       type: "text",
+       text: message
+      }
+     ]
+    })
+   })
+
+   console.log("✅ LINE SENT")
+
+  }catch(lineErr){
+
+   console.log("⚠️ LINE ERROR:", lineErr.message)
+
+  }
 
   res.json(data)
 
