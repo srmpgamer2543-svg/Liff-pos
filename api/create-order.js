@@ -29,10 +29,11 @@ export default async function handler(req,res){
      Prefer:"return=representation"
     },
     body:JSON.stringify({
-     table_id: body.table_id || 1,
-     total: body.total,
-     status:"pending"
-    })
+ table_id: body.table_id || 1,
+ total: body.total,
+ status:"pending",
+ line_user_id: body.line_user_id || null // 🔥 เพิ่ม
+})
    }
   )
 
