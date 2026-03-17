@@ -1,12 +1,17 @@
 export default async function handler(req,res){
 
+ console.log("=== START create-order-items ===")
+
  if(req.method!=="POST"){
+  console.log("❌ METHOD NOT ALLOWED:", req.method)
   return res.status(405).end()
  }
 
  try{
 
-  const body = req.body // ✅ ใช้ตรง ๆ ไม่ต้อง stringify
+  const body = req.body
+
+  console.log("📦 BODY:", JSON.stringify(body))
 
   const response = await fetch(
    process.env.SUPABASE_URL + "/rest/v1/order_items",
@@ -22,19 +27,22 @@ export default async function handler(req,res){
    }
   )
 
-  // 🔥 debug error จาก supabase
+  console.log("📡 STATUS:", response.status)
+
+  const text = await response.text()
+  console.log("📡 RESPONSE:", text)
+
   if(!response.ok){
-   const text = await response.text()
-   console.log("SUPABASE ERROR:", text)
    return res.status(500).json({error:text})
   }
 
-  const data = await response.json()
+  const data = JSON.parse(text)
 
   res.json(data)
 
  }catch(err){
 
+  console.log("🔥 ERROR:", err)
   res.status(500).json({error:err.message})
 
  }
