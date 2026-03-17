@@ -6,13 +6,7 @@ export default async function handler(req,res){
 
  try{
 
-  let body = req.body
-
-  // 🔥 FIX: แปลง modifiers ให้เป็น JSON string
-  body = body.map(item=>({
-   ...item,
-   modifiers: JSON.stringify(item.modifiers || {})
-  }))
+  const body = req.body // ✅ ใช้ตรง ๆ ไม่ต้อง stringify
 
   const response = await fetch(
    process.env.SUPABASE_URL + "/rest/v1/order_items",
@@ -28,8 +22,10 @@ export default async function handler(req,res){
    }
   )
 
+  // 🔥 debug error จาก supabase
   if(!response.ok){
    const text = await response.text()
+   console.log("SUPABASE ERROR:", text)
    return res.status(500).json({error:text})
   }
 
