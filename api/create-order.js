@@ -26,6 +26,12 @@ export default async function handler(req,res){
    }
   )
 
+  // 👇 เพิ่มตรงนี้
+  if(!response.ok){
+   const text = await response.text()
+   return res.status(500).json({error:text})
+  }
+
   const data = await response.json()
 
   res.json(data[0])
