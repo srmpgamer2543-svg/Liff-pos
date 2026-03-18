@@ -7,11 +7,11 @@ export default async function handler(req, res) {
   }
 
   // ======================
-  // 🔥 NEW: FORMAT MODIFIER
+  // FORMAT MODIFIER
   // ======================
   function formatModifiers(modifiers){
 
-    if(!modifiers) return { type:"-", sweet:"-", toppings:"-" }
+    if(!modifiers) return { type:"-", sweet:"-", toppings:{} }
 
     let type = ""
     let sweet = ""
@@ -39,14 +39,156 @@ export default async function handler(req, res) {
 
     })
 
-    const toppings = Object.entries(toppingMap)
-      .map(([k,v])=> v > 1 ? `${k} x${v}` : k)
-      .join(", ")
-
     return {
       type: type || "-",
       sweet: sweet || "-",
-      toppings: toppings || "-"
+      toppings: toppingMap
+    }
+  }
+
+  // ======================
+  // 🔥 BUILD FLEX ใหม่
+  // ======================
+  function buildOrderFlex(orderId, statusText, statusColor, itemsData, total){
+
+    const merged = {}
+
+    itemsData.forEach(i=>{
+      const key = i.name + JSON.stringify(i.modifiers || {})
+
+      if(!merged[key]){
+        merged[key] = {
+          ...i,
+          qty:1
+        }
+      }else{
+        merged[key].qty++
+      }
+    })
+
+    const items = Object.values(merged)
+
+    let totalQty = 0
+
+    const itemBlocks = []
+
+    items.forEach(item=>{
+
+      totalQty += item.qty
+
+      const f = formatModifiers(item.modifiers)
+
+      const toppingLines = Object.entries(f.toppings).map(([k,v])=>({
+        type:"text",
+        text:`${k} ${v>1?`x${v}`:""}`,
+        size:"sm",
+        color:"#444444"
+      }))
+
+      itemBlocks.push(
+        {
+          type:"box",
+          layout:"vertical",
+          spacing:"xs",
+          contents:[
+            {
+              type:"text",
+              text:item.name,
+              weight:"bold"
+            },
+            {
+              type:"text",
+              text:f.type,
+              size:"sm"
+            },
+            {
+              type:"text",
+              text:f.sweet,
+              size:"sm"
+            },
+            ...toppingLines,
+            {
+              type:"text",
+              text:`${item.price} บาท`,
+              align:"end",
+              weight:"bold"
+            }
+          ]
+        },
+        {
+          type:"separator",
+          margin:"md"
+        }
+      )
+    })
+
+    return {
+      type:"flex",
+      altText:`สถานะออเดอร์ #${orderId}`,
+      contents:{
+        type:"bubble",
+        size:"mega",
+        body:{
+          type:"box",
+          layout:"vertical",
+          spacing:"md",
+          contents:[
+
+            {
+              type:"text",
+              text:"📋 สถานะออเดอร์",
+              weight:"bold",
+              size:"xl"
+            },
+
+            {
+              type:"text",
+              text:`หมายเลขออเดอร์ #${orderId}`,
+              size:"sm",
+              color:"#888888"
+            },
+
+            {
+              type:"separator"
+            },
+
+            {
+              type:"text",
+              text:"----- สถานะตอนนี้ -----",
+              size:"sm",
+              color:"#888888"
+            },
+
+            {
+              type:"text",
+              text:statusText,
+              weight:"bold",
+              color:statusColor
+            },
+
+            {
+              type:"separator"
+            },
+
+            {
+              type:"text",
+              text:"🧋 รายการ",
+              weight:"bold"
+            },
+
+            ...itemBlocks,
+
+            {
+              type:"text",
+              text:`ยอดรวม ${totalQty} รายการ  ${total} บาท`,
+              weight:"bold",
+              size:"lg",
+              align:"end"
+            }
+
+          ]
+        }
+      }
     }
   }
 
@@ -58,32 +200,25 @@ export default async function handler(req, res) {
       req.on("end", () => resolve(data))
     })
 
-    console.log("RAW:", raw)
-
     let body = {}
 
     try {
       body = JSON.parse(raw || "{}")
-    } catch (e) {
-      console.log("❌ JSON PARSE ERROR:", e)
+    } catch {
       body = {}
     }
 
     const events = body.events || []
 
-    console.log("EVENTS:", events)
-
     for (const event of events) {
 
       // ======================
-      // 🔥 MESSAGE HANDLER
+      // 🔥 ตรวจสอบสถานะ
       // ======================
       if (event.type === "message" && event.message.type === "text") {
 
         const text = event.message.text || ""
         const userId = event.source.userId
-
-        console.log("💬 TEXT:", text)
 
         if (text.includes("ตรวจสอบสถานะออเดอร์")) {
 
@@ -98,35 +233,9 @@ export default async function handler(req, res) {
           )
 
           const orderData = await orderRes.json()
-
-          console.log("📦 ORDER DATA:", orderData)
-
           const order = orderData?.[0]
 
-          if (!order) {
-
-            await fetch(
-              "https://api.line.me/v2/bot/message/reply",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
-                },
-                body: JSON.stringify({
-                  replyToken: event.replyToken,
-                  messages: [
-                    {
-                      type: "text",
-                      text: "ไม่พบออเดอร์"
-                    }
-                  ]
-                })
-              }
-            )
-
-            continue
-          }
+          if (!order) continue
 
           const orderId = order.id
 
@@ -142,136 +251,38 @@ export default async function handler(req, res) {
 
           const itemsData = await itemsRes.json()
 
-          const flex = {
-            type: "flex",
-            altText: `สถานะออเดอร์ #${orderId}`,
-            contents: {
-              type: "bubble",
-              size: "mega",
-              body: {
-                type: "box",
-                layout: "vertical",
-                paddingAll: "16px",
-                spacing: "lg",
-                contents: [
+          let statusText = "⏳ รอร้านยืนยัน"
+          let color = "#aaaaaa"
 
-                  {
-                    type: "text",
-                    text: "สถานะออเดอร์",
-                    weight: "bold",
-                    size: "xl"
-                  },
-
-                  {
-                    type: "text",
-                    text: `หมายเลข #${orderId}`,
-                    size: "sm",
-                    color: "#888888"
-                  },
-
-                  {
-                    type: "text",
-                    text: `สถานะ: ${order.status}`,
-                    weight: "bold",
-                    size: "md",
-                    color: "#FF9500"
-                  },
-
-                  {
-                    type: "separator",
-                    margin: "md"
-                  },
-
-                  ...itemsData.map(i => {
-
-                    const f = formatModifiers(i.modifiers)
-
-                    return {
-                      type: "box",
-                      layout: "vertical",
-                      margin: "md",
-                      spacing: "xs",
-                      contents: [
-
-                        {
-                          type: "text",
-                          text: i.name,
-                          weight: "bold",
-                          size: "md"
-                        },
-
-                        {
-                          type: "text",
-                          text: f.type,
-                          size: "sm",
-                          color: "#666666"
-                        },
-
-                        {
-                          type: "text",
-                          text: f.sweet,
-                          size: "sm",
-                          color: "#666666"
-                        },
-
-                        {
-                          type: "text",
-                          text: f.toppings,
-                          size: "sm",
-                          color: "#666666",
-                          wrap: true
-                        }
-
-                      ]
-                    }
-
-                  }),
-
-                  {
-                    type: "separator",
-                    margin: "lg"
-                  },
-
-                  {
-                    type: "box",
-                    layout: "horizontal",
-                    contents: [
-                      {
-                        type: "text",
-                        text: "ยอดรวม",
-                        weight: "bold",
-                        size: "md"
-                      },
-                      {
-                        type: "text",
-                        text: `${order.total || "-"} บาท`,
-                        align: "end",
-                        weight: "bold",
-                        size: "lg",
-                        color: "#111111"
-                      }
-                    ]
-                  }
-
-                ]
-              }
-            }
+          if(order.status==="preparing"){
+            statusText = "🟠 ร้านกำลังเตรียมออเดอร์ของคุณ"
+            color = "#FF9500"
           }
 
-          await fetch(
-            "https://api.line.me/v2/bot/message/reply",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
-              },
-              body: JSON.stringify({
-                replyToken: event.replyToken,
-                messages: [flex]
-              })
-            }
+          if(order.status==="completed"){
+            statusText = "🟢 ออเดอร์ของคุณเสร็จแล้ว"
+            color = "#34C759"
+          }
+
+          const flex = buildOrderFlex(
+            orderId,
+            statusText,
+            color,
+            itemsData,
+            order.total
           )
+
+          await fetch("https://api.line.me/v2/bot/message/reply",{
+            method:"POST",
+            headers:{
+              "Content-Type":"application/json",
+              Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
+            },
+            body:JSON.stringify({
+              replyToken:event.replyToken,
+              messages:[flex]
+            })
+          })
 
         }
 
@@ -282,174 +293,88 @@ export default async function handler(req, res) {
       // ======================
       if (event.type === "postback") {
 
-        const data = event.postback.data
-
-        const params = new URLSearchParams(data)
-
+        const params = new URLSearchParams(event.postback.data)
         const action = params.get("action")
-        const orderIdRaw = params.get("order_id")
-
-        const orderId = Number(orderIdRaw)
+        const orderId = Number(params.get("order_id"))
 
         if (!orderId) continue
 
         let newStatus = "pending"
         let statusText = ""
+        let color = "#FF9500"
 
         if (action === "accept") {
           newStatus = "preparing"
-          statusText = "ร้านกำลังเตรียมเครื่องดื่มของคุณ"
+          statusText = "🟠 ร้านกำลังเตรียมออเดอร์ของคุณ"
+          color = "#FF9500"
         }
 
         if (action === "done") {
           newStatus = "completed"
-          statusText = "เครื่องดื่มของคุณเสร็จแล้ว"
+          statusText = "🟢 ออเดอร์ของคุณเสร็จแล้ว"
+          color = "#34C759"
         }
 
         await fetch(
           `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
           {
-            method: "PATCH",
-            headers: {
-              apikey: process.env.SUPABASE_KEY,
-              Authorization: `Bearer ${process.env.SUPABASE_KEY}`,
-              "Content-Type": "application/json"
+            method:"PATCH",
+            headers:{
+              apikey:process.env.SUPABASE_KEY,
+              Authorization:`Bearer ${process.env.SUPABASE_KEY}`,
+              "Content-Type":"application/json"
             },
-            body: JSON.stringify({ status: newStatus })
+            body:JSON.stringify({status:newStatus})
           }
         )
 
         const orderRes = await fetch(
-          `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=line_user_id`,
+          `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
           {
-            headers: {
-              apikey: process.env.SUPABASE_KEY,
-              Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+            headers:{
+              apikey:process.env.SUPABASE_KEY,
+              Authorization:`Bearer ${process.env.SUPABASE_KEY}`
             }
           }
         )
 
         const orderData = await orderRes.json()
-        const customerId = orderData?.[0]?.line_user_id
+        const order = orderData?.[0]
+        const customerId = order?.line_user_id
 
         const itemsRes = await fetch(
           `${process.env.SUPABASE_URL}/rest/v1/order_items?order_id=eq.${orderId}`,
           {
-            headers: {
-              apikey: process.env.SUPABASE_KEY,
-              Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+            headers:{
+              apikey:process.env.SUPABASE_KEY,
+              Authorization:`Bearer ${process.env.SUPABASE_KEY}`
             }
           }
         )
 
         const itemsData = await itemsRes.json()
 
-        if (customerId && typeof customerId === "string") {
+        if (customerId) {
 
-          const flex = {
-            type: "flex",
-            altText: `อัปเดตออเดอร์ #${orderId}`,
-            contents: {
-              type: "bubble",
-              size: "mega",
-              body: {
-                type: "box",
-                layout: "vertical",
-                paddingAll: "16px",
-                spacing: "lg",
-                contents: [
-
-                  {
-                    type: "text",
-                    text: "อัปเดตสถานะออเดอร์",
-                    weight: "bold",
-                    size: "xl"
-                  },
-
-                  {
-                    type: "text",
-                    text: `หมายเลข #${orderId}`,
-                    size: "sm",
-                    color: "#888888"
-                  },
-
-                  {
-                    type: "text",
-                    text: statusText,
-                    weight: "bold",
-                    size: "md",
-                    color: action === "done" ? "#34C759" : "#FF9500"
-                  },
-
-                  {
-                    type: "separator",
-                    margin: "md"
-                  },
-
-                  ...itemsData.map(i => {
-
-                    const f = formatModifiers(i.modifiers)
-
-                    return {
-                      type: "box",
-                      layout: "vertical",
-                      margin: "md",
-                      spacing: "xs",
-                      contents: [
-
-                        {
-                          type: "text",
-                          text: i.name,
-                          weight: "bold",
-                          size: "md"
-                        },
-
-                        {
-                          type: "text",
-                          text: f.type,
-                          size: "sm",
-                          color: "#666666"
-                        },
-
-                        {
-                          type: "text",
-                          text: f.sweet,
-                          size: "sm",
-                          color: "#666666"
-                        },
-
-                        {
-                          type: "text",
-                          text: f.toppings,
-                          size: "sm",
-                          color: "#666666",
-                          wrap: true
-                        }
-
-                      ]
-                    }
-
-                  })
-
-                ]
-              }
-            }
-          }
-
-          await fetch(
-            "https://api.line.me/v2/bot/message/push",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
-              },
-              body: JSON.stringify({
-                to: customerId,
-                messages: [flex]
-              })
-            }
+          const flex = buildOrderFlex(
+            orderId,
+            statusText,
+            color,
+            itemsData,
+            order.total
           )
+
+          await fetch("https://api.line.me/v2/bot/message/push",{
+            method:"POST",
+            headers:{
+              "Content-Type":"application/json",
+              Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
+            },
+            body:JSON.stringify({
+              to:customerId,
+              messages:[flex]
+            })
+          })
 
         }
 
