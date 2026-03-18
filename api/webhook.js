@@ -142,147 +142,122 @@ export default async function handler(req, res) {
 
           const itemsData = await itemsRes.json()
 
-          // 🔥 NEW FORMAT
-          const itemsText = itemsData.map(i => {
-
-            const f = formatModifiers(i.modifiers)
-
-            return [
-              `• ${i.name}`,
-              `${f.type}`,
-              `${f.sweet}`,
-              `${f.toppings}`
-            ].join("\n")
-
-          }).join("\n\n")
-
           const flex = {
-  type: "flex",
-  altText: `อัปเดตออเดอร์ #${orderId}`,
-  contents: {
-    type: "bubble",
-    size: "mega",
-    body: {
-      type: "box",
-      layout: "vertical",
-      spacing: "md",
-      contents: [
+            type: "flex",
+            altText: `สถานะออเดอร์ #${orderId}`,
+            contents: {
+              type: "bubble",
+              size: "mega",
+              body: {
+                type: "box",
+                layout: "vertical",
+                paddingAll: "16px",
+                spacing: "lg",
+                contents: [
 
-        // 🔥 HEADER
-        {
-          type: "text",
-          text: "🍹 สถานะออเดอร์",
-          weight: "bold",
-          size: "xl",
-          color: "#FF6B00"
-        },
+                  {
+                    type: "text",
+                    text: "สถานะออเดอร์",
+                    weight: "bold",
+                    size: "xl"
+                  },
 
-        {
-          type: "text",
-          text: `#${orderId}`,
-          size: "sm",
-          color: "#999999"
-        },
+                  {
+                    type: "text",
+                    text: `หมายเลข #${orderId}`,
+                    size: "sm",
+                    color: "#888888"
+                  },
 
-        {
-          type: "separator"
-        },
+                  {
+                    type: "text",
+                    text: `สถานะ: ${order.status}`,
+                    weight: "bold",
+                    size: "md",
+                    color: "#FF9500"
+                  },
 
-        // 🔥 STATUS
-        {
-          type: "text",
-          text: `สถานะ: ${order.status}`,
-          weight: "bold",
-          size: "md",
-          color: "#FF9500"
-        },
+                  {
+                    type: "separator",
+                    margin: "md"
+                  },
 
-        {
-          type: "separator",
-          margin: "md"
-        },
+                  ...itemsData.map(i => {
 
-        // 🔥 รายการแบบ Apple + 2 column
-        ...itemsData.map(i => {
+                    const f = formatModifiers(i.modifiers)
 
-          const f = formatModifiers(i.modifiers)
+                    return {
+                      type: "box",
+                      layout: "vertical",
+                      margin: "md",
+                      spacing: "xs",
+                      contents: [
 
-          return {
-            type: "box",
-            layout: "vertical",
-            margin: "sm",
-            contents: [
+                        {
+                          type: "text",
+                          text: i.name,
+                          weight: "bold",
+                          size: "md"
+                        },
 
-              // ชื่อเมนู
-              {
-                type: "text",
-                text: i.name,
-                weight: "bold",
-                size: "md"
-              },
+                        {
+                          type: "text",
+                          text: f.type,
+                          size: "sm",
+                          color: "#666666"
+                        },
 
-              // type
-              {
-                type: "text",
-                text: f.type,
-                size: "sm",
-                color: "#666666"
-              },
+                        {
+                          type: "text",
+                          text: f.sweet,
+                          size: "sm",
+                          color: "#666666"
+                        },
 
-              // sweet
-              {
-                type: "text",
-                text: f.sweet,
-                size: "sm",
-                color: "#666666"
-              },
+                        {
+                          type: "text",
+                          text: f.toppings,
+                          size: "sm",
+                          color: "#666666",
+                          wrap: true
+                        }
 
-              // topping
-              {
-                type: "text",
-                text: f.toppings,
-                size: "sm",
-                color: "#666666",
-                wrap: true
+                      ]
+                    }
+
+                  }),
+
+                  {
+                    type: "separator",
+                    margin: "lg"
+                  },
+
+                  {
+                    type: "box",
+                    layout: "horizontal",
+                    contents: [
+                      {
+                        type: "text",
+                        text: "ยอดรวม",
+                        weight: "bold",
+                        size: "md"
+                      },
+                      {
+                        type: "text",
+                        text: `${order.total || "-"} บาท`,
+                        align: "end",
+                        weight: "bold",
+                        size: "lg",
+                        color: "#111111"
+                      }
+                    ]
+                  }
+
+                ]
               }
-
-            ]
+            }
           }
 
-        }),
-
-        {
-          type: "separator",
-          margin: "lg"
-        },
-
-        // 🔥 TOTAL (ถ้ามี total ใน DB)
-        {
-          type: "box",
-          layout: "horizontal",
-          contents: [
-            {
-              type: "text",
-              text: "ยอดรวม",
-              weight: "bold",
-              size: "md"
-            },
-            {
-              type: "text",
-              text: `${order.total || "-"} บาท`,
-              align: "end",
-              weight: "bold",
-              size: "lg",
-              color: "#FF6B00"
-            }
-          ]
-        }
-
-      ]
-    }
-  }
-}
-          
           await fetch(
             "https://api.line.me/v2/bot/message/reply",
             {
@@ -303,7 +278,7 @@ export default async function handler(req, res) {
       }
 
       // ======================
-      // 🔥 POSTBACK (ไม่แตะ flow)
+      // 🔥 POSTBACK
       // ======================
       if (event.type === "postback") {
 
@@ -316,48 +291,33 @@ export default async function handler(req, res) {
 
         const orderId = Number(orderIdRaw)
 
-        console.log("ACTION:", action)
-        console.log("ORDER RAW:", orderIdRaw)
-        console.log("ORDER NUMBER:", orderId)
-
-        if (!orderId) {
-          console.log("❌ orderId ไม่ถูกต้อง")
-          continue
-        }
+        if (!orderId) continue
 
         let newStatus = "pending"
         let statusText = ""
 
         if (action === "accept") {
           newStatus = "preparing"
-          statusText = "🧑‍🍳 ร้านกำลังเตรียมเครื่องดื่มของคุณ"
+          statusText = "ร้านกำลังเตรียมเครื่องดื่มของคุณ"
         }
 
         if (action === "done") {
           newStatus = "completed"
-          statusText = "🎉 เครื่องดื่มของคุณเสร็จแล้ว"
+          statusText = "เครื่องดื่มของคุณเสร็จแล้ว"
         }
 
-        const updateRes = await fetch(
+        await fetch(
           `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
           {
             method: "PATCH",
             headers: {
               apikey: process.env.SUPABASE_KEY,
               Authorization: `Bearer ${process.env.SUPABASE_KEY}`,
-              "Content-Type": "application/json",
-              Prefer: "return=representation"
+              "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-              status: newStatus
-            })
+            body: JSON.stringify({ status: newStatus })
           }
         )
-
-        const updateData = await updateRes.json()
-
-        console.log("🛠 UPDATE STATUS:", updateRes.status)
-        console.log("🛠 UPDATE DATA:", updateData)
 
         const orderRes = await fetch(
           `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}&select=line_user_id`,
@@ -370,12 +330,7 @@ export default async function handler(req, res) {
         )
 
         const orderData = await orderRes.json()
-
-        console.log("📦 ORDER DATA:", orderData)
-
         const customerId = orderData?.[0]?.line_user_id
-
-        console.log("👤 CUSTOMER ID:", customerId)
 
         const itemsRes = await fetch(
           `${process.env.SUPABASE_URL}/rest/v1/order_items?order_id=eq.${orderId}`,
@@ -389,20 +344,6 @@ export default async function handler(req, res) {
 
         const itemsData = await itemsRes.json()
 
-        // 🔥 NEW FORMAT (เหมือนด้านบน)
-        const itemsText = itemsData.map(i => {
-
-          const f = formatModifiers(i.modifiers)
-
-          return [
-            `• ${i.name}`,
-            `${f.type}`,
-            `${f.sweet}`,
-            `${f.toppings}`
-          ].join("\n")
-
-        }).join("\n\n")
-
         if (customerId && typeof customerId === "string") {
 
           const flex = {
@@ -414,25 +355,22 @@ export default async function handler(req, res) {
               body: {
                 type: "box",
                 layout: "vertical",
-                spacing: "md",
+                paddingAll: "16px",
+                spacing: "lg",
                 contents: [
 
                   {
                     type: "text",
-                    text: "🍹 สถานะออเดอร์",
+                    text: "อัปเดตสถานะออเดอร์",
                     weight: "bold",
                     size: "xl"
                   },
 
                   {
                     type: "text",
-                    text: `#${orderId}`,
+                    text: `หมายเลข #${orderId}`,
                     size: "sm",
-                    color: "#aaaaaa"
-                  },
-
-                  {
-                    type: "separator"
+                    color: "#888888"
                   },
 
                   {
@@ -448,29 +386,57 @@ export default async function handler(req, res) {
                     margin: "md"
                   },
 
-                  {
-                    type: "text",
-                    text: "รายการ",
-                    weight: "bold",
-                    size: "md"
-                  },
+                  ...itemsData.map(i => {
 
-                  {
-                    type: "text",
-                    text: itemsText || "-",
-                    wrap: true,
-                    size: "sm",
-                    color: "#555555"
-                  }
+                    const f = formatModifiers(i.modifiers)
+
+                    return {
+                      type: "box",
+                      layout: "vertical",
+                      margin: "md",
+                      spacing: "xs",
+                      contents: [
+
+                        {
+                          type: "text",
+                          text: i.name,
+                          weight: "bold",
+                          size: "md"
+                        },
+
+                        {
+                          type: "text",
+                          text: f.type,
+                          size: "sm",
+                          color: "#666666"
+                        },
+
+                        {
+                          type: "text",
+                          text: f.sweet,
+                          size: "sm",
+                          color: "#666666"
+                        },
+
+                        {
+                          type: "text",
+                          text: f.toppings,
+                          size: "sm",
+                          color: "#666666",
+                          wrap: true
+                        }
+
+                      ]
+                    }
+
+                  })
 
                 ]
               }
             }
           }
 
-          console.log("📤 SENDING TO LINE USER:", customerId)
-
-          const lineRes = await fetch(
+          await fetch(
             "https://api.line.me/v2/bot/message/push",
             {
               method: "POST",
@@ -480,21 +446,10 @@ export default async function handler(req, res) {
               },
               body: JSON.stringify({
                 to: customerId,
-                messages: [
-                  flex,
-                  {
-                    type: "text",
-                    text: `สถานะออเดอร์ #${orderId} → ${newStatus}`
-                  }
-                ]
+                messages: [flex]
               })
             }
           )
-
-          const lineText = await lineRes.text()
-
-          console.log("📨 LINE STATUS:", lineRes.status)
-          console.log("📨 LINE RESPONSE:", lineText)
 
         }
 
