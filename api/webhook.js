@@ -157,63 +157,131 @@ export default async function handler(req, res) {
           }).join("\n\n")
 
           const flex = {
-            type: "flex",
-            altText: `สถานะออเดอร์ #${orderId}`,
-            contents: {
-              type: "bubble",
-              size: "mega",
-              body: {
-                type: "box",
-                layout: "vertical",
-                spacing: "md",
-                contents: [
+  type: "flex",
+  altText: `อัปเดตออเดอร์ #${orderId}`,
+  contents: {
+    type: "bubble",
+    size: "mega",
+    body: {
+      type: "box",
+      layout: "vertical",
+      spacing: "md",
+      contents: [
 
-                  {
-                    type: "text",
-                    text: "🍹 สถานะออเดอร์",
-                    weight: "bold",
-                    size: "xl"
-                  },
+        // 🔥 HEADER
+        {
+          type: "text",
+          text: "🍹 สถานะออเดอร์",
+          weight: "bold",
+          size: "xl",
+          color: "#FF6B00"
+        },
 
-                  {
-                    type: "text",
-                    text: `#${orderId}`,
-                    size: "sm",
-                    color: "#aaaaaa"
-                  },
+        {
+          type: "text",
+          text: `#${orderId}`,
+          size: "sm",
+          color: "#999999"
+        },
 
-                  {
-                    type: "separator"
-                  },
+        {
+          type: "separator"
+        },
 
-                  {
-                    type: "text",
-                    text: `สถานะ: ${order.status}`,
-                    weight: "bold"
-                  },
+        // 🔥 STATUS
+        {
+          type: "text",
+          text: statusText,
+          weight: "bold",
+          size: "md",
+          color: action === "done" ? "#34C759" : "#FF9500"
+        },
 
-                  {
-                    type: "separator",
-                    margin: "md"
-                  },
+        {
+          type: "separator",
+          margin: "md"
+        },
 
-                  {
-                    type: "text",
-                    text: "รายการ",
-                    weight: "bold"
-                  },
+        // 🔥 รายการแบบ Apple + 2 column
+        ...itemsData.map(i => {
 
-                  {
-                    type: "text",
-                    text: itemsText || "-",
-                    wrap: true
-                  }
+          const f = formatModifiers(i.modifiers)
 
-                ]
+          return {
+            type: "box",
+            layout: "vertical",
+            margin: "sm",
+            contents: [
+
+              // ชื่อเมนู
+              {
+                type: "text",
+                text: i.name,
+                weight: "bold",
+                size: "md"
+              },
+
+              // type
+              {
+                type: "text",
+                text: f.type,
+                size: "sm",
+                color: "#666666"
+              },
+
+              // sweet
+              {
+                type: "text",
+                text: f.sweet,
+                size: "sm",
+                color: "#666666"
+              },
+
+              // topping
+              {
+                type: "text",
+                text: f.toppings,
+                size: "sm",
+                color: "#666666",
+                wrap: true
               }
-            }
+
+            ]
           }
 
+        }),
+
+        {
+          type: "separator",
+          margin: "lg"
+        },
+
+        // 🔥 TOTAL (ถ้ามี total ใน DB)
+        {
+          type: "box",
+          layout: "horizontal",
+          contents: [
+            {
+              type: "text",
+              text: "ยอดรวม",
+              weight: "bold",
+              size: "md"
+            },
+            {
+              type: "text",
+              text: `${order.total || "-"} บาท`,
+              align: "end",
+              weight: "bold",
+              size: "lg",
+              color: "#FF6B00"
+            }
+          ]
+        }
+
+      ]
+    }
+  }
+          
           await fetch(
             "https://api.line.me/v2/bot/message/reply",
             {
