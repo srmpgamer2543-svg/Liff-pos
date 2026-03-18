@@ -9,6 +9,10 @@ function cleanName(name){
 
 let isSending = false // 👈 lock ยิงซ้ำ
 
+function isLiffReady(){
+ return window.liff && typeof liff.isLoggedIn === "function" && liff.isLoggedIn()
+}
+
 export function openOrderScreen(){
 
  const screen = document.getElementById("orderScreen")
@@ -151,9 +155,7 @@ export function openOrderScreen(){
  document.body.classList.add("order-open")
 
  document.getElementById("backToMenu").onclick = ()=>{
-
   closeOrderScreen()
-
  }
 
  document.querySelectorAll(".edit-btn").forEach(btn=>{
@@ -161,12 +163,10 @@ export function openOrderScreen(){
   btn.onclick=()=>{
 
    const indexes = btn.dataset.indexes.split(",").map(Number)
-
    const index = indexes[0]
    const item = CART[index]
 
    closeOrderScreen()
-
    openModifier(item,item.modifiers,index)
 
   }
@@ -186,7 +186,6 @@ export function openOrderScreen(){
     })
 
     updateStickyCart(CART)
-
     openOrderScreen()
 
    }
@@ -290,38 +289,55 @@ async function sendOrder(){
 
   console.log("📡 ITEMS RESPONSE:", res)
 
-  // 🔥 NEW FLOW (เช็คว่าอยู่ใน LINE ไหม)
-  if(window.liff && liff.isInClient()){
+  // =========================
+  // 🔥 FIX LIFF FLOW
+  // =========================
 
-   await liff.sendMessages([
-    {
-     type:"text",
-     text:`ตรวจสอบสถานะออเดอร์ #${orderId}`
+  if(isLiffReady()){
+
+   try{
+
+    if(liff.isInClient()){
+
+     await liff.sendMessages([
+      {
+       type:"text",
+       text:`ตรวจสอบสถานะออเดอร์ #${orderId}`
+      }
+     ])
+
+     liff.closeWindow()
+     return
+
     }
-   ])
 
-   liff.closeWindow()
+   }catch(err){
 
-  }else{
-
-   // fallback เดิม (กรณีเปิดจาก browser)
-   window.showIOSAlert(
-    "ลูกค้าจำเป็นต้องกดตรวจสอบสถานะออเดอร์ในไลน์\nเพื่อดูสถานะออเดอร์ของคุณ"
-   )
-
-   const alertBtn = document.getElementById("iosAlertBtn")
-
-   alertBtn.onclick = ()=>{
-
-    document.getElementById("iosAlert").classList.add("hidden")
-
-    const oaId = "513fqglz"
-    const text = encodeURIComponent("ตรวจสอบสถานะออเดอร์")
-
-    window.location.href =
-     `https://line.me/R/oaMessage/${oaId}/?text=${text}`
+    console.log("❌ LIFF ERROR:", err)
 
    }
+
+  }
+
+  // =========================
+  // 🔥 FALLBACK (100% ทำงาน)
+  // =========================
+
+  window.showIOSAlert(
+   "ลูกค้าจำเป็นต้องกดตรวจสอบสถานะออเดอร์ในไลน์\nเพื่อดูสถานะออเดอร์ของคุณ"
+  )
+
+  const alertBtn = document.getElementById("iosAlertBtn")
+
+  alertBtn.onclick = ()=>{
+
+   document.getElementById("iosAlert").classList.add("hidden")
+
+   const oaId = "513fqglz"
+   const text = encodeURIComponent(`ตรวจสอบสถานะออเดอร์ #${orderId}`)
+
+   window.location.href =
+    `https://line.me/R/oaMessage/${oaId}/?text=${text}`
 
   }
 
