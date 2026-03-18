@@ -21,7 +21,8 @@
   <div class="topbar">
 
   <div class="shop-name">
-   🍉🥥🍓เมนูขายดี!แนะนำ✨ ชาไทย+วิปปิ้งครีม🔥  </div>
+   🍉🥥🍓เมนูขายดี!แนะนำ✨ ชาไทย+วิปปิ้งครีม🔥
+  </div>
 
   <div class="cart-icon">
     🛒 <span id="headerCartCount">0</span>
@@ -94,7 +95,6 @@
 <script src="/js/scroll.js"></script>
 
 <script>
-
 window.showIOSAlert = function(message){
 
  const alert = document.getElementById("iosAlert")
@@ -110,7 +110,6 @@ window.showIOSAlert = function(message){
  }
 
 }
-
 </script>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -128,10 +127,43 @@ async function initLiff(){
  }
 
  const profile = await liff.getProfile()
-
  window.lineUserId = profile.userId
 
  console.log("✅ USER ID:", window.lineUserId)
+
+ // =========================
+ // 🔥 AUTO SEND (เนียนสุด)
+ // =========================
+
+ if(liff.isInClient()){
+
+  // กันยิงซ้ำ
+  if(!sessionStorage.getItem("liff_sent")){
+
+   setTimeout(async ()=>{
+
+    try{
+
+     await liff.sendMessages([
+      {
+       type: "text",
+       text: "ตรวจสอบสถานะออเดอร์"
+      }
+     ])
+
+     console.log("📨 AUTO MESSAGE SENT")
+
+     sessionStorage.setItem("liff_sent","1")
+
+    }catch(err){
+     console.log("❌ SEND ERROR:", err)
+    }
+
+   }, 500)
+
+  }
+
+ }
 
 }
 
