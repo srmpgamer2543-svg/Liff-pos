@@ -290,7 +290,7 @@ async function sendOrder(){
   console.log("📡 ITEMS RESPONSE:", res)
 
   // =========================
-  // 🔥 FIX LIFF FLOW
+  // 🔥 ONE CLICK FLOW
   // =========================
 
   if(isLiffReady()){
@@ -302,7 +302,7 @@ async function sendOrder(){
      await liff.sendMessages([
       {
        type:"text",
-       text:`ตรวจสอบสถานะออเดอร์ #${orderId}`
+       text:`🧾 สั่งออเดอร์แล้ว #${orderId}\nกด “ตรวจสอบสถานะ” เพื่อดูความคืบหน้า`
       }
      ])
 
@@ -319,27 +319,8 @@ async function sendOrder(){
 
   }
 
-  // =========================
-  // 🔥 FALLBACK (100% ทำงาน)
-  // =========================
-
-  window.showIOSAlert(
-   "ลูกค้าจำเป็นต้องกดตรวจสอบสถานะออเดอร์ในไลน์\nเพื่อดูสถานะออเดอร์ของคุณ"
-  )
-
-  const alertBtn = document.getElementById("iosAlertBtn")
-
-  alertBtn.onclick = ()=>{
-
-   document.getElementById("iosAlert").classList.add("hidden")
-
-   const oaId = "513fqglz"
-   const text = encodeURIComponent(`ตรวจสอบสถานะออเดอร์ #${orderId}`)
-
-   window.location.href =
-    `https://line.me/R/oaMessage/${oaId}/?text=${text}`
-
-  }
+  // fallback (เผื่อเปิดจาก browser)
+  window.showIOSAlert("สั่งออเดอร์สำเร็จแล้ว")
 
  }catch(err){
 
