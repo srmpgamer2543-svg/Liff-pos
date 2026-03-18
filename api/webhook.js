@@ -191,10 +191,10 @@ export default async function handler(req, res) {
         // 🔥 STATUS
         {
           type: "text",
-          text: statusText,
+          text: `สถานะ: ${order.status}`,
           weight: "bold",
           size: "md",
-          color: action === "done" ? "#34C759" : "#FF9500"
+          color: "#FF9500"
         },
 
         {
@@ -281,6 +281,7 @@ export default async function handler(req, res) {
       ]
     }
   }
+}
           
           await fetch(
             "https://api.line.me/v2/bot/message/reply",
