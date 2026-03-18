@@ -290,21 +290,29 @@ async function sendOrder(){
   console.log("📡 ITEMS RESPONSE:", res)
 
   // =========================
-  // 🔥 ONE CLICK FLOW
+  // 🔥 NEW: ยิงทันทีหลังสั่ง
   // =========================
+  if(isLiffReady() && liff.isInClient()){
+    try{
+      await liff.sendMessages([
+        {
+          type:"text",
+          text:`🧾 รับออเดอร์แล้ว #${orderId}\n⏳ รอร้านยืนยัน`
+        }
+      ])
+    }catch(err){
+      console.log("❌ SEND CONFIRM ERROR:", err)
+    }
+  }
 
+  // =========================
+  // 🔥 ONE CLICK FLOW (เดิม)
+  // =========================
   if(isLiffReady()){
 
    try{
 
     if(liff.isInClient()){
-
-     await liff.sendMessages([
-      {
-       type:"text",
-       text:`🧾 สั่งออเดอร์แล้ว #${orderId}\nกด “ตรวจสอบสถานะ” เพื่อดูความคืบหน้า`
-      }
-     ])
 
      liff.closeWindow()
      return
@@ -319,7 +327,6 @@ async function sendOrder(){
 
   }
 
-  // fallback (เผื่อเปิดจาก browser)
   window.showIOSAlert("สั่งออเดอร์สำเร็จแล้ว")
 
  }catch(err){
