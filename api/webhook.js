@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   // ======================
   function formatModifiers(modifiers){
 
-    if(!modifiers) return { type:"-", sweet:"-", toppings:{} }
+    if(!modifiers) return { type:"", sweet:"", toppings:{} }
 
     let type = ""
     let sweet = ""
@@ -26,11 +26,9 @@ export default async function handler(req, res) {
         if(name.includes("เย็น") || name.includes("ปั่น")){
           type = name
         }
-
         else if(name.includes("หวาน")){
           sweet = name
         }
-
         else{
           toppingMap[name] = (toppingMap[name] || 0) + 1
         }
@@ -40,14 +38,14 @@ export default async function handler(req, res) {
     })
 
     return {
-      type: type || "-",
-      sweet: sweet || "-",
+      type,
+      sweet,
       toppings: toppingMap
     }
   }
 
   // ======================
-  // 🔥 BUILD FLEX ใหม่
+  // 🔥 BUILD FLEX (FIX overflow)
   // ======================
   function buildOrderFlex(orderId, statusText, statusColor, itemsData, total){
 
@@ -57,10 +55,7 @@ export default async function handler(req, res) {
       const key = i.name + JSON.stringify(i.modifiers || {})
 
       if(!merged[key]){
-        merged[key] = {
-          ...i,
-          qty:1
-        }
+        merged[key] = { ...i, qty:1 }
       }else{
         merged[key].qty++
       }
@@ -68,59 +63,66 @@ export default async function handler(req, res) {
 
     const items = Object.values(merged)
 
-    let totalQty = 0
+    const MAX_ITEMS = 10
+    const displayItems = items.slice(0, MAX_ITEMS)
 
+    let totalQty = 0
     const itemBlocks = []
 
-    items.forEach(item=>{
+    displayItems.forEach(item=>{
 
       totalQty += item.qty
 
       const f = formatModifiers(item.modifiers)
 
-      const toppingLines = Object.entries(f.toppings).map(([k,v])=>({
-        type:"text",
-        text:`${k} ${v>1?`x${v}`:""}`,
-        size:"sm",
-        color:"#444444"
-      }))
+      const toppingsText = Object.entries(f.toppings)
+        .map(([k,v])=> v>1 ? `${k} x${v}` : k)
+        .join(", ")
 
-      itemBlocks.push(
-        {
-          type:"box",
-          layout:"vertical",
-          spacing:"xs",
-          contents:[
-            {
-              type:"text",
-              text:item.name,
-              weight:"bold"
-            },
-            {
-              type:"text",
-              text:f.type,
-              size:"sm"
-            },
-            {
-              type:"text",
-              text:f.sweet,
-              size:"sm"
-            },
-            ...toppingLines,
-            {
-              type:"text",
-              text:`${item.price} บาท`,
-              align:"end",
-              weight:"bold"
-            }
-          ]
-        },
-        {
-          type:"separator",
-          margin:"md"
-        }
-      )
+      let line = `${item.name} x${item.qty}`
+
+      if(f.type){
+        line += `\n${f.type}`
+      }
+
+      if(f.sweet){
+        line += `\n${f.sweet}`
+      }
+
+      if(toppingsText){
+        line += `\n+ ${toppingsText}`
+      }
+
+      itemBlocks.push({
+        type:"box",
+        layout:"vertical",
+        contents:[
+          {
+            type:"text",
+            text: line,
+            wrap:true,
+            size:"sm"
+          },
+          {
+            type:"text",
+            text:`${item.price * item.qty} บาท`,
+            align:"end",
+            weight:"bold",
+            size:"sm"
+          }
+        ]
+      })
     })
+
+    // ถ้ามีรายการเกิน
+    if(items.length > MAX_ITEMS){
+      itemBlocks.push({
+        type:"text",
+        text:`... และอีก ${items.length - MAX_ITEMS} รายการ`,
+        size:"sm",
+        color:"#888888"
+      })
+    }
 
     return {
       type:"flex",
@@ -148,13 +150,11 @@ export default async function handler(req, res) {
               color:"#888888"
             },
 
-            {
-              type:"separator"
-            },
+            { type:"separator" },
 
             {
               type:"text",
-              text:"----- สถานะตอนนี้ -----",
+              text:"สถานะตอนนี้",
               size:"sm",
               color:"#888888"
             },
@@ -163,12 +163,11 @@ export default async function handler(req, res) {
               type:"text",
               text:statusText,
               weight:"bold",
-              color:statusColor
+              color:statusColor,
+              wrap:true
             },
 
-            {
-              type:"separator"
-            },
+            { type:"separator" },
 
             {
               type:"text",
@@ -213,7 +212,7 @@ export default async function handler(req, res) {
     for (const event of events) {
 
       // ======================
-      // 🔥 ตรวจสอบสถานะ
+      // 📩 MESSAGE
       // ======================
       if (event.type === "message" && event.message.type === "text") {
 
@@ -283,13 +282,11 @@ export default async function handler(req, res) {
               messages:[flex]
             })
           })
-
         }
-
       }
 
       // ======================
-      // 🔥 POSTBACK
+      // 🔘 POSTBACK
       // ======================
       if (event.type === "postback") {
 
@@ -375,9 +372,7 @@ export default async function handler(req, res) {
               messages:[flex]
             })
           })
-
         }
-
       }
 
     }
