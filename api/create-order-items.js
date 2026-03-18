@@ -13,8 +13,10 @@ export default async function handler(req, res) {
     }
 
     const orderId = body[0].order_id
+    const customerId = body[0].line_user_id // 👈 เอา user จาก item
 
     console.log("🧾 ORDER ID:", orderId)
+    console.log("👤 CUSTOMER ID:", customerId)
 
     const insertData = body.map(i => ({
       order_id: i.order_id,
@@ -46,6 +48,41 @@ export default async function handler(req, res) {
     }
 
     // ======================
+    // 🔥 PUSH หา "ลูกค้า" ทันที
+    // ======================
+
+    if (customerId) {
+
+      const customerPush = await fetch(
+        "https://api.line.me/v2/bot/message/push",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+          },
+          body: JSON.stringify({
+            to: customerId,
+            messages: [
+              {
+                type: "text",
+                text: `🧾 รับออเดอร์แล้ว #${orderId}\n⏳ รอร้านยืนยัน`
+              }
+            ]
+          })
+        }
+      )
+
+      const customerText = await customerPush.text()
+
+      console.log("📨 CUSTOMER PUSH STATUS:", customerPush.status)
+      console.log("📨 CUSTOMER PUSH RESPONSE:", customerText)
+
+    } else {
+      console.log("❌ ไม่มี customerId → push ไม่ได้")
+    }
+
+    // ======================
     // รายการสินค้า
     // ======================
 
@@ -54,7 +91,7 @@ export default async function handler(req, res) {
       .join("\n")
 
     // ======================
-    // FLEX ร้าน (iOS style)
+    // FLEX ร้าน
     // ======================
 
     const shopFlex = {
