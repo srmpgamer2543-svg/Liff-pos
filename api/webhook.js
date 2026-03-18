@@ -45,7 +45,7 @@ export default async function handler(req, res) {
   }
 
   // ======================
-  // 🔥 BUILD FLEX (FIX overflow)
+  // BUILD FLEX
   // ======================
   function buildOrderFlex(orderId, statusText, statusColor, itemsData, total){
 
@@ -53,7 +53,6 @@ export default async function handler(req, res) {
 
     itemsData.forEach(i=>{
       const key = i.name + JSON.stringify(i.modifiers || {})
-
       if(!merged[key]){
         merged[key] = { ...i, qty:1 }
       }else{
@@ -81,17 +80,9 @@ export default async function handler(req, res) {
 
       let line = `${item.name} x${item.qty}`
 
-      if(f.type){
-        line += `\n${f.type}`
-      }
-
-      if(f.sweet){
-        line += `\n${f.sweet}`
-      }
-
-      if(toppingsText){
-        line += `\n+ ${toppingsText}`
-      }
+      if(f.type) line += `\n${f.type}`
+      if(f.sweet) line += `\n${f.sweet}`
+      if(toppingsText) line += `\n+ ${toppingsText}`
 
       itemBlocks.push({
         type:"box",
@@ -114,7 +105,6 @@ export default async function handler(req, res) {
       })
     })
 
-    // ถ้ามีรายการเกิน
     if(items.length > MAX_ITEMS){
       itemBlocks.push({
         type:"text",
@@ -136,44 +126,17 @@ export default async function handler(req, res) {
           spacing:"md",
           contents:[
 
-            {
-              type:"text",
-              text:"📋 สถานะออเดอร์",
-              weight:"bold",
-              size:"xl"
-            },
-
-            {
-              type:"text",
-              text:`หมายเลขออเดอร์ #${orderId}`,
-              size:"sm",
-              color:"#888888"
-            },
+            { type:"text", text:"📋 สถานะออเดอร์", weight:"bold", size:"xl" },
+            { type:"text", text:`หมายเลขออเดอร์ #${orderId}`, size:"sm", color:"#888888" },
 
             { type:"separator" },
 
-            {
-              type:"text",
-              text:"สถานะตอนนี้",
-              size:"sm",
-              color:"#888888"
-            },
-
-            {
-              type:"text",
-              text:statusText,
-              weight:"bold",
-              color:statusColor,
-              wrap:true
-            },
+            { type:"text", text:"สถานะตอนนี้", size:"sm", color:"#888888" },
+            { type:"text", text:statusText, weight:"bold", color:statusColor, wrap:true },
 
             { type:"separator" },
 
-            {
-              type:"text",
-              text:"🧋 รายการ",
-              weight:"bold"
-            },
+            { type:"text", text:"🧋 รายการ", weight:"bold" },
 
             ...itemBlocks,
 
@@ -184,7 +147,6 @@ export default async function handler(req, res) {
               size:"lg",
               align:"end"
             }
-
           ]
         }
       }
@@ -200,7 +162,6 @@ export default async function handler(req, res) {
     })
 
     let body = {}
-
     try {
       body = JSON.parse(raw || "{}")
     } catch {
@@ -212,7 +173,7 @@ export default async function handler(req, res) {
     for (const event of events) {
 
       // ======================
-      // 📩 MESSAGE
+      // MESSAGE
       // ======================
       if (event.type === "message" && event.message.type === "text") {
 
@@ -224,16 +185,15 @@ export default async function handler(req, res) {
           const orderRes = await fetch(
             `${process.env.SUPABASE_URL}/rest/v1/orders?line_user_id=eq.${userId}&order=created_at.desc&limit=1`,
             {
-              headers: {
-                apikey: process.env.SUPABASE_KEY,
-                Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+              headers:{
+                apikey:process.env.SUPABASE_KEY,
+                Authorization:`Bearer ${process.env.SUPABASE_KEY}`
               }
             }
           )
 
           const orderData = await orderRes.json()
           const order = orderData?.[0]
-
           if (!order) continue
 
           const orderId = order.id
@@ -241,9 +201,9 @@ export default async function handler(req, res) {
           const itemsRes = await fetch(
             `${process.env.SUPABASE_URL}/rest/v1/order_items?order_id=eq.${orderId}`,
             {
-              headers: {
-                apikey: process.env.SUPABASE_KEY,
-                Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+              headers:{
+                apikey:process.env.SUPABASE_KEY,
+                Authorization:`Bearer ${process.env.SUPABASE_KEY}`
               }
             }
           )
@@ -263,13 +223,7 @@ export default async function handler(req, res) {
             color = "#34C759"
           }
 
-          const flex = buildOrderFlex(
-            orderId,
-            statusText,
-            color,
-            itemsData,
-            order.total
-          )
+          const flex = buildOrderFlex(orderId, statusText, color, itemsData, order.total)
 
           await fetch("https://api.line.me/v2/bot/message/reply",{
             method:"POST",
@@ -286,7 +240,7 @@ export default async function handler(req, res) {
       }
 
       // ======================
-      // 🔘 POSTBACK
+      // POSTBACK (🔥 แก้ครบ)
       // ======================
       if (event.type === "postback") {
 
@@ -299,19 +253,23 @@ export default async function handler(req, res) {
         let newStatus = "pending"
         let statusText = ""
         let color = "#FF9500"
+        let replyText = ""
 
         if (action === "accept") {
           newStatus = "preparing"
           statusText = "🟠 ร้านกำลังเตรียมออเดอร์ของคุณ"
           color = "#FF9500"
+          replyText = `✅ รับออเดอร์ #${orderId} แล้ว`
         }
 
         if (action === "done") {
           newStatus = "completed"
           statusText = "🟢 ออเดอร์ของคุณเสร็จแล้ว"
           color = "#34C759"
+          replyText = `🎉 ออเดอร์ #${orderId} ทำเสร็จแล้ว`
         }
 
+        // อัปเดต DB
         await fetch(
           `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
           {
@@ -325,6 +283,22 @@ export default async function handler(req, res) {
           }
         )
 
+        // 🔥 reply พนักงาน
+        if(replyText){
+          await fetch("https://api.line.me/v2/bot/message/reply",{
+            method:"POST",
+            headers:{
+              "Content-Type":"application/json",
+              Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
+            },
+            body:JSON.stringify({
+              replyToken:event.replyToken,
+              messages:[{ type:"text", text:replyText }]
+            })
+          })
+        }
+
+        // 🔥 push ลูกค้า
         const orderRes = await fetch(
           `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
           {
@@ -339,27 +313,21 @@ export default async function handler(req, res) {
         const order = orderData?.[0]
         const customerId = order?.line_user_id
 
-        const itemsRes = await fetch(
-          `${process.env.SUPABASE_URL}/rest/v1/order_items?order_id=eq.${orderId}`,
-          {
-            headers:{
-              apikey:process.env.SUPABASE_KEY,
-              Authorization:`Bearer ${process.env.SUPABASE_KEY}`
-            }
-          }
-        )
-
-        const itemsData = await itemsRes.json()
-
         if (customerId) {
 
-          const flex = buildOrderFlex(
-            orderId,
-            statusText,
-            color,
-            itemsData,
-            order.total
+          const itemsRes = await fetch(
+            `${process.env.SUPABASE_URL}/rest/v1/order_items?order_id=eq.${orderId}`,
+            {
+              headers:{
+                apikey:process.env.SUPABASE_KEY,
+                Authorization:`Bearer ${process.env.SUPABASE_KEY}`
+              }
+            }
           )
+
+          const itemsData = await itemsRes.json()
+
+          const flex = buildOrderFlex(orderId, statusText, color, itemsData, order.total)
 
           await fetch("https://api.line.me/v2/bot/message/push",{
             method:"POST",
@@ -374,16 +342,12 @@ export default async function handler(req, res) {
           })
         }
       }
-
     }
 
     res.status(200).end()
 
   } catch (err) {
-
     console.log("🔥 ERROR:", err)
     res.status(500).end()
-
   }
-
 }
