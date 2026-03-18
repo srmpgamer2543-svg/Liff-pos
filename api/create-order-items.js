@@ -6,18 +6,16 @@ export default async function handler(req, res) {
 
     const body = req.body
 
-    console.log("📦 BODY:", JSON.stringify(body, null, 2))
-
     if (!Array.isArray(body) || body.length === 0) {
       return res.status(400).json({ error: "No items" })
     }
 
     const orderId = body[0].order_id
-    const customerId = body[0].line_user_id // 👈 เอา user จาก item
+    const customerId = body[0].line_user_id
 
-    console.log("🧾 ORDER ID:", orderId)
-    console.log("👤 CUSTOMER ID:", customerId)
-
+    // ======================
+    // INSERT DB
+    // ======================
     const insertData = body.map(i => ({
       order_id: i.order_id,
       name: i.name,
@@ -38,184 +36,188 @@ export default async function handler(req, res) {
       }
     )
 
-    const txt = await r.text()
-
-    console.log("📥 INSERT STATUS:", r.status)
-    console.log("📥 INSERT RESPONSE:", txt)
-
     if (r.status >= 400) {
+      const txt = await r.text()
       return res.status(500).json({ error: txt })
     }
 
     // ======================
-    // 🔥 PUSH หา "ลูกค้า" ทันที
+    // 🔥 FORMAT MODIFIER
     // ======================
+    function formatModifiers(modifiers){
 
-    if (customerId) {
+      if(!modifiers) return []
 
-      const customerPush = await fetch(
-        "https://api.line.me/v2/bot/message/push",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
-          },
-          body: JSON.stringify({
-            to: customerId,
-            messages: [
+      const result = []
+
+      Object.entries(modifiers).forEach(([group, arr])=>{
+
+        const map = {}
+
+        arr.forEach(m=>{
+          const name = typeof m === "object" ? m.name : m
+          map[name] = (map[name] || 0) + 1
+        })
+
+        Object.entries(map).forEach(([name,count])=>{
+          result.push(count > 1 ? `${name} x${count}` : name)
+        })
+
+      })
+
+      return result
+    }
+
+    // ======================
+    // 🔥 MERGE ITEM
+    // ======================
+    function mergeItems(items){
+      const merged={}
+      items.forEach(i=>{
+        const key=i.name+JSON.stringify(i.modifiers||{})
+        if(!merged[key]){
+          merged[key]={...i,qty:1}
+        }else{
+          merged[key].qty++
+        }
+      })
+      return Object.values(merged)
+    }
+
+    // ======================
+    // 🔥 BUILD FLEX (ใหม่)
+    // ======================
+    function buildStaffFlex(orderId, items){
+
+      const merged = mergeItems(items)
+
+      const itemBlocks = merged.map(item=>{
+
+        const mods = formatModifiers(item.modifiers)
+
+        let text = `${item.name} x${item.qty}`
+
+        if(mods.length){
+          text += `\n- ${mods.join("\n- ")}`
+        }
+
+        return {
+          type:"box",
+          layout:"vertical",
+          contents:[
+            {
+              type:"text",
+              text:text,
+              wrap:true,
+              size:"sm"
+            }
+          ]
+        }
+
+      })
+
+      return {
+        type:"flex",
+        altText:`ออเดอร์ใหม่ #${orderId}`,
+        contents:{
+          type:"bubble",
+          size:"mega",
+          body:{
+            type:"box",
+            layout:"vertical",
+            spacing:"md",
+            contents:[
               {
-                type: "text",
-                text: `🧾 รับออเดอร์แล้ว #${orderId}\n⏳ รอร้านยืนยัน`
+                type:"text",
+                text:"🧾 ออเดอร์ใหม่",
+                weight:"bold",
+                size:"xl"
+              },
+              {
+                type:"text",
+                text:`#${orderId}`,
+                size:"sm",
+                color:"#888888"
+              },
+              { type:"separator" },
+              ...itemBlocks
+            ]
+          },
+          footer:{
+            type:"box",
+            layout:"vertical",
+            spacing:"sm",
+            contents:[
+              {
+                type:"button",
+                style:"primary",
+                color:"#34C759",
+                action:{
+                  type:"postback",
+                  label:"รับออเดอร์",
+                  data:`action=accept&order_id=${orderId}`
+                }
+              },
+              {
+                type:"button",
+                style:"secondary",
+                action:{
+                  type:"postback",
+                  label:"ทำเสร็จแล้ว",
+                  data:`action=done&order_id=${orderId}`
+                }
               }
             ]
-          })
+          }
         }
-      )
-
-      const customerText = await customerPush.text()
-
-      console.log("📨 CUSTOMER PUSH STATUS:", customerPush.status)
-      console.log("📨 CUSTOMER PUSH RESPONSE:", customerText)
-
-    } else {
-      console.log("❌ ไม่มี customerId → push ไม่ได้")
-    }
-
-    // ======================
-    // รายการสินค้า
-    // ======================
-
-    const itemsText = body
-      .map(i => `• ${i.name} - ${i.price}฿`)
-      .join("\n")
-
-    // ======================
-    // FLEX ร้าน
-    // ======================
-
-    const shopFlex = {
-
-      type: "flex",
-
-      altText: `ออเดอร์ใหม่ #${orderId}`,
-
-      contents: {
-
-        type: "bubble",
-
-        size: "mega",
-
-        body: {
-
-          type: "box",
-
-          layout: "vertical",
-
-          spacing: "md",
-
-          contents: [
-
-            {
-              type: "text",
-              text: "🧾 ออเดอร์ใหม่",
-              weight: "bold",
-              size: "xl"
-            },
-
-            {
-              type: "text",
-              text: `#${orderId}`,
-              size: "sm",
-              color: "#aaaaaa"
-            },
-
-            {
-              type: "separator"
-            },
-
-            {
-              type: "text",
-              text: itemsText,
-              wrap: true
-            }
-
-          ]
-
-        },
-
-        footer: {
-
-          type: "box",
-
-          layout: "vertical",
-
-          spacing: "sm",
-
-          contents: [
-
-            {
-              type: "button",
-              style: "primary",
-              color: "#34C759",
-              action: {
-                type: "postback",
-                label: "รับออเดอร์",
-                data: `action=accept&order_id=${orderId}`
-              }
-            },
-
-            {
-              type: "button",
-              style: "secondary",
-              action: {
-                type: "postback",
-                label: "ทำเสร็จแล้ว",
-                data: `action=done&order_id=${orderId}`
-              }
-            }
-
-          ]
-
-        }
-
       }
-
     }
 
-    const groupId = process.env.SHOP_LINE_GROUP_ID
-
-    console.log("👥 GROUP ID:", groupId)
-
-    const lineRes = await fetch(
-      "https://api.line.me/v2/bot/message/push",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+    // ======================
+    // PUSH ลูกค้า
+    // ======================
+    if (customerId) {
+      await fetch("https://api.line.me/v2/bot/message/push",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
         },
-        body: JSON.stringify({
-          to: groupId,
-          messages: [shopFlex]
+        body:JSON.stringify({
+          to:customerId,
+          messages:[
+            {
+              type:"text",
+              text:`🧾 รับออเดอร์แล้ว #${orderId}\n⏳ รอร้านยืนยัน`
+            }
+          ]
         })
-      }
-    )
+      })
+    }
 
-    const lineText = await lineRes.text()
+    // ======================
+    // PUSH พนักงาน
+    // ======================
+    const flex = buildStaffFlex(orderId, body)
 
-    console.log("📨 LINE STATUS:", lineRes.status)
-    console.log("📨 LINE RESPONSE:", lineText)
+    await fetch("https://api.line.me/v2/bot/message/push",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
+      },
+      body:JSON.stringify({
+        to:process.env.SHOP_LINE_GROUP_ID,
+        messages:[flex]
+      })
+    })
 
     res.status(200).json({ ok: true })
 
   } catch (err) {
 
     console.log("❌ ERROR:", err)
-
-    res.status(500).json({
-      error: err.message
-    })
+    res.status(500).json({ error: err.message })
 
   }
 
