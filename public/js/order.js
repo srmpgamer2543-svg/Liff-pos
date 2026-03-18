@@ -290,22 +290,38 @@ async function sendOrder(){
 
   console.log("📡 ITEMS RESPONSE:", res)
 
-  // 🔥 NEW FLOW
-  window.showIOSAlert(
-   "ลูกค้าจำเป็นต้องกดตรวจสอบสถานะออเดอร์ในไลน์\nเพื่อดูสถานะออเดอร์ของคุณ"
-  )
+  // 🔥 NEW FLOW (เช็คว่าอยู่ใน LINE ไหม)
+  if(window.liff && liff.isInClient()){
 
-  const alertBtn = document.getElementById("iosAlertBtn")
+   await liff.sendMessages([
+    {
+     type:"text",
+     text:`ตรวจสอบสถานะออเดอร์ #${orderId}`
+    }
+   ])
 
-  alertBtn.onclick = ()=>{
+   liff.closeWindow()
 
-   document.getElementById("iosAlert").classList.add("hidden")
+  }else{
 
-   const oaId = "513fqglz"
-   const text = encodeURIComponent("ตรวจสอบสถานะออเดอร์")
+   // fallback เดิม (กรณีเปิดจาก browser)
+   window.showIOSAlert(
+    "ลูกค้าจำเป็นต้องกดตรวจสอบสถานะออเดอร์ในไลน์\nเพื่อดูสถานะออเดอร์ของคุณ"
+   )
 
-   window.location.href =
-    `https://line.me/R/oaMessage/${oaId}/?text=${text}`
+   const alertBtn = document.getElementById("iosAlertBtn")
+
+   alertBtn.onclick = ()=>{
+
+    document.getElementById("iosAlert").classList.add("hidden")
+
+    const oaId = "513fqglz"
+    const text = encodeURIComponent("ตรวจสอบสถานะออเดอร์")
+
+    window.location.href =
+     `https://line.me/R/oaMessage/${oaId}/?text=${text}`
+
+   }
 
   }
 
