@@ -290,9 +290,24 @@ async function sendOrder(){
 
   console.log("📡 ITEMS RESPONSE:", res)
 
-  window.showIOSAlert("ส่งออเดอร์สำเร็จ")
+  // 🔥 NEW FLOW
+  window.showIOSAlert(
+   "ลูกค้าจำเป็นต้องกดตรวจสอบสถานะออเดอร์ในไลน์\nเพื่อดูสถานะออเดอร์ของคุณ"
+  )
 
-  location.reload()
+  const alertBtn = document.getElementById("iosAlertBtn")
+
+  alertBtn.onclick = ()=>{
+
+   document.getElementById("iosAlert").classList.add("hidden")
+
+   const oaId = "513fqglz"
+   const text = encodeURIComponent("ตรวจสอบสถานะออเดอร์")
+
+   window.location.href =
+    `https://line.me/R/oaMessage/${oaId}/?text=${text}`
+
+  }
 
  }catch(err){
 
