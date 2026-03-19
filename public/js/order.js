@@ -269,7 +269,7 @@ if(isLiffReady() && liff.isInClient()){
 }
 
 // fallback
-window.showIOSAlert("สั่งออเดอร์สำเร็จแล้ว")แล้ว")
+window.showIOSAlert("สั่งออเดอร์สำเร็จแล้ว")
 
  }catch(err){
 
