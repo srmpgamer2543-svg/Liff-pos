@@ -93,53 +93,56 @@ export function openOrderScreen(){
 
   div.innerHTML = `
 
-   <div class="receipt-product">
+<div class="bg-white rounded-2xl p-4 shadow">
 
-     <div class="receipt-name">
-       ${cleanName(item.name)}
-     </div>
+  <!-- Header -->
+  <div class="flex items-center justify-between">
 
-     ${mods}
+    <!-- ชื่อเมนู -->
+    <h3 class="text-lg font-semibold">
+      ${cleanName(item.name)}
+    </h3>
 
-     <div class="receipt-price-row">
+    <!-- ปุ่ม -->
+    <div class="flex gap-2">
 
-       <div class="receipt-actions">
+      <button class="edit-btn bg-blue-500 text-white px-3 py-1 rounded-lg"
+        data-indexes="${item.indexes.join(",")}">
+        แก้ไข
+      </button>
 
-        <button class="minus-btn" data-indexes="${item.indexes.join(",")}">➖</button>
-        <span class="qty-text">${item.qty}</span>
-        <button class="plus-btn" data-indexes="${item.indexes.join(",")}">➕</button>
+      <button class="delete-btn bg-red-200 text-red-600 px-3 py-1 rounded-lg"
+        data-indexes="${item.indexes.join(",")}">
+        ลบ
+      </button>
 
-       </div>
+    </div>
 
-       <div class="receipt-price">
-         ฿${item.price * item.qty}
-       </div>
+  </div>
 
-       <div class="qty-control">
+  <!-- รายละเอียด -->
+  <div class="mt-2 text-gray-500 text-sm">
+    ${mods}
+  </div>
 
- <button class="minus-btn qty-btn" data-indexes="${item.indexes.join(",")}">−</button>
+  <!-- ราคา + จำนวน -->
+  <div class="flex items-center justify-between mt-4">
 
- <span class="qty-text">${item.qty}</span>
+    <div class="flex items-center gap-2">
+      <button class="minus-btn" data-indexes="${item.indexes.join(",")}">−</button>
+      <span class="qty-text">${item.qty}</span>
+      <button class="plus-btn" data-indexes="${item.indexes.join(",")}">+</button>
+    </div>
 
- <button class="plus-btn qty-btn" data-indexes="${item.indexes.join(",")}">+</button>
+    <span class="font-semibold">
+      ฿${item.price * item.qty}
+    </span>
+
+  </div>
 
 </div>
 
-        <button class="edit-btn" data-indexes="${item.indexes.join(",")}">
-         แก้ไข
-        </button>
-
-        <button class="delete-btn" data-indexes="${item.indexes.join(",")}">
-         ลบ
-        </button>
-
-       </div>
-
-     </div>
-
-   </div>
-
-  `
+`
 
   total += item.price * item.qty
 
