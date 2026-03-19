@@ -465,44 +465,54 @@ export function openModifier(item,previousSelections=null,indexes=null){
   }
 
 let startY = 0
-let startY = 0
 let currentY = 0
 let isDragging = false
 
 modal.addEventListener("touchstart", (e)=>{
   startY = e.touches[0].clientY
+  currentY = startY
 
-  // ✅ อนุญาต drag เฉพาะตอน scroll อยู่บนสุด
-  isDragging = modal.scrollTop === 0
+  // ❗ ยังไม่ตัดสินว่า drag หรือ scroll
+  isDragging = false
 })
 
 modal.addEventListener("touchmove", (e)=>{
-  if(!isDragging) return
 
   currentY = e.touches[0].clientY
   let diff = currentY - startY
 
-  // ❗ ถ้ามี scroll อยู่ ห้าม drag ปิด
-  if(modal.scrollTop > 0) return
-
-  if(diff > 0){ // ลากลงเท่านั้น
-    modal.style.transform = `translateX(-50%) translateY(${diff}px)`
+  // ✅ ถ้า scroll ยังไม่สุด → ให้ scroll ทำงานปกติ
+  if(modal.scrollTop > 0){
+    return
   }
+
+  // ✅ เริ่ม drag เมื่อเลื่อนลงจริงๆ
+  if(diff > 5){
+    isDragging = true
+  }
+
+  if(!isDragging) return
+
+  // ❗ กัน browser scroll
+  e.preventDefault()
+
+  modal.style.transform = `translateX(-50%) translateY(${diff}px)`
 })
 
 modal.addEventListener("touchend", ()=>{
-  if(!isDragging) return
+
+  if(!isDragging){
+    return
+  }
 
   isDragging = false
 
   let diff = currentY - startY
 
   if(diff > 120){
-    // ปิด
     overlay.classList.remove("active")
   }
 
-  // เด้งกลับ / reset
   modal.style.transform = ""
 })
   
