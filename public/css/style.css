@@ -233,6 +233,7 @@ transition:transform .35s cubic-bezier(.22,.61,.36,1);
 padding:22px;
 padding-bottom:120px;
 overflow-y:auto;
+touch-action: none;
 }
 
 #modifierOverlay.active #modifierModal{
