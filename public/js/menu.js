@@ -368,7 +368,9 @@ export function openModifier(item,previousSelections=null,index=null){
 
   })
 
-  btn.onclick=()=>{
+  btn.onclick=(e)=>{
+
+ e.stopPropagation() // 🔥 กัน overlay ดัก click
 
    const selections={}
    let extraPrice=0
