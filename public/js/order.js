@@ -79,17 +79,21 @@ export function openOrderScreen(){
   div.innerHTML = `
 <div class="receipt-item">
 
-  <div class="receipt-name">
-    ${cleanName(item.name)}
-  </div>
+  <div style="display:flex; justify-content:space-between; align-items:center;">
 
-  <div class="receipt-actions">
-    <button class="edit-btn" data-indexes="${item.indexes.join(",")}">
-      แก้ไข
-    </button>
-    <button class="delete-btn" data-indexes="${item.indexes.join(",")}">
-      ลบ
-    </button>
+    <div class="receipt-name">
+      ${cleanName(item.name)}
+    </div>
+
+    <div class="receipt-actions">
+      <button class="edit-btn" data-indexes="${item.indexes.join(",")}">
+        แก้ไข
+      </button>
+      <button class="delete-btn" data-indexes="${item.indexes.join(",")}">
+        ลบ
+      </button>
+    </div>
+
   </div>
 
   <div class="receipt-mod">
@@ -97,15 +101,7 @@ export function openOrderScreen(){
   </div>
 
   <div class="receipt-price-row">
-    <div class="qty-control">
-      <button class="qty-btn minus-btn" data-indexes="${item.indexes.join(",")}">-</button>
-      <span class="qty-text">${item.qty}</span>
-      <button class="qty-btn plus-btn" data-indexes="${item.indexes.join(",")}">+</button>
-    </div>
-
-    <div class="receipt-price">
-      ฿${item.price * item.qty}
-    </div>
+    ...
   </div>
 
 </div>
