@@ -1,8 +1,9 @@
 import { getMenu, getCategories } from "./api.js"
 import { addToCart, updateCartItem, CART } from "./cart.js"
+
 let MENU=[]
 let CATEGORY_ORDER={}
-let editIndex=null
+let editIndexes=null
 
 export async function loadMenu(){
 
@@ -124,9 +125,9 @@ function renderMenu(list){
 
 }
 
-export function openModifier(item,previousSelections=null,index=null){
+export function openModifier(item,previousSelections=null,indexes=null){
 
- editIndex=index
+ editIndexes=indexes
 
  const overlay=document.getElementById("modifierOverlay")
  const modal=document.getElementById("modifierModal")
@@ -292,7 +293,7 @@ export function openModifier(item,previousSelections=null,index=null){
  setTimeout(()=>{
 
   const qtyNum=modal.querySelector("#qtyNum")
-  let qty=item.qty||1
+  let qty = editIndexes ? editIndexes.length : 1
   qtyNum.innerText=qty
 
   function updateTotalPrice(){
@@ -370,7 +371,7 @@ export function openModifier(item,previousSelections=null,index=null){
 
   btn.onclick=(e)=>{
 
- e.stopPropagation() // 🔥 กัน overlay ดัก click
+   e.stopPropagation()
 
    const selections={}
    let extraPrice=0
@@ -439,25 +440,26 @@ export function openModifier(item,previousSelections=null,index=null){
 
    }
 
-   if(editIndex!==null){
+   if(editIndexes){
 
- // 🔥 ลบตัวเดิม
- CART.splice(editIndex,1)
+    editIndexes
+     .map(Number)
+     .sort((a,b)=>b-a)
+     .forEach(i=>CART.splice(i,1))
 
- // 🔥 ใส่ใหม่ตาม qty
- for(let i=0;i<qty;i++){
-  addToCart(newItem)
- }
+    for(let i=0;i<qty;i++){
+     addToCart(newItem)
+    }
 
-}else{
+   }else{
 
- for(let i=0;i<qty;i++){
-  addToCart(newItem)
- }
+    for(let i=0;i<qty;i++){
+     addToCart(newItem)
+    }
 
    }
 
-   editIndex=null
+   editIndexes=null
    overlay.classList.remove("active")
 
   }
@@ -468,4 +470,4 @@ export function openModifier(item,previousSelections=null,index=null){
 
 function cleanName(name){
  return name.replace(/^\d+/,"").trim()
-    }
+}
