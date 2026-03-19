@@ -464,6 +464,41 @@ export function openModifier(item,previousSelections=null,indexes=null){
 
   }
 
+let startY = 0
+let currentY = 0
+let isDragging = false
+
+modal.addEventListener("touchstart", (e)=>{
+  startY = e.touches[0].clientY
+  isDragging = true
+})
+
+modal.addEventListener("touchmove", (e)=>{
+  if(!isDragging) return
+
+  currentY = e.touches[0].clientY
+  let diff = currentY - startY
+
+  if(diff > 0){ // ลากลงเท่านั้น
+    modal.style.transform = `translateX(-50%) translateY(${diff}px)`
+  }
+})
+
+modal.addEventListener("touchend", ()=>{
+  isDragging = false
+
+  let diff = currentY - startY
+
+  if(diff > 120){
+    // ปิด
+    overlay.classList.remove("active")
+    modal.style.transform = ""
+  }else{
+    // เด้งกลับ
+    modal.style.transform = ""
+  }
+})
+  
  },50)
 
 }
