@@ -164,7 +164,7 @@ export function openModifier(item,previousSelections=null,index=null){
  </div>
 
  <div class="mod-trash-box">
-  <button id="clearMods">🗑️</button>
+  <button id="clearMods">❌</button>
  </div>
  `
 
