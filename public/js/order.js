@@ -87,7 +87,12 @@ export function openOrderScreen(){
 <div class="receipt-item">
 
   <!-- HEADER -->
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+  mods += `
+   <div class="receipt-mod">
+  <span>${name}${qty}</span>
+  <span>${price}</span>
+</div>
+`
 
     <div class="receipt-name">
       ${cleanName(item.name)}
