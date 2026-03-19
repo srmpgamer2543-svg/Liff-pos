@@ -250,19 +250,26 @@ async function sendOrder(){
 
   await createOrderItems(items)
 
+// 🔥 send message (กันพัง)
+try{
   if(isLiffReady() && liff.isInClient()){
     await liff.sendMessages([{
       type:"text",
       text:`🧾 รับออเดอร์แล้ว #${orderId}\n⏳ รอร้านยืนยัน`
     }])
   }
+}catch(err){
+  console.log("❌ sendMessages error:", err)
+}
 
-  if(isLiffReady() && liff.isInClient()){
-    liff.closeWindow()
-    return
-  }
+// 🔥 ปิด LIFF แน่นอน
+if(isLiffReady() && liff.isInClient()){
+  liff.closeWindow()
+  return
+}
 
-  window.showIOSAlert("สั่งออเดอร์สำเร็จแล้ว")
+// fallback
+window.showIOSAlert("สั่งออเดอร์สำเร็จแล้ว")แล้ว")
 
  }catch(err){
 
