@@ -191,20 +191,19 @@ export function openOrderScreen(){
  // =====================
  // EDIT
  // =====================
- document.querySelectorAll(".edit-btn").forEach(btn=>{
+document.querySelectorAll(".edit-btn").forEach(btn=>{
 
   btn.onclick=()=>{
 
    const indexes = btn.dataset.indexes.split(",").map(Number)
-   const index = indexes[0]
-   const item = CART[index]
+   const item = CART[indexes[0]]
 
    closeOrderScreen()
-   openModifier(item,item.modifiers,index)
+   openModifier(item, item.modifiers, indexes)
 
   }
 
- })
+})
 
  // =====================
  // DELETE
