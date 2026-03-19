@@ -115,7 +115,15 @@ export function openOrderScreen(){
          ฿${item.price * item.qty}
        </div>
 
-       <div class="receipt-actions">
+       <div class="qty-control">
+
+ <button class="minus-btn qty-btn" data-indexes="${item.indexes.join(",")}">−</button>
+
+ <span class="qty-text">${item.qty}</span>
+
+ <button class="plus-btn qty-btn" data-indexes="${item.indexes.join(",")}">+</button>
+
+</div>
 
         <button class="edit-btn" data-indexes="${item.indexes.join(",")}">
          แก้ไข
