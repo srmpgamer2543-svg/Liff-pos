@@ -23,11 +23,9 @@ export function openOrderScreen(){
  list.innerHTML = ""
 
  let total = 0
-
  const mergedMap = {}
 
  CART.forEach((item,index)=>{
-
   const key = item.name + JSON.stringify(item.modifiers || {})
 
   if(!mergedMap[key]){
@@ -40,7 +38,6 @@ export function openOrderScreen(){
    mergedMap[key].qty++
    mergedMap[key].indexes.push(index)
   }
-
  })
 
  const mergedItems = Object.values(mergedMap)
@@ -48,12 +45,10 @@ export function openOrderScreen(){
  mergedItems.forEach((item)=>{
 
   const div = document.createElement("div")
-  div.className = "mb-3"
 
   let mods = ""
 
   if(item.modifiers){
-
    Object.entries(item.modifiers).forEach(([group,arr])=>{
 
     const modCount = {}
@@ -71,7 +66,7 @@ export function openOrderScreen(){
      const price = data.price ? ` +฿${data.price*data.count}` : ""
 
      mods += `
-     <div class="flex justify-between">
+     <div>
        <span>${name}${qty}</span>
        <span>${price}</span>
      </div>
@@ -79,15 +74,11 @@ export function openOrderScreen(){
     })
 
    })
-
   }
 
   div.innerHTML = `
-div.innerHTML = `
-
 <div class="receipt-item">
 
-  <!-- HEADER -->
   <div class="receipt-name">
     ${cleanName(item.name)}
   </div>
@@ -96,20 +87,16 @@ div.innerHTML = `
     <button class="edit-btn" data-indexes="${item.indexes.join(",")}">
       แก้ไข
     </button>
-
     <button class="delete-btn" data-indexes="${item.indexes.join(",")}">
       ลบ
     </button>
   </div>
 
-  <!-- MOD -->
   <div class="receipt-mod">
     ${mods}
   </div>
 
-  <!-- FOOTER -->
   <div class="receipt-price-row">
-
     <div class="qty-control">
       <button class="qty-btn minus-btn" data-indexes="${item.indexes.join(",")}">-</button>
       <span class="qty-text">${item.qty}</span>
@@ -119,11 +106,11 @@ div.innerHTML = `
     <div class="receipt-price">
       ฿${item.price * item.qty}
     </div>
-
   </div>
 
 </div>
 `
+
   total += item.price * item.qty
   list.appendChild(div)
 
@@ -137,11 +124,7 @@ div.innerHTML = `
  if(menu) menu.style.display = "none"
  if(sticky) sticky.style.display = "none"
 
- document.body.classList.add("order-open")
-
- document.getElementById("backToMenu").onclick = ()=>{
-  closeOrderScreen()
- }
+ document.getElementById("backToMenu").onclick = closeOrderScreen
 
  // ➕ เพิ่ม
  document.querySelectorAll(".plus-btn").forEach(btn=>{
@@ -196,7 +179,6 @@ div.innerHTML = `
 }
 
 function closeOrderScreen(){
-
  const screen = document.getElementById("orderScreen")
  const menu = document.getElementById("menuGrid")
 
@@ -205,27 +187,12 @@ function closeOrderScreen(){
 
  if(menu) menu.style.display = ""
 
- document.body.classList.remove("order-open")
-
  updateStickyCart(CART)
-
 }
 
 document.addEventListener("DOMContentLoaded",()=>{
-
- const screen = document.getElementById("orderScreen")
-
- if(screen){
-  screen.classList.add("hidden")
-  screen.style.display = "none"
- }
-
  const sendBtn = document.getElementById("sendOrderBtn")
-
- if(sendBtn){
-  sendBtn.onclick = sendOrder
- }
-
+ if(sendBtn) sendBtn.onclick = sendOrder
 })
 
 async function sendOrder(){
@@ -253,9 +220,7 @@ async function sendOrder(){
  try{
 
   let total = 0
-  CART.forEach(i=>{
-   total += i.price
-  })
+  CART.forEach(i=> total += i.price)
 
   const order = await createOrder({
    table_id:1,
@@ -280,21 +245,15 @@ async function sendOrder(){
   await createOrderItems(items)
 
   if(isLiffReady() && liff.isInClient()){
-    try{
-      await liff.sendMessages([
-        {
-          type:"text",
-          text:`🧾 รับออเดอร์แล้ว #${orderId}\n⏳ รอร้านยืนยัน`
-        }
-      ])
-    }catch(err){}
+    await liff.sendMessages([{
+      type:"text",
+      text:`🧾 รับออเดอร์แล้ว #${orderId}\n⏳ รอร้านยืนยัน`
+    }])
   }
 
-  if(isLiffReady()){
-   if(liff.isInClient()){
-     liff.closeWindow()
-     return
-   }
+  if(isLiffReady() && liff.isInClient()){
+    liff.closeWindow()
+    return
   }
 
   window.showIOSAlert("สั่งออเดอร์สำเร็จแล้ว")
