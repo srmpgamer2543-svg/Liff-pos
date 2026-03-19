@@ -440,13 +440,19 @@ export function openModifier(item,previousSelections=null,index=null){
 
    if(editIndex!==null){
 
-    updateCartItem(editIndex,newItem)
+ // 🔥 ลบของเดิมทั้งหมดในกลุ่มนั้นก่อน
+ window.CART.splice(editIndex,1)
 
-   }else{
+ // 🔥 ใส่ใหม่ตาม qty
+ for(let i=0;i<qty;i++){
+  addToCart(newItem)
+ }
 
-    for(let i=0;i<qty;i++){
-     addToCart(newItem)
-    }
+}else{
+
+ for(let i=0;i<qty;i++){
+  addToCart(newItem)
+ }
 
    }
 
