@@ -554,10 +554,11 @@ margin-bottom:6px;
 
 .receipt-mod{
 display:flex;
-justify-content:space-between;
+flex-direction:column; /* 🔥 ให้เรียงลง */
+align-items:flex-start; /* 🔥 ชิดซ้าย */
 font-size:14px;
 color:#6b7280;
-margin-bottom:2px;
+margin-bottom:4px;
 }
 
 /* ROW */
