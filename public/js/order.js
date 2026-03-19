@@ -84,69 +84,48 @@ export function openOrderScreen(){
 
   div.innerHTML = `
 
-<div class="bg-white rounded-2xl p-4 shadow">
+<div class="receipt-item">
 
   <!-- HEADER -->
-  <div class="flex items-center justify-between">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
 
-    <!-- ชื่อ -->
-    <h3 class="text-lg font-semibold">
+    <div class="receipt-name">
       ${cleanName(item.name)}
-    </h3>
+    </div>
 
-    <!-- ปุ่ม -->
-    <div class="flex gap-2 shrink-0">
-
-      <button class="edit-btn bg-blue-500 text-white px-3 py-1 rounded-lg text-sm"
-        data-indexes="${item.indexes.join(",")}">
+    <div class="receipt-actions">
+      <button class="edit-btn" data-indexes="${item.indexes.join(",")}">
         แก้ไข
       </button>
 
-      <button class="delete-btn bg-red-200 text-red-600 px-3 py-1 rounded-lg text-sm"
-        data-indexes="${item.indexes.join(",")}">
+      <button class="delete-btn" data-indexes="${item.indexes.join(",")}">
         ลบ
       </button>
-
     </div>
 
   </div>
 
-  <!-- MODIFIER -->
-  <div class="mt-2 text-gray-500 text-sm space-y-1">
+  <!-- MOD -->
+  <div class="receipt-mod">
     ${mods}
   </div>
 
   <!-- FOOTER -->
-  <div class="flex items-center justify-between mt-4">
+  <div class="receipt-price-row">
 
-    <!-- qty -->
-    <div class="flex items-center gap-3">
-
-      <button class="minus-btn w-8 h-8 border rounded-lg"
-        data-indexes="${item.indexes.join(",")}">
-        −
-      </button>
-
-      <span class="font-medium text-base">
-        ${item.qty}
-      </span>
-
-      <button class="plus-btn w-8 h-8 border rounded-lg"
-        data-indexes="${item.indexes.join(",")}">
-        +
-      </button>
-
+    <div class="qty-control">
+      <button class="qty-btn minus-btn" data-indexes="${item.indexes.join(",")}">-</button>
+      <span class="qty-text">${item.qty}</span>
+      <button class="qty-btn plus-btn" data-indexes="${item.indexes.join(",")}">+</button>
     </div>
 
-    <!-- price -->
-    <span class="font-semibold text-base">
+    <div class="receipt-price">
       ฿${item.price * item.qty}
-    </span>
+    </div>
 
   </div>
 
 </div>
-
 `
 
   total += item.price * item.qty
