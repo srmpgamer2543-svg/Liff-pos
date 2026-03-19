@@ -7,7 +7,7 @@ function cleanName(name){
  return name.replace(/^\d+/, "").trim()
 }
 
-let isSending = false // 👈 lock ยิงซ้ำ
+let isSending = false
 
 function isLiffReady(){
  return window.liff && typeof liff.isLoggedIn === "function" && liff.isLoggedIn()
@@ -91,30 +91,25 @@ export function openOrderScreen(){
 
   }
 
-  let noteHTML = ""
-
-  if(item.note){
-
-   noteHTML = `
-   <div class="receipt-note">
-     หมายเหตุ: ${item.note}
-   </div>
-   `
-
-  }
-
   div.innerHTML = `
 
    <div class="receipt-product">
 
      <div class="receipt-name">
-       ${cleanName(item.name)} x${item.qty}
+       ${cleanName(item.name)}
      </div>
 
      ${mods}
-     ${noteHTML}
 
      <div class="receipt-price-row">
+
+       <div class="receipt-actions">
+
+        <button class="minus-btn" data-indexes="${item.indexes.join(",")}">➖</button>
+        <span class="qty-text">${item.qty}</span>
+        <button class="plus-btn" data-indexes="${item.indexes.join(",")}">➕</button>
+
+       </div>
 
        <div class="receipt-price">
          ฿${item.price * item.qty}
@@ -158,6 +153,44 @@ export function openOrderScreen(){
   closeOrderScreen()
  }
 
+ // =====================
+ // ➕ เพิ่มจำนวน
+ // =====================
+ document.querySelectorAll(".plus-btn").forEach(btn=>{
+  btn.onclick=()=>{
+
+   const indexes = btn.dataset.indexes.split(",").map(Number)
+   const item = CART[indexes[0]]
+
+   CART.push(item)
+
+   updateStickyCart(CART)
+   openOrderScreen()
+  }
+ })
+
+ // =====================
+ // ➖ ลดจำนวน
+ // =====================
+ document.querySelectorAll(".minus-btn").forEach(btn=>{
+  btn.onclick=()=>{
+
+   const indexes = btn.dataset.indexes.split(",").map(Number)
+
+   if(indexes.length === 1){
+    CART.splice(indexes[0],1)
+   }else{
+    CART.splice(indexes[0],1)
+   }
+
+   updateStickyCart(CART)
+   openOrderScreen()
+  }
+ })
+
+ // =====================
+ // EDIT
+ // =====================
  document.querySelectorAll(".edit-btn").forEach(btn=>{
 
   btn.onclick=()=>{
@@ -173,6 +206,9 @@ export function openOrderScreen(){
 
  })
 
+ // =====================
+ // DELETE
+ // =====================
  document.querySelectorAll(".delete-btn").forEach(btn=>{
 
   btn.onclick=()=>{
@@ -208,7 +244,6 @@ function closeOrderScreen(){
 
  document.body.classList.remove("order-open")
 
- // ✅ FIX: ให้ sticky-cart ตัดสินเอง
  updateStickyCart(CART)
 
 }
@@ -235,12 +270,9 @@ async function sendOrder(){
  if(isSending) return
 
  if(!window.lineUserId){
-  console.log("❌ USER ID NULL")
   window.showIOSAlert("กรุณาเปิดผ่าน LINE ใหม่")
   return
  }
-
- console.log("👤 USER ID:", window.lineUserId)
 
  if(CART.length===0){
   window.showIOSAlert("ไม่มีสินค้า")
@@ -268,8 +300,6 @@ async function sendOrder(){
    line_user_id: window.lineUserId
   })
 
-  console.log("📦 ORDER:", order)
-
   if(!order || !order.id){
    throw new Error("create order failed")
   }
@@ -284,11 +314,7 @@ async function sendOrder(){
    line_user_id: window.lineUserId
   }))
 
-  console.log("📦 ITEMS:", items)
-
-  const res = await createOrderItems(items)
-
-  console.log("📡 ITEMS RESPONSE:", res)
+  await createOrderItems(items)
 
   if(isLiffReady() && liff.isInClient()){
     try{
@@ -298,35 +324,19 @@ async function sendOrder(){
           text:`🧾 รับออเดอร์แล้ว #${orderId}\n⏳ รอร้านยืนยัน`
         }
       ])
-    }catch(err){
-      console.log("❌ SEND CONFIRM ERROR:", err)
-    }
+    }catch(err){}
   }
 
   if(isLiffReady()){
-
-   try{
-
-    if(liff.isInClient()){
-
+   if(liff.isInClient()){
      liff.closeWindow()
      return
-
-    }
-
-   }catch(err){
-
-    console.log("❌ LIFF ERROR:", err)
-
    }
-
   }
 
   window.showIOSAlert("สั่งออเดอร์สำเร็จแล้ว")
 
  }catch(err){
-
-  console.error("🔥 ERROR:", err)
 
   window.showIOSAlert("ส่งออเดอร์ไม่สำเร็จ")
 
