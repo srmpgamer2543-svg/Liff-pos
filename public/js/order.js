@@ -83,31 +83,23 @@ export function openOrderScreen(){
   }
 
   div.innerHTML = `
+div.innerHTML = `
 
 <div class="receipt-item">
 
   <!-- HEADER -->
-  mods += `
-   <div class="receipt-mod">
-  <span>${name}${qty}</span>
-  <span>${price}</span>
-</div>
-`
+  <div class="receipt-name">
+    ${cleanName(item.name)}
+  </div>
 
-    <div class="receipt-name">
-      ${cleanName(item.name)}
-    </div>
+  <div class="receipt-actions">
+    <button class="edit-btn" data-indexes="${item.indexes.join(",")}">
+      แก้ไข
+    </button>
 
-    <div class="receipt-actions">
-      <button class="edit-btn" data-indexes="${item.indexes.join(",")}">
-        แก้ไข
-      </button>
-
-      <button class="delete-btn" data-indexes="${item.indexes.join(",")}">
-        ลบ
-      </button>
-    </div>
-
+    <button class="delete-btn" data-indexes="${item.indexes.join(",")}">
+      ลบ
+    </button>
   </div>
 
   <!-- MOD -->
@@ -132,7 +124,6 @@ export function openOrderScreen(){
 
 </div>
 `
-
   total += item.price * item.qty
   list.appendChild(div)
 
