@@ -12,6 +12,7 @@ export function updateStickyCart(cart){
  if(!cart || cart.length === 0){
 
   bar.classList.add("hidden")
+  bar.style.display = "" // ✅ กัน display ค้าง
 
   if(headerCount) headerCount.textContent = 0
 
@@ -19,6 +20,7 @@ export function updateStickyCart(cart){
  }
 
  bar.classList.remove("hidden")
+ bar.style.display = "flex" // ✅ ให้แน่ใจว่าแสดงถูก
 
  let totalItems = 0
  let totalPrice = 0
@@ -51,8 +53,6 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
  }
-
- /* 🔥 NEW: cart icon click */
 
  const cartIcon = document.querySelector(".cart-icon")
 
