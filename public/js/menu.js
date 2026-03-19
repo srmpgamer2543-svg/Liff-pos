@@ -132,8 +132,6 @@ export function openModifier(item,previousSelections=null,indexes=null){
  const overlay=document.getElementById("modifierOverlay")
  const modal=document.getElementById("modifierModal")
 
- modal.scrollTop=0
-
  const sortedGroups=[...item.modifier_groups].sort((a,b)=>{
 
   const order=(name)=>{
@@ -291,6 +289,8 @@ export function openModifier(item,previousSelections=null,indexes=null){
  }
 
  setTimeout(()=>{
+
+  modal.scrollTop=0
 
   const qtyNum=modal.querySelector("#qtyNum")
   let qty = editIndexes ? editIndexes.length : 1
