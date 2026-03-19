@@ -175,7 +175,7 @@ export function openModifier(item,previousSelections=null,index=null){
   const isTopping=name.includes("ท็อป")||name.includes("ท้อป")
 
   html+=`<div class="mod-group" data-required="${isRequired}" data-group="${name}" data-id="${group.id}">`
-  html+=`<div class="mod-title">${name}</div>`
+  html+=`<div class="mod-title">${name}${isRequired ? ' <span style="color:red">*</span>' : ''}</div>`
 
   group.modifiers.forEach(mod=>{
 
@@ -188,13 +188,15 @@ export function openModifier(item,previousSelections=null,index=null){
      data-price="${mod.price}"
      data-name="${mod.name}">
 
-     <span>${mod.name}</span>
-     <span class="mod-price">฿${mod.price||0}</span>
+     <div class="mod-left">
+      <div class="mod-name">${mod.name}</div>
+      <div class="mod-price">+฿${mod.price||0}</div>
+     </div>
 
-     <div class="qty-box">
-      <button class="top-minus">➖</button>
+     <div class="topping-control">
+      <button class="top-minus top-btn">-</button>
       <span class="top-qty">0</span>
-      <button class="top-plus">➕</button>
+      <button class="top-plus top-btn">+</button>
      </div>
 
     </div>
@@ -206,8 +208,10 @@ export function openModifier(item,previousSelections=null,index=null){
 
     <label class="mod-option">
 
-     <span>${mod.name}</span>
-     <span class="mod-price">฿${mod.price||0}</span>
+     <div class="mod-left">
+      <div class="mod-name">${mod.name}</div>
+      <div class="mod-price">+฿${mod.price||0}</div>
+     </div>
 
      <input
       type="${isRequired?"radio":"checkbox"}"
@@ -236,9 +240,9 @@ export function openModifier(item,previousSelections=null,index=null){
   <span class="qty-label">จำนวนแก้ว</span>
 
   <div class="qty-box">
-   <button id="qtyMinus">➖</button>
+   <button id="qtyMinus" class="qty-btn">-</button>
    <span id="qtyNum">1</span>
-   <button id="qtyPlus">➕</button>
+   <button id="qtyPlus" class="qty-btn">+</button>
   </div>
 
  </div>
@@ -457,4 +461,4 @@ export function openModifier(item,previousSelections=null,index=null){
 
 function cleanName(name){
  return name.replace(/^\d+/,"").trim()
-}
+    }
