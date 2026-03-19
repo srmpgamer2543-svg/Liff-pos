@@ -1,6 +1,5 @@
 import { getMenu, getCategories } from "./api.js"
-import { addToCart, updateCartItem } from "./cart.js"
-
+import { addToCart, updateCartItem, CART } from "./cart.js"
 let MENU=[]
 let CATEGORY_ORDER={}
 let editIndex=null
@@ -440,8 +439,8 @@ export function openModifier(item,previousSelections=null,index=null){
 
    if(editIndex!==null){
 
- // 🔥 ลบของเดิมทั้งหมดในกลุ่มนั้นก่อน
- window.CART.splice(editIndex,1)
+ // 🔥 ลบตัวเดิม
+ CART.splice(editIndex,1)
 
  // 🔥 ใส่ใหม่ตาม qty
  for(let i=0;i<qty;i++){
