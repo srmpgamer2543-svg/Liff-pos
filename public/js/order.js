@@ -101,7 +101,17 @@ export function openOrderScreen(){
   </div>
 
   <div class="receipt-price-row">
-    ...
+
+    <div class="qty-control">
+      <button class="qty-btn minus-btn" data-indexes="${item.indexes.join(",")}">-</button>
+      <span class="qty-text">${item.qty}</span>
+      <button class="qty-btn plus-btn" data-indexes="${item.indexes.join(",")}">+</button>
+    </div>
+
+    <div class="receipt-price">
+      ฿${item.price * item.qty}
+    </div>
+
   </div>
 
 </div>
@@ -266,5 +276,4 @@ async function sendOrder(){
   }
 
  }
-
 }
