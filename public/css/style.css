@@ -384,7 +384,10 @@ border-radius:12px;
 padding:8px 12px;
 font-weight:700;
 font-size:16px;
+text-align:center;
+line-height:1.2;
 }
+
 
 /* IOS ALERT */
 
