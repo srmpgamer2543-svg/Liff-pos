@@ -47,9 +47,27 @@ document.addEventListener("DOMContentLoaded",()=>{
  if(confirmBtn){
 
   confirmBtn.onclick = ()=>{
+   openOrderScreen()
+  }
+
+ }
+
+ /* 🔥 NEW: cart icon click */
+
+ const cartIcon = document.querySelector(".cart-icon")
+
+ if(cartIcon){
+
+  cartIcon.onclick = ()=>{
+
+   const count = document.getElementById("headerCartCount")
+
+   if(!count || Number(count.textContent) === 0){
+    window.showIOSAlert("ไม่มีสินค้าในตะกร้า")
+    return
+   }
 
    openOrderScreen()
-
   }
 
  }
