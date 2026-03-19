@@ -31,18 +31,14 @@ export function openOrderScreen(){
   const key = item.name + JSON.stringify(item.modifiers || {})
 
   if(!mergedMap[key]){
-
    mergedMap[key] = {
     ...item,
     qty:1,
     indexes:[index]
    }
-
   }else{
-
    mergedMap[key].qty++
    mergedMap[key].indexes.push(index)
-
   }
 
  })
@@ -52,7 +48,7 @@ export function openOrderScreen(){
  mergedItems.forEach((item)=>{
 
   const div = document.createElement("div")
-  div.className = "receipt-item"
+  div.className = "mb-3"
 
   let mods = ""
 
@@ -63,28 +59,23 @@ export function openOrderScreen(){
     const modCount = {}
 
     arr.forEach(m=>{
-
      const name = typeof m === "object" ? m.name : m
      const price = typeof m === "object" ? m.price || 0 : 0
 
      if(!modCount[name]) modCount[name] = {count:0,price}
-
      modCount[name].count++
-
     })
 
     Object.entries(modCount).forEach(([name,data])=>{
-
      const qty = data.count > 1 ? ` x${data.count}` : ""
      const price = data.price ? ` +฿${data.price*data.count}` : ""
 
      mods += `
-     <div class="receipt-mod">
-        <span class="mod-name">${name}${qty}</span>
-        <span class="mod-price">${price}</span>
+     <div class="flex justify-between">
+       <span>${name}${qty}</span>
+       <span>${price}</span>
      </div>
      `
-
     })
 
    })
@@ -95,23 +86,23 @@ export function openOrderScreen(){
 
 <div class="bg-white rounded-2xl p-4 shadow">
 
-  <!-- Header -->
+  <!-- HEADER -->
   <div class="flex items-center justify-between">
 
-    <!-- ชื่อเมนู -->
+    <!-- ชื่อ -->
     <h3 class="text-lg font-semibold">
       ${cleanName(item.name)}
     </h3>
 
     <!-- ปุ่ม -->
-    <div class="flex gap-2">
+    <div class="flex gap-2 shrink-0">
 
-      <button class="edit-btn bg-blue-500 text-white px-3 py-1 rounded-lg"
+      <button class="edit-btn bg-blue-500 text-white px-3 py-1 rounded-lg text-sm"
         data-indexes="${item.indexes.join(",")}">
         แก้ไข
       </button>
 
-      <button class="delete-btn bg-red-200 text-red-600 px-3 py-1 rounded-lg"
+      <button class="delete-btn bg-red-200 text-red-600 px-3 py-1 rounded-lg text-sm"
         data-indexes="${item.indexes.join(",")}">
         ลบ
       </button>
@@ -120,21 +111,35 @@ export function openOrderScreen(){
 
   </div>
 
-  <!-- รายละเอียด -->
-  <div class="mt-2 text-gray-500 text-sm">
+  <!-- MODIFIER -->
+  <div class="mt-2 text-gray-500 text-sm space-y-1">
     ${mods}
   </div>
 
-  <!-- ราคา + จำนวน -->
+  <!-- FOOTER -->
   <div class="flex items-center justify-between mt-4">
 
-    <div class="flex items-center gap-2">
-      <button class="minus-btn" data-indexes="${item.indexes.join(",")}">−</button>
-      <span class="qty-text">${item.qty}</span>
-      <button class="plus-btn" data-indexes="${item.indexes.join(",")}">+</button>
+    <!-- qty -->
+    <div class="flex items-center gap-3">
+
+      <button class="minus-btn w-8 h-8 border rounded-lg"
+        data-indexes="${item.indexes.join(",")}">
+        −
+      </button>
+
+      <span class="font-medium text-base">
+        ${item.qty}
+      </span>
+
+      <button class="plus-btn w-8 h-8 border rounded-lg"
+        data-indexes="${item.indexes.join(",")}">
+        +
+      </button>
+
     </div>
 
-    <span class="font-semibold">
+    <!-- price -->
+    <span class="font-semibold text-base">
       ฿${item.price * item.qty}
     </span>
 
@@ -145,7 +150,6 @@ export function openOrderScreen(){
 `
 
   total += item.price * item.qty
-
   list.appendChild(div)
 
  })
@@ -164,15 +168,11 @@ export function openOrderScreen(){
   closeOrderScreen()
  }
 
- // =====================
- // ➕ เพิ่มจำนวน
- // =====================
+ // ➕ เพิ่ม
  document.querySelectorAll(".plus-btn").forEach(btn=>{
   btn.onclick=()=>{
-
    const indexes = btn.dataset.indexes.split(",").map(Number)
    const item = CART[indexes[0]]
-
    CART.push(item)
 
    updateStickyCart(CART)
@@ -180,64 +180,42 @@ export function openOrderScreen(){
   }
  })
 
- // =====================
- // ➖ ลดจำนวน
- // =====================
+ // ➖ ลด
  document.querySelectorAll(".minus-btn").forEach(btn=>{
   btn.onclick=()=>{
-
    const indexes = btn.dataset.indexes.split(",").map(Number)
-
-   if(indexes.length === 1){
-    CART.splice(indexes[0],1)
-   }else{
-    CART.splice(indexes[0],1)
-   }
+   CART.splice(indexes[0],1)
 
    updateStickyCart(CART)
    openOrderScreen()
   }
  })
 
- // =====================
  // EDIT
- // =====================
-document.querySelectorAll(".edit-btn").forEach(btn=>{
-
+ document.querySelectorAll(".edit-btn").forEach(btn=>{
   btn.onclick=()=>{
-
    const indexes = btn.dataset.indexes.split(",").map(Number)
    const item = CART[indexes[0]]
 
    closeOrderScreen()
    openModifier(item, item.modifiers, indexes)
-
   }
+ })
 
-})
-
- // =====================
  // DELETE
- // =====================
  document.querySelectorAll(".delete-btn").forEach(btn=>{
-
   btn.onclick=()=>{
-
    const indexes = btn.dataset.indexes.split(",").map(Number)
 
    if(confirm("ลบรายการนี้ทั้งหมด?")){
-
     indexes.sort((a,b)=>b-a).forEach(i=>{
      CART.splice(i,1)
     })
 
     updateStickyCart(CART)
     openOrderScreen()
-
    }
-
   }
-
  })
 
 }
