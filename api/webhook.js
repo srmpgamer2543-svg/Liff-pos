@@ -288,59 +288,113 @@ export default async function handler(req, res) {
         // ======================
         if (text.includes("สรุปยอด")) {
 
-          const date = parseThaiDate(text)
-          if (!date) {
-            await fetch("https://api.line.me/v2/bot/message/reply",{
-              method:"POST",
-              headers:{
-                "Content-Type":"application/json",
-                Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
-              },
-              body:JSON.stringify({
-                replyToken:event.replyToken,
-                messages:[{ type:"text", text:"❌ กรุณาระบุวันที่ เช่น 20/3/69 หรือ 20 มีนาคม 69" }]
-              })
-            })
-            continue
-          }
+  let start = ""
+  let end = ""
+  let label = ""
 
-          const start = `${date}T00:00:00`
-          const end = `${date}T23:59:59`
+  const now = new Date()
 
-          const orderRes = await fetch(
-            `${process.env.SUPABASE_URL}/rest/v1/orders?created_at=gte.${start}&created_at=lte.${end}`,
-            {
-              headers:{
-                apikey:process.env.SUPABASE_KEY,
-                Authorization:`Bearer ${process.env.SUPABASE_KEY}`
-              }
-            }
-          )
+  // ======================
+  // รายปี
+  // ======================
+  if (text.includes("รายปี")) {
 
-          const orders = await orderRes.json()
+    const year = now.getFullYear()
+    start = `${year}-01-01T00:00:00`
+    end = `${year}-12-31T23:59:59`
+    label = `ปี ${year}`
+  }
 
-          let total = 0
-          let count = 0
+  // ======================
+  // รายเดือน
+  // ======================
+  else if (text.includes("รายเดือน")) {
 
-          orders.forEach(o=>{
-            total += Number(o.total || 0)
-            count++
-          })
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, "0")
 
-          await fetch("https://api.line.me/v2/bot/message/reply",{
-            method:"POST",
-            headers:{
-              "Content-Type":"application/json",
-              Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
-            },
-            body:JSON.stringify({
-              replyToken:event.replyToken,
-              messages:[{
-                type:"text",
-                text:`📊 สรุปยอดวันที่ ${date}\n💰 ${total} บาท\n🧾 ${count} ออเดอร์`
-              }]
-            })
-          })
+    start = `${year}-${month}-01T00:00:00`
+    end = `${year}-${month}-31T23:59:59`
+    label = `เดือน ${month}/${year}`
+  }
+
+  // ======================
+  // รายสัปดาห์
+  // ======================
+  else if (text.includes("รายสัปดาห์")) {
+
+    const first = new Date()
+    first.setDate(first.getDate() - first.getDay())
+
+    const last = new Date(first)
+    last.setDate(first.getDate() + 6)
+
+    start = first.toISOString()
+    end = last.toISOString()
+    label = "สัปดาห์นี้"
+  }
+
+  // ======================
+  // รายวัน (ของเดิม)
+  // ======================
+  else {
+
+    const date = parseThaiDate(text)
+
+    if (!date) {
+      await fetch("https://api.line.me/v2/bot/message/reply",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
+        },
+        body:JSON.stringify({
+          replyToken:event.replyToken,
+          messages:[{ type:"text", text:"❌ กรุณาระบุวันที่ เช่น 20/3/69 หรือ 20 มีนาคม 69" }]
+        })
+      })
+      continue
+    }
+
+    start = `${date}T00:00:00`
+    end = `${date}T23:59:59`
+    label = date
+  }
+
+  const orderRes = await fetch(
+    `${process.env.SUPABASE_URL}/rest/v1/orders?created_at=gte.${start}&created_at=lte.${end}`,
+    {
+      headers:{
+        apikey:process.env.SUPABASE_KEY,
+        Authorization:`Bearer ${process.env.SUPABASE_KEY}`
+      }
+    }
+  )
+
+  const orders = await orderRes.json()
+
+  let total = 0
+  let count = 0
+
+  orders.forEach(o=>{
+    total += Number(o.total || 0)
+    count++
+  })
+
+  await fetch("https://api.line.me/v2/bot/message/reply",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
+    },
+    body:JSON.stringify({
+      replyToken:event.replyToken,
+      messages:[{
+        type:"text",
+        text:`📊 สรุปยอด${label}\n💰 ${total} บาท\n🧾 ${count} ออเดอร์`
+      }]
+    })
+  })
         }
       }
 
