@@ -282,12 +282,7 @@ export default async function handler(req, res) {
             })
           })
         }
-
-        ()
-    label = "สัปดาห์นี้"
   }
-
-
 
 
 // ======================
