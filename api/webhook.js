@@ -373,61 +373,107 @@ export default async function handler(req, res) {
         }
       }
 
-      // ======================
-      // POSTBACK
-      // ======================
-      if (event.type === "postback") {
+      // 🔥 แทนของเดิมทั้งหมดใน postback ส่วนนี้
 
-        const params = new URLSearchParams(event.postback.data)
-        const action = params.get("action")
-        const orderId = Number(params.get("order_id"))
+// ======================
+// POSTBACK HANDLER
+// ======================
+if (event.type === "postback") {
 
-        if (!orderId) continue
+  const params = new URLSearchParams(event.postback.data)
 
-        let newStatus = "pending"
-        let statusText = ""
-        let color = "#FF9500"
-        let replyText = ""
+  const action = params.get("action")
+  const orderId = Number(params.get("order_id"))
 
-        if (action === "accept") {
-          newStatus = "preparing"
-          statusText = "🟠 ร้านกำลังเตรียมออเดอร์ของคุณ"
-          replyText = `✅ รับออเดอร์ #${orderId} แล้ว`
-        }
+  if (!orderId) continue
 
-        if (action === "done") {
-          newStatus = "completed"
-          statusText = "🟢 ออเดอร์ของคุณเสร็จแล้ว"
-          color = "#34C759"
-          replyText = `🎉 ออเดอร์ #${orderId} ทำเสร็จแล้ว`
-        }
+  let newStatus = "pending"
+  let statusText = ""
+  let statusColor = "#FF9500"
 
-        await fetch(
-          `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
-          {
-            method:"PATCH",
-            headers:{
-              apikey:process.env.SUPABASE_KEY,
-              Authorization:`Bearer ${process.env.SUPABASE_KEY}`,
-              "Content-Type":"application/json"
-            },
-            body:JSON.stringify({status:newStatus})
-          }
-        )
+  if (action === "accept") {
+    newStatus = "preparing"
+    statusText = "ร้านกำลังเตรียมเครื่องดื่มของคุณ 🧑‍🍳"
+    statusColor = "#FF9500"
+  }
 
-        if(replyText){
-          await fetch("https://api.line.me/v2/bot/message/reply",{
-            method:"POST",
-            headers:{
-              "Content-Type":"application/json",
-              Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
-            },
-            body:JSON.stringify({
-              replyToken:event.replyToken,
-              messages:[{ type:"text", text:replyText }]
-            })
-          })
-        }
+  if (action === "done") {
+    newStatus = "completed"
+    statusText = "ออเดอร์ของคุณลูกค้าเสร็จแล้ว 🎉"
+    statusColor = "#34C759"
+  }
+
+  // ✅ UPDATE STATUS
+  await fetch(
+    `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: process.env.SUPABASE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ status: newStatus })
+    }
+  )
+
+  // ✅ ดึง ORDER เต็ม (แก้ตรงนี้)
+  const orderRes = await fetch(
+    `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
+    {
+      headers: {
+        apikey: process.env.SUPABASE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+      }
+    }
+  )
+
+  const orderData = await orderRes.json()
+  const order = orderData?.[0]
+
+  console.log("🧾 ORDER FULL:", order)
+
+  if (!order || !order.line_user_id) {
+    console.log("❌ ไม่มี customerId ส่งไม่ได้")
+    continue
+  }
+
+  const customerId = order.line_user_id
+
+  // ✅ ดึง items
+  const itemsRes = await fetch(
+    `${process.env.SUPABASE_URL}/rest/v1/order_items?order_id=eq.${orderId}`,
+    {
+      headers: {
+        apikey: process.env.SUPABASE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+      }
+    }
+  )
+
+  const itemsData = await itemsRes.json()
+
+  const flex = createFlex(order, itemsData, statusText, statusColor)
+
+  // ✅ PUSH พร้อม debug
+  const pushRes = await fetch(
+    "https://api.line.me/v2/bot/message/push",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+      },
+      body: JSON.stringify({
+        to: customerId,
+        messages: [flex]
+      })
+    }
+  )
+
+  const pushText = await pushRes.text()
+  console.log("📤 PUSH STATUS:", pushRes.status, pushText)
+}
       }
     }
 
