@@ -468,6 +468,89 @@ if (text.includes("สรุปยอด")) {
     if (!date) {
       await fetch("https://api.line.me/v2/bot/message/reply",{
         method:"POST",
+// ======================
+// สรุปยอดตามวันที่
+// ======================
+if (text.includes("สรุปยอด")) {
+
+  let start = ""
+  let end = ""
+  let label = ""
+
+  const now = new Date()
+
+  // helper แปลงเป็น local (ไทย) ไม่ใช้ toISOString()
+  function formatLocal(date){
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, "0")
+    const d = String(date.getDate()).padStart(2, "0")
+    const h = String(date.getHours()).padStart(2, "0")
+    const mi = String(date.getMinutes()).padStart(2, "0")
+    const s = String(date.getSeconds()).padStart(2, "0")
+    return `${y}-${m}-${d}T${h}:${mi}:${s}`
+  }
+
+  // ======================
+  // รายปี
+  // ======================
+  if (text.includes("รายปี")) {
+
+    const year = now.getFullYear()
+
+    const first = new Date(year, 0, 1, 0, 0, 0)
+    const last = new Date(year, 11, 31, 23, 59, 59)
+
+    start = formatLocal(first)
+    end = formatLocal(last)
+    label = `ปี ${year}`
+  }
+
+  // ======================
+  // รายเดือน
+  // ======================
+  else if (text.includes("รายเดือน")) {
+
+    const year = now.getFullYear()
+    const month = now.getMonth()
+
+    const first = new Date(year, month, 1, 0, 0, 0)
+    const last = new Date(year, month + 1, 0, 23, 59, 59)
+
+    start = formatLocal(first)
+    end = formatLocal(last)
+
+    const mDisplay = String(month + 1).padStart(2, "0")
+    label = `เดือน ${mDisplay}/${year}`
+  }
+
+  // ======================
+  // รายสัปดาห์
+  // ======================
+  else if (text.includes("รายสัปดาห์")) {
+
+    const first = new Date()
+    first.setHours(0,0,0,0)
+    first.setDate(first.getDate() - first.getDay())
+
+    const last = new Date(first)
+    last.setDate(first.getDate() + 6)
+    last.setHours(23,59,59,999)
+
+    start = formatLocal(first)
+    end = formatLocal(last)
+    label = "สัปดาห์นี้"
+  }
+
+  // ======================
+  // รายวัน
+  // ======================
+  else {
+
+    const date = parseThaiDate(text)
+
+    if (!date) {
+      await fetch("https://api.line.me/v2/bot/message/reply",{
+        method:"POST",
         headers:{
           "Content-Type":"application/json",
           Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
@@ -519,7 +602,7 @@ if (text.includes("สรุปยอด")) {
       }]
     })
   })
-  }
+      }
 
       // ======================
       // POSTBACK
