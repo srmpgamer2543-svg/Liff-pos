@@ -6,9 +6,6 @@ export default async function handler(req, res) {
     return res.status(405).end()
   }
 
-  // ======================
-  // FORMAT MODIFIER
-  // ======================
   function formatModifiers(modifiers){
 
     if(!modifiers) return { type:"", sweet:"", toppings:{} }
@@ -18,9 +15,7 @@ export default async function handler(req, res) {
     let toppingMap = {}
 
     Object.entries(modifiers).forEach(([group, arr])=>{
-
       arr.forEach(m=>{
-
         const name = typeof m === "object" ? m.name : m
 
         if(name.includes("เย็น") || name.includes("ปั่น")){
@@ -32,21 +27,12 @@ export default async function handler(req, res) {
         else{
           toppingMap[name] = (toppingMap[name] || 0) + 1
         }
-
       })
-
     })
 
-    return {
-      type,
-      sweet,
-      toppings: toppingMap
-    }
+    return { type, sweet, toppings: toppingMap }
   }
 
-  // ======================
-  // PARSE DATE (ไทย)
-  // ======================
   function parseThaiDate(text){
 
     const monthMap = {
@@ -83,9 +69,6 @@ export default async function handler(req, res) {
     return null
   }
 
-  // ======================
-  // BUILD FLEX
-  // ======================
   function buildOrderFlex(orderId, statusText, statusColor, itemsData, total){
 
     const merged = {}
@@ -100,7 +83,6 @@ export default async function handler(req, res) {
     })
 
     const items = Object.values(merged)
-
     const MAX_ITEMS = 10
     const displayItems = items.slice(0, MAX_ITEMS)
 
@@ -127,19 +109,8 @@ export default async function handler(req, res) {
         type:"box",
         layout:"vertical",
         contents:[
-          {
-            type:"text",
-            text: line,
-            wrap:true,
-            size:"sm"
-          },
-          {
-            type:"text",
-            text:`${item.price * item.qty} บาท`,
-            align:"end",
-            weight:"bold",
-            size:"sm"
-          }
+          { type:"text", text: line, wrap:true, size:"sm" },
+          { type:"text", text:`${item.price * item.qty} บาท`, align:"end", weight:"bold", size:"sm" }
         ]
       })
     })
@@ -164,21 +135,14 @@ export default async function handler(req, res) {
           layout:"vertical",
           spacing:"md",
           contents:[
-
             { type:"text", text:"📋 สถานะออเดอร์", weight:"bold", size:"xl" },
             { type:"text", text:`หมายเลขออเดอร์ #${orderId}`, size:"sm", color:"#888888" },
-
             { type:"separator" },
-
             { type:"text", text:"สถานะตอนนี้", size:"sm", color:"#888888" },
             { type:"text", text:statusText, weight:"bold", color:statusColor, wrap:true },
-
             { type:"separator" },
-
             { type:"text", text:"🧋 รายการ", weight:"bold" },
-
             ...itemBlocks,
-
             {
               type:"text",
               text:`ยอดรวม ${totalQty} รายการ  ${total} บาท`,
@@ -208,8 +172,6 @@ export default async function handler(req, res) {
     }
 
     const events = body.events || []
-
-    // 🔥 กัน event ซ้ำ
     const processedEvents = new Set()
 
     for (const event of events) {
@@ -217,14 +179,19 @@ export default async function handler(req, res) {
       if (processedEvents.has(event.replyToken)) continue
       processedEvents.add(event.replyToken)
 
+      // ✅ FIX: define text safely
+      const text = event?.message?.text || ""
+
       // ======================
       // MESSAGE
       // ======================
       if (event.type === "message" && event.message.type === "text") {
 
-        const text = event.message.text || ""
         const userId = event.source.userId
 
+        // ======================
+        // ตรวจสอบสถานะออเดอร์
+        // ======================
         if (text.includes("ตรวจสอบสถานะออเดอร์")) {
 
           const orderRes = await fetch(
@@ -283,141 +250,127 @@ export default async function handler(req, res) {
           })
         }
 
+        // ======================
+        // สรุปยอด
+        // ======================
+        if (text.includes("สรุปยอด")) {
 
-// ======================
-// สรุปยอดตามวันที่
-// ======================
-if (text.includes("สรุปยอด")) {
+          let start = ""
+          let end = ""
+          let label = ""
 
-  let start = ""
-  let end = ""
-  let label = ""
+          const now = new Date()
 
-  const now = new Date()
+          function formatLocal(date){
+            const y = date.getFullYear()
+            const m = String(date.getMonth() + 1).padStart(2, "0")
+            const d = String(date.getDate()).padStart(2, "0")
+            const h = String(date.getHours()).padStart(2, "0")
+            const mi = String(date.getMinutes()).padStart(2, "0")
+            const s = String(date.getSeconds()).padStart(2, "0")
+            return `${y}-${m}-${d}T${h}:${mi}:${s}`
+          }
 
-  // helper แปลงเป็น local (ไทย) ไม่ใช้ toISOString()
-  function formatLocal(date){
-    const y = date.getFullYear()
-    const m = String(date.getMonth() + 1).padStart(2, "0")
-    const d = String(date.getDate()).padStart(2, "0")
-    const h = String(date.getHours()).padStart(2, "0")
-    const mi = String(date.getMinutes()).padStart(2, "0")
-    const s = String(date.getSeconds()).padStart(2, "0")
-    return `${y}-${m}-${d}T${h}:${mi}:${s}`
-  }
+          if (text.includes("รายปี")) {
 
-  // ======================
-  // รายปี
-  // ======================
-  if (text.includes("รายปี")) {
+            const year = now.getFullYear()
+            const first = new Date(year, 0, 1, 0, 0, 0)
+            const last = new Date(year, 11, 31, 23, 59, 59)
 
-    const year = now.getFullYear()
+            start = formatLocal(first)
+            end = formatLocal(last)
+            label = `ปี ${year}`
+          }
 
-    const first = new Date(year, 0, 1, 0, 0, 0)
-    const last = new Date(year, 11, 31, 23, 59, 59)
+          else if (text.includes("รายเดือน")) {
 
-    start = formatLocal(first)
-    end = formatLocal(last)
-    label = `ปี ${year}`
-  }
+            const year = now.getFullYear()
+            const month = now.getMonth()
 
-  // ======================
-  // รายเดือน
-  // ======================
-  else if (text.includes("รายเดือน")) {
+            const first = new Date(year, month, 1, 0, 0, 0)
+            const last = new Date(year, month + 1, 0, 23, 59, 59)
 
-    const year = now.getFullYear()
-    const month = now.getMonth()
+            start = formatLocal(first)
+            end = formatLocal(last)
 
-    const first = new Date(year, month, 1, 0, 0, 0)
-    const last = new Date(year, month + 1, 0, 23, 59, 59)
+            const mDisplay = String(month + 1).padStart(2, "0")
+            label = `เดือน ${mDisplay}/${year}`
+          }
 
-    start = formatLocal(first)
-    end = formatLocal(last)
+          else if (text.includes("รายสัปดาห์")) {
 
-    const mDisplay = String(month + 1).padStart(2, "0")
-    label = `เดือน ${mDisplay}/${year}`
-  }
+            const first = new Date()
+            first.setHours(0,0,0,0)
+            first.setDate(first.getDate() - first.getDay())
 
-  // ======================
-  // รายสัปดาห์
-  // ======================
-  else if (text.includes("รายสัปดาห์")) {
+            const last = new Date(first)
+            last.setDate(first.getDate() + 6)
+            last.setHours(23,59,59,999)
 
-    const first = new Date()
-    first.setHours(0,0,0,0)
-    first.setDate(first.getDate() - first.getDay())
+            start = formatLocal(first)
+            end = formatLocal(last)
+            label = "สัปดาห์นี้"
+          }
 
-    const last = new Date(first)
-    last.setDate(first.getDate() + 6)
-    last.setHours(23,59,59,999)
+          else {
 
-    start = formatLocal(first)
-    end = formatLocal(last)
-    label = "สัปดาห์นี้"
-  }
+            const date = parseThaiDate(text)
 
-  // ======================
-  // รายวัน
-  // ======================
-  else {
+            if (!date) {
+              await fetch("https://api.line.me/v2/bot/message/reply",{
+                method:"POST",
+                headers:{
+                  "Content-Type":"application/json",
+                  Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
+                },
+                body:JSON.stringify({
+                  replyToken:event.replyToken,
+                  messages:[{ type:"text", text:"❌ กรุณาระบุวันที่ เช่น 20/3/69 หรือ 20 มีนาคม 69" }]
+                })
+              })
+              continue
+            }
 
-    const date = parseThaiDate(text)
+            start = `${date}T00:00:00`
+            end = `${date}T23:59:59`
+            label = date
+          }
 
-    if (!date) {
-      await fetch("https://api.line.me/v2/bot/message/reply",{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
-        },
-        body:JSON.stringify({
-          replyToken:event.replyToken,
-          messages:[{ type:"text", text:"❌ กรุณาระบุวันที่ เช่น 20/3/69 หรือ 20 มีนาคม 69" }]
-        })
-      })
-      continue
-    }
+          const orderRes = await fetch(
+            `${process.env.SUPABASE_URL}/rest/v1/orders?created_at=gte.${start}&created_at=lte.${end}`,
+            {
+              headers:{
+                apikey:process.env.SUPABASE_KEY,
+                Authorization:`Bearer ${process.env.SUPABASE_KEY}`
+              }
+            }
+          )
 
-    start = `${date}T00:00:00`
-    end = `${date}T23:59:59`
-    label = date
-  }
+          const orders = await orderRes.json()
 
-  const orderRes = await fetch(
-    `${process.env.SUPABASE_URL}/rest/v1/orders?created_at=gte.${start}&created_at=lte.${end}`,
-    {
-      headers:{
-        apikey:process.env.SUPABASE_KEY,
-        Authorization:`Bearer ${process.env.SUPABASE_KEY}`
-      }
-    }
-  )
+          let total = 0
+          let count = 0
 
-  const orders = await orderRes.json()
+          orders.forEach(o=>{
+            total += Number(o.total || 0)
+            count++
+          })
 
-  let total = 0
-  let count = 0
-
-  orders.forEach(o=>{
-    total += Number(o.total || 0)
-    count++
-  })
-
-  await fetch("https://api.line.me/v2/bot/message/reply",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
-    },
-    body:JSON.stringify({
-      replyToken:event.replyToken,
-      messages:[{
-        type:"text",
-        text:`📊 สรุปยอด${label}\n💰 ${total} บาท\n🧾 ${count} ออเดอร์`
-      }]
-    })
-  })
+          await fetch("https://api.line.me/v2/bot/message/reply",{
+            method:"POST",
+            headers:{
+              "Content-Type":"application/json",
+              Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
+            },
+            body:JSON.stringify({
+              replyToken:event.replyToken,
+              messages:[{
+                type:"text",
+                text:`📊 สรุปยอด${label}\n💰 ${total} บาท\n🧾 ${count} ออเดอร์`
+              }]
+            })
+          })
+        }
       }
 
       // ======================
@@ -439,7 +392,6 @@ if (text.includes("สรุปยอด")) {
         if (action === "accept") {
           newStatus = "preparing"
           statusText = "🟠 ร้านกำลังเตรียมออเดอร์ของคุณ"
-          color = "#FF9500"
           replyText = `✅ รับออเดอร์ #${orderId} แล้ว`
         }
 
@@ -476,49 +428,6 @@ if (text.includes("สรุปยอด")) {
             })
           })
         }
-
-        const orderRes = await fetch(
-          `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
-          {
-            headers:{
-              apikey:process.env.SUPABASE_KEY,
-              Authorization:`Bearer ${process.env.SUPABASE_KEY}`
-            }
-          }
-        )
-
-        const orderData = await orderRes.json()
-        const order = orderData?.[0]
-        const customerId = order?.line_user_id
-
-        if (customerId) {
-
-          const itemsRes = await fetch(
-            `${process.env.SUPABASE_URL}/rest/v1/order_items?order_id=eq.${orderId}`,
-            {
-              headers:{
-                apikey:process.env.SUPABASE_KEY,
-                Authorization:`Bearer ${process.env.SUPABASE_KEY}`
-              }
-            }
-          )
-
-          const itemsData = await itemsRes.json()
-
-          const flex = buildOrderFlex(orderId, statusText, color, itemsData, order.total)
-
-          await fetch("https://api.line.me/v2/bot/message/push",{
-            method:"POST",
-            headers:{
-              "Content-Type":"application/json",
-              Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
-            },
-            body:JSON.stringify({
-              to:customerId,
-              messages:[flex]
-            })
-          })
-        }
       }
     }
 
@@ -528,4 +437,4 @@ if (text.includes("สรุปยอด")) {
     console.log("🔥 ERROR:", err)
     res.status(500).end()
   }
-              }
+            }
