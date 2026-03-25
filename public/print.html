@@ -25,6 +25,8 @@ async function main(){
 
   try{
 
+    const status = document.getElementById("status")
+
     // =========================
     // INIT LIFF
     // =========================
@@ -37,11 +39,11 @@ async function main(){
     const orderId = params.get("order_id")
 
     if(!orderId){
-      document.getElementById("status").innerText = "No order_id"
+      status.innerText = "No order_id"
       return
     }
 
-    document.getElementById("status").innerText = "Loading order..."
+    status.innerText = "Loading order..."
 
     // =========================
     // GET ORDER
@@ -50,7 +52,7 @@ async function main(){
     const order = await orderRes.json()
 
     if(!order || !order.id){
-      document.getElementById("status").innerText = "Order not found"
+      status.innerText = "Order not found"
       return
     }
 
@@ -102,47 +104,56 @@ async function main(){
     const items = mergeItems(order.items || [])
 
     // =========================
-    // BUILD RECEIPT TEXT
+    // BUILD RECEIPT HTML (สำคัญมาก)
     // =========================
-    let text = ""
-
-    text += "DRINK SHOP\n"
-    text += "----------------\n"
-    text += "Order #" + order.id + "\n"
-    text += "----------------\n"
-
     let total = 0
+
+    let html = `
+    <div style="font-family: monospace; font-size:20px;">
+      <center><b>ร้านน้ำ</b></center>
+      <center>DRINK SHOP</center>
+      <hr>
+      Order #${order.id}<br>
+      <hr>
+    `
 
     items.forEach(i=>{
 
       const lineTotal = i.price * i.qty
       total += lineTotal
 
-      text += i.name + " x" + i.qty + "\n"
+      html += `
+        ${i.name} x${i.qty}<br>
+      `
 
       const mods = formatModifiers(i.modifiers)
 
       mods.forEach(m=>{
-        text += "  + " + m + "\n"
+        html += `&nbsp;&nbsp;+ ${m}<br>`
       })
 
-      text += "  = " + lineTotal + " BAHT\n"
-      text += "----------------\n"
+      html += `
+        &nbsp;&nbsp;= ${lineTotal} บาท<br>
+        <hr>
+      `
     })
 
-    text += "TOTAL " + total + " BAHT\n"
-    text += "\nTHANK YOU\n"
+    html += `
+      <b>รวม ${total} บาท</b><br><br>
+      ขอบคุณครับ
+    </div>
+    `
 
-    console.log("PRINT:", text)
+    console.log("PRINT HTML:", html)
 
-    document.getElementById("status").innerText = "Printing..."
+    status.innerText = "Printing..."
 
     // =========================
-    // PRINT VIA RAWBT (BASE64)
+    // PRINT VIA RAWBT (HTML MODE)
     // =========================
-    const encoded = btoa(unescape(encodeURIComponent(text)))
+    window.location.href =
+      "rawbt:print?html=" + encodeURIComponent(html)
 
-    window.location.href = "rawbt:base64," + encoded
   }catch(err){
     console.log(err)
     document.getElementById("status").innerText = "ERROR: " + err.message
