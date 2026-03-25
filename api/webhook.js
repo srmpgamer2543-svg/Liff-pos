@@ -453,23 +453,24 @@ if (event.type === "postback") {
 
   const itemsData = await itemsRes.json()
 
-  const flex = createFlex(order, itemsData, statusText, statusColor)
+  const flex = buildOrderFlex(orderId, statusText, statusColor, itemsData, order.total)
 
-  // ✅ PUSH พร้อม debug
-  const pushRes = await fetch(
-    "https://api.line.me/v2/bot/message/push",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
-      },
-      body: JSON.stringify({
-        to: customerId,
-        messages: [flex]
-      })
+        await fetch(
+          "https://api.line.me/v2/bot/message/push",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+            },
+            body: JSON.stringify({
+              to: customerId,
+              messages: [flex]
+            })
+          }
+        )
+      }
     }
-  )
 
   const pushText = await pushRes.text()
   console.log("📤 PUSH STATUS:", pushRes.status, pushText)
