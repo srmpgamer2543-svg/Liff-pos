@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kitchen Auto Print</title>
+</head>
+
+<body>
+
+<h2>🖨️ Kitchen Auto Print</h2>
+<div id="log"></div>
+
+<script>
+
+let printedOrders = new Set()
+
+async function checkOrders(){
+
+  try{
+
+    const res = await fetch("/api/get-latest-order")
+    const orders = await res.json()
+
+    orders.forEach(order=>{
+
+      // ❌ กันพิมพ์ซ้ำ
+      if(printedOrders.has(order.id)) return
+
+      printedOrders.add(order.id)
+
+      print(order)
+
+    })
+
+  }catch(err){
+    console.log(err)
+  }
+
+}
+
+function print(order){
+
+  const text = buildText(order)
+
+  // 🔥 สั่ง RawBT
+  window.location.href =
+    "rawbt:print?text=" + encodeURIComponent(text)
+
+  log("🖨️ PRINT #" + order.id)
+
+}
+
+function buildText(order){
+
+  let text = ""
+  text += "🧾 ใบเสร็จ\n"
+  text += "Order #" + order.id + "\n"
+  text += "----------------\n"
+
+  order.items.forEach(i=>{
+    text += `${i.name} ${i.price}฿\n`
+  })
+
+  text += "----------------\n"
+  text += "รวม " + order.total + " บาท\n"
+
+  return text
+}
+
+function log(msg){
+  document.getElementById("log").innerHTML += msg + "<br>"
+}
+
+// 🔁 เช็คทุก 3 วิ
+setInterval(checkOrders, 3000)
+
+</script>
+
+</body>
+</html>
