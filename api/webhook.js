@@ -517,8 +517,152 @@ module.exports = async function handler(req, res) {
 
         const itemsData = await itemsRes.json()
 
-        const flexCustomer = buildOrderFlex(orderId, statusText, statusColor, itemsData, order.total)
-        const flexStaff = buildStaffFlex(orderId, statusText, statusColor, itemsData, order.total)
+        function buildOrderFlexUniversal(orderId, items, total){
+
+  const merged = {}
+
+  items.forEach(i=>{
+    const key = i.name + JSON.stringify(i.modifiers || {})
+    if(!merged[key]){
+      merged[key] = { ...i, qty:1 }
+    }else{
+      merged[key].qty++
+    }
+  })
+
+  const mergedItems = Object.values(merged)
+
+  function formatMods(modifiers){
+
+    if(!modifiers) return []
+
+    const map = {}
+
+    Object.values(modifiers).forEach(arr=>{
+      arr.forEach(m=>{
+        const name = typeof m==="object"?m.name:m
+        const price = typeof m==="object"?(m.price||0):0
+
+        if(!map[name]){
+          map[name] = { count:0, price }
+        }
+
+        map[name].count++
+      })
+    })
+
+    return Object.entries(map).map(([name,data])=>{
+      return {
+        name: name,
+        qty: data.count,
+        price: data.price * data.count
+      }
+    })
+  }
+
+  const contents = []
+
+  mergedItems.forEach((item, index)=>{
+
+    const mods = formatMods(item.modifiers)
+    const itemTotal = item.price * item.qty
+
+    contents.push({
+      type:"box",
+      layout:"horizontal",
+      contents:[
+        {
+          type:"text",
+          text:`${item.name} x${item.qty}`,
+          weight:"bold",
+          size:"md",
+          flex:3,
+          wrap:true
+        },
+        {
+          type:"text",
+          text:`${itemTotal}฿`,
+          weight:"bold",
+          size:"md",
+          align:"end",
+          flex:1
+        }
+      ]
+    })
+
+    mods.forEach(m=>{
+      contents.push({
+        type:"box",
+        layout:"horizontal",
+        margin:"sm",
+        contents:[
+          {
+            type:"text",
+            text:`• ${m.name}${m.qty>1?` x${m.qty}`:""}`,
+            size:"sm",
+            color:"#666666",
+            flex:3,
+            wrap:true
+          },
+          {
+            type:"text",
+            text: m.price ? `${m.price}.-` : "",
+            size:"sm",
+            color:"#666666",
+            align:"end",
+            flex:1
+          }
+        ]
+      })
+    })
+
+    if(index < mergedItems.length - 1){
+      contents.push({
+        type:"separator",
+        margin:"md"
+      })
+    }
+
+  })
+
+  return {
+    type:"flex",
+    altText:`ออเดอร์ #${orderId}`,
+    contents:{
+      type:"bubble",
+      size:"mega",
+      body:{
+        type:"box",
+        layout:"vertical",
+        spacing:"md",
+        contents:[
+          {
+            type:"text",
+            text:"🧾 ออเดอร์อัปเดต",
+            weight:"bold",
+            size:"xl"
+          },
+          {
+            type:"text",
+            text:`#${orderId}`,
+            size:"sm",
+            color:"#999999"
+          },
+          { type:"separator" },
+          ...contents,
+          { type:"separator", margin:"lg" },
+          {
+            type:"text",
+            text:`💰 รวม ${total} บาท`,
+            weight:"bold",
+            size:"lg",
+            align:"end"
+          }
+        ]
+      }
+    }
+  }
+}
 
         await fetch(
           "https://api.line.me/v2/bot/message/reply",
