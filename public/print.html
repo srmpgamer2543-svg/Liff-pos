@@ -112,8 +112,8 @@ async function main(){
     function gap(h=10){ y+=h }
 
     // ========= HEADER =========
-    center("ร้านน้ำอร่อยเว่อร์",26,true)
-    center("อร่อย สด ชื่นใจ",18)
+    center("ใบเสร็จรับเงิน",26,true)
+    center("ร้านมีนม.ขนมปัง!ยินดีให้บริการ",18)
 
     gap(4)
     line()
@@ -187,20 +187,18 @@ order.items.forEach(i=>{
     line()
 
     // ========= SUMMARY =========
-    const vat = subtotal * 0.07
-    const total = subtotal + vat
+    const total = subtotal
 
-    row("รวมย่อย", subtotal.toFixed(2))
-    row("VAT 7%", vat.toFixed(2))
+    row("รวม", total.toFixed(2),24,true)
 
     line()
 
-    row("ยอดรวม", total.toFixed(2),24,true)
+const total = subtotal
 
-    gap(10)
-    center("ขอบคุณที่ใช้บริการ!",18)
-
-    gap(20)
+row("💰 ยอดรวมสุทธิ", total.toFixed(2),24,true)
+    
+gap(10)
+center("ขอบคุณที่ใช้บริการ!",18)
 
     // ======================
     // ✂️ crop
