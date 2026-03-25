@@ -13,24 +13,25 @@
 <script>
 
 let printedOrders = new Set()
+let isPrinting = false   // 🔥 กันยิงซ้อน
 
 async function checkOrders(){
+
+  if(isPrinting) return   // ❌ ถ้ากำลังพิมอยู่ หยุดก่อน
 
   try{
 
     const res = await fetch("/api/get-latest-order")
     const orders = await res.json()
 
-    orders.forEach(order=>{
+    for(const order of orders){
 
-      // ❌ กันพิมพ์ซ้ำ
-      if(printedOrders.has(order.id)) return
+      if(printedOrders.has(order.id)) continue
 
       printedOrders.add(order.id)
 
-      print(order)
-
-    })
+      await print(order)   // 🔥 รอพิมทีละบิล
+    }
 
   }catch(err){
     console.log(err)
@@ -38,16 +39,33 @@ async function checkOrders(){
 
 }
 
-function print(order){
+function delay(ms){
+  return new Promise(res=>setTimeout(res, ms))
+}
+
+async function print(order){
+
+  isPrinting = true
 
   const text = buildText(order)
 
-  // 🔥 สั่ง RawBT
-  window.location.href =
-    "rawbt:print?text=" + encodeURIComponent(text)
+  // 🔥 ใช้ iframe แทน redirect
+  const iframe = document.createElement("iframe")
+  iframe.style.display = "none"
+
+  iframe.src = "rawbt:print?text=" + encodeURIComponent(text)
+
+  document.body.appendChild(iframe)
 
   log("🖨️ PRINT #" + order.id)
 
+  // ⏳ รอให้พิมเสร็จ
+  await delay(3000)
+
+  // 🧹 ลบ iframe
+  document.body.removeChild(iframe)
+
+  isPrinting = false
 }
 
 function buildText(order){
