@@ -89,6 +89,8 @@ export default async function handler(req, res) {
     // ======================
     function buildStaffFlex(orderId, items){
 
+      const LIFF_URL = process.env.LIFF_PRINT_URL
+
       const merged = mergeItems(items)
 
       const itemBlocks = merged.map(item=>{
@@ -165,6 +167,16 @@ export default async function handler(req, res) {
                   type:"postback",
                   label:"ทำเสร็จแล้ว",
                   data:`action=done&order_id=${orderId}`
+                }
+              },
+              {
+                type:"button",
+                style:"primary",
+                color:"#007AFF",
+                action:{
+                  type:"uri",
+                  label:"🖨️ พิมพ์ใบเสร็จ",
+                  uri:`${LIFF_URL}?order_id=${orderId}`
                 }
               }
             ]
