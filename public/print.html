@@ -59,12 +59,15 @@ async function main(){
     const order = await res.json()
 
     // ======================
-    // 🧾 canvas FIX (REAL 58mm)
+    // 🧾 canvas FIX (FINAL)
     // ======================
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")
 
     const width = 384
+    const LEFT = 10
+    const RIGHT = width - 10
+
     let y = 30
 
     canvas.width = width
@@ -76,33 +79,45 @@ async function main(){
     ctx.fillStyle = "#000"
 
     // ========= helpers =========
-    function center(text, size=26, bold=false){
+    function center(text, size=24, bold=false){
       ctx.font = `${bold?"bold ":""}${size}px monospace`
-      const w = ctx.measureText(text).width
-      ctx.fillText(text,(width-w)/2,y)
-      y += size + 8
+      ctx.textAlign = "center"
+      ctx.fillText(text, width/2, y)
+      y += size + 12
     }
 
-    function left(text, size=22, bold=false){
+    function textLeft(text, size=22, bold=false){
       ctx.font = `${bold?"bold ":""}${size}px monospace`
-      ctx.fillText(text,10,y)
-      y += size + 8
+      ctx.textAlign = "left"
+      ctx.fillText(text, LEFT, y)
+      y += size + 10
     }
 
-    function row(l,r,size=22,bold=false){
+    function textRight(text, size=22, bold=false){
       ctx.font = `${bold?"bold ":""}${size}px monospace`
-      ctx.fillText(l,10,y)
-      const w = ctx.measureText(r).width
-      ctx.fillText(r,width-w-10,y)
-      y += size + 8
+      ctx.textAlign = "right"
+      ctx.fillText(text, RIGHT, y)
+      y += size + 10
+    }
+
+    function row(l, r, size=22, bold=false){
+      ctx.font = `${bold?"bold ":""}${size}px monospace`
+
+      ctx.textAlign = "left"
+      ctx.fillText(l, LEFT, y)
+
+      ctx.textAlign = "right"
+      ctx.fillText(r, RIGHT, y)
+
+      y += size + 10
     }
 
     function line(){
-      ctx.fillRect(10,y,width-20,2)
-      y += 14
+      ctx.fillRect(10, y, width-20, 1)
+      y += 12
     }
 
-    function gap(h=10){ y+=h }
+    function gap(h=12){ y+=h }
 
     function formatMods(modifiers){
       if(!modifiers) return []
@@ -133,14 +148,16 @@ async function main(){
 
     // ========= HEADER =========
     center("ร้านน้ำ",26,true)
-    center("DRINK SHOP",22)
-    gap(4)
-    line()
-
-    left("Order #" + order.id,20,true)
-    line()
+    center("DRINK SHOP",20)
 
     gap(6)
+    line()
+
+    textLeft("Order #" + order.id,20,true)
+
+    gap(6)
+    line()
+    gap(10)
 
     // ========= ITEMS =========
     let total = 0
@@ -150,20 +167,20 @@ async function main(){
       const itemTotal = i.price
       total += itemTotal
 
-      left(i.name,22,true)
+      textLeft(i.name,22,true)
 
       const mods = formatMods(i.modifiers)
 
       mods.forEach(m=>{
         const name = m.qty > 1 ? `${m.name} x${m.qty}` : m.name
-        const price = m.price ? `+${m.price * m.qty}` : ""
+        const price = m.price ? `+${m.price * m.qty}฿` : ""
 
-        row("  + " + name, price ? price+"฿" : "",18)
+        row("   + " + name, price,18)
       })
 
-      row(" ", itemTotal + "฿",22,true)
+      row("", itemTotal + "฿",22,true)
 
-      gap(4)
+      gap(6)
       line()
       gap(6)
 
@@ -172,7 +189,7 @@ async function main(){
     // ========= TOTAL =========
     row("รวม", total + " บาท",26,true)
 
-    gap(10)
+    gap(14)
     center("ขอบคุณครับ",20)
 
     gap(20)
