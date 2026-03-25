@@ -324,15 +324,16 @@ module.exports = async function handler(req, res) {
     Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
   },
   body: JSON.stringify({
-    to: userId,
-    messages: [flex]
+    to: customerId,
+    messages: [flexCustomer]
   })
 })
 
 const pushText = await pushRes.text()
 console.log("📤 PUSH CUSTOMER:", pushRes.status, pushText)
         }
-
+        
+          
         if (text.includes("สรุปยอด")) {
 
           let start = ""
