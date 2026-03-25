@@ -156,6 +156,81 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  // ✅ PRO: Flex สำหรับพนักงาน
+  function buildStaffFlex(orderId, statusText, statusColor, itemsData, total){
+
+    const merged = {}
+
+    itemsData.forEach(i=>{
+      const key = i.name + JSON.stringify(i.modifiers || {})
+      if(!merged[key]){
+        merged[key] = { ...i, qty:1 }
+      }else{
+        merged[key].qty++
+      }
+    })
+
+    const items = Object.values(merged)
+
+    const contents = items.map(item=>{
+      return {
+        type:"box",
+        layout:"horizontal",
+        contents:[
+          {
+            type:"text",
+            text:`${item.name} x${item.qty}`,
+            size:"sm",
+            wrap:true
+          },
+          {
+            type:"text",
+            text:`${item.price * item.qty}฿`,
+            size:"sm",
+            align:"end",
+            weight:"bold"
+          }
+        ]
+      }
+    })
+
+    return {
+      type:"flex",
+      altText:`จัดการออเดอร์ #${orderId}`,
+      contents:{
+        type:"bubble",
+        body:{
+          type:"box",
+          layout:"vertical",
+          spacing:"md",
+          contents:[
+            {
+              type:"text",
+              text:`🧾 ออเดอร์ #${orderId}`,
+              weight:"bold",
+              size:"lg"
+            },
+            {
+              type:"text",
+              text:statusText,
+              color:statusColor,
+              weight:"bold"
+            },
+            { type:"separator" },
+            ...contents,
+            { type:"separator" },
+            {
+              type:"text",
+              text:`💰 ${total} บาท`,
+              align:"end",
+              weight:"bold"
+            }
+          ]
+        }
+      }
+    }
+  }
+
   try {
 
     const raw = await new Promise((resolve) => {
@@ -430,8 +505,34 @@ module.exports = async function handler(req, res) {
 
         const itemsData = await itemsRes.json()
 
-        const flex = buildOrderFlex(orderId, statusText, statusColor, itemsData, order.total)
+        const flexCustomer = buildOrderFlex(orderId, statusText, statusColor, itemsData, order.total)
+        const flexStaff = buildStaffFlex(orderId, statusText, statusColor, itemsData, order.total)
 
+        // ✅ reply พนักงานก่อน
+        await fetch(
+          "https://api.line.me/v2/bot/message/reply",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+            },
+            body: JSON.stringify({
+              replyToken: event.replyToken,
+              messages: [
+                {
+                  type: "text",
+                  text: action === "accept"
+                    ? `🧾 รับออเดอร์ #${orderId} แล้ว`
+                    : `🎉 ออเดอร์ #${orderId} เสร็จแล้ว`
+                },
+                flexStaff
+              ]
+            })
+          }
+        )
+
+        // ✅ push ลูกค้า
         const pushRes = await fetch(
           "https://api.line.me/v2/bot/message/push",
           {
@@ -442,7 +543,7 @@ module.exports = async function handler(req, res) {
             },
             body: JSON.stringify({
               to: customerId,
-              messages: [flex]
+              messages: [flexCustomer]
             })
           }
         )
@@ -458,4 +559,4 @@ module.exports = async function handler(req, res) {
     console.log("🔥 ERROR:", err)
     res.status(500).end()
   }
-}
+              }
