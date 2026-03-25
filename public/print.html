@@ -142,8 +142,7 @@ async function main(){
     // =========================
     const encoded = btoa(unescape(encodeURIComponent(text)))
 
-    window.location.href = "rawbt:print?text=" + encoded + "&format=base64"
-
+    window.location.href = "rawbt:base64," + encoded
   }catch(err){
     console.log(err)
     document.getElementById("status").innerText = "ERROR: " + err.message
