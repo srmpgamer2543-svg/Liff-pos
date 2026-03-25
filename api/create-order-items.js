@@ -231,7 +231,20 @@ export default async function handler(req, res) {
     // PUSH ลูกค้า
     // ======================
     if (customerId) {
-      await fetch("https://api.line.me/v2/bot/message/push",{
+      const pushRes = await fetch("https://api.line.me/v2/bot/message/push",{
+  method:"POST",
+  headers:{
+    "Content-Type":"application/json",
+    Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
+  },
+  body:JSON.stringify({
+    to:process.env.SHOP_LINE_GROUP_ID,
+    messages:[flex]
+  })
+})
+
+const pushText = await pushRes.text()
+console.log("📤 PUSH GROUP:", pushRes.status, pushText)
         method:"POST",
         headers:{
           "Content-Type":"application/json",
