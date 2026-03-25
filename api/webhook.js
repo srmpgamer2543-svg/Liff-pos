@@ -91,19 +91,31 @@ module.exports = async function handler(req, res) {
 
     displayItems.forEach(item=>{
 
+      // ⚠️ IMPORTANT:
+      // item.price = รวม modifier แล้ว
+      // ห้ามเอา modifier ไปบวกซ้ำ
+
       totalQty += item.qty
-
-      const f = formatModifiers(item.modifiers)
-
-      const toppingsText = Object.entries(f.toppings)
-        .map(([k,v])=> v>1 ? `${k} x${v}` : k)
-        .join(", ")
 
       let line = `${item.name} x${item.qty}`
 
-      if(f.type) line += `\n${f.type}`
-      if(f.sweet) line += `\n${f.sweet}`
-      if(toppingsText) line += `\n+ ${toppingsText}`
+      // 🔥 แก้ตรงนี้ (แสดง modifier แบบรวมจำนวน)
+      if(item.modifiers){
+
+        const modMap = {}
+
+        Object.values(item.modifiers).forEach(arr=>{
+          arr.forEach(m=>{
+            const name = typeof m === "object" ? m.name : m
+            modMap[name] = (modMap[name] || 0) + 1
+          })
+        })
+
+        Object.entries(modMap).forEach(([name,count])=>{
+          line += `\n- ${name}${count > 1 ? ` x${count}` : ""}`
+        })
+
+      }
 
       itemBlocks.push({
         type:"box",
@@ -156,7 +168,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // ✅ PRO: Flex สำหรับพนักงาน
+  // ✅ (ไม่แตะ)
   function buildStaffFlex(orderId, statusText, statusColor, itemsData, total){
 
     const merged = {}
@@ -508,14 +520,13 @@ module.exports = async function handler(req, res) {
         const flexCustomer = buildOrderFlex(orderId, statusText, statusColor, itemsData, order.total)
         const flexStaff = buildStaffFlex(orderId, statusText, statusColor, itemsData, order.total)
 
-        // ✅ reply พนักงานก่อน
         await fetch(
           "https://api.line.me/v2/bot/message/reply",
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+              "Content-Type":"application/json",
+              Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
             },
             body: JSON.stringify({
               replyToken: event.replyToken,
@@ -532,14 +543,13 @@ module.exports = async function handler(req, res) {
           }
         )
 
-        // ✅ push ลูกค้า
-        const pushRes = await fetch(
+        await fetch(
           "https://api.line.me/v2/bot/message/push",
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`
+              "Content-Type":"application/json",
+              Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
             },
             body: JSON.stringify({
               to: customerId,
@@ -547,9 +557,6 @@ module.exports = async function handler(req, res) {
             })
           }
         )
-
-        const pushText = await pushRes.text()
-        console.log("📤 PUSH STATUS:", pushRes.status, pushText)
       }
     }
 
@@ -559,4 +566,4 @@ module.exports = async function handler(req, res) {
     console.log("🔥 ERROR:", err)
     res.status(500).end()
   }
-              }
+}
