@@ -91,7 +91,7 @@ async function main(){
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")
 
-    const width = 384 // 58mm printer
+    const width = 384
     let y = 40
 
     canvas.width = width
@@ -114,20 +114,12 @@ async function main(){
       y += 28
     }
 
-    function rightText(text){
-      const w = ctx.measureText(text).width
-      ctx.fillText(text,width - w - 10,y)
-      y += 28
-    }
-
     function line(){
       ctx.fillText("--------------------------------",10,y)
       y += 28
     }
 
-    // =========================
     // HEADER
-    // =========================
     centerText("ร้านน้ำ")
     centerText("DRINK SHOP")
     line()
@@ -172,14 +164,36 @@ async function main(){
     fctx.fillRect(0,0,finalCanvas.width,finalCanvas.height)
     fctx.drawImage(canvas,0,0)
 
-    const base64 = finalCanvas.toDataURL("image/png").split(",")[1]
+    const base64 = finalCanvas.toDataURL("image/png")
 
-    status.innerText = "Printing..."
+    status.innerText = "Uploading..."
 
     // =========================
-    // 🖨️ PRINT IMAGE
+    // 📤 UPLOAD IMAGE TO SERVER
     // =========================
-    window.location.href = "rawbt:base64:image/png;base64," + base64;
+    const upload = await fetch("/api/upload-image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        image: base64
+      })
+    })
+
+    const result = await upload.json()
+
+    if(!result.url){
+      status.innerText = "Upload failed"
+      return
+    }
+
+    status.innerText = "Downloading..."
+
+    // =========================
+    // 📥 DOWNLOAD → AUTOPRINT
+    // =========================
+    window.location.href = result.url
 
   }catch(err){
     console.log(err)
