@@ -610,7 +610,7 @@ console.log("📤 PUSH CUSTOMER:", pushRes.status, pushText)
           },
           {
             type:"text",
-            text: m.price ? `${m.price}.-` : "",
+            text: m.price ? `${m.price}.-` : "-",
             size:"sm",
             color:"#666666",
             align:"end",
