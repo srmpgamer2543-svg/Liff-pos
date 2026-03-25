@@ -13,7 +13,6 @@ body{
   text-align:center;
   padding:20px;
 }
-
 img{
   max-width:100%;
   border:1px solid #ddd;
@@ -53,77 +52,6 @@ async function main(){
     }
 
     status.innerText = "Loading order..."
-
-    const res = await fetch(`/api/get-order?order_id=${orderId}`)
-    const order = await res.json()
-
-    // ======================
-    // 🧾 CANVAS POS STYLE
-    // ======================
-    const canvas = document.createElement("canvas")
-    const ctx = canvas.getContext("2d")
-
-    const width = 384
-    const LEFT = 10
-    const RIGHT = width - 10
-
-    let y = 30
-
-    canvas.width = width
-    canvas.height = 2000
-
-    ctx.fillStyle = "#fff"
-    ctx.fillRect(0,0,width,2000)
-
-    ctx.fillStyle = "#000"
-
-    // ========= helpers =========
-    function center(text, size=24, bold=false){
-      ctx.font = `${bold?"bold ":""}${size}px monospace`
-      ctx.textAlign = "center"
-      ctx.fillText(text, width/2, y)
-      y += size + 10
-    }
-
-    function left(text, size=20){
-      ctx.font = `${size}px monospace`
-      ctx.textAlign = "left"
-      ctx.fillText(text, LEFT, y)
-      y += size + 8
-    }
-
-    function row(l,r,size=20,bold=false){
-      ctx.font = `${bold?"bold ":""}${size}px monospace`
-
-      ctx.textAlign = "left"
-      ctx.fillText(l, LEFT, y)
-
-      ctx.textAlign = "right"
-<script>
-async function main(){
-
-  const status = document.getElementById("status")
-  const preview = document.getElementById("preview")
-
-  try{
-
-    const params = new URLSearchParams(location.search)
-
-    if(params.get("external")==="1"){
-      const url = location.href.replace("external=1","external=0")
-      location.href =
-        "intent://" + url.replace("https://","") +
-        "#Intent;scheme=https;package=com.android.chrome;end;"
-      return
-    }
-
-    await liff.init({ liffId:"2009308319-yTnMMIYi" })
-
-    const orderId = params.get("order_id")
-    if(!orderId){
-      status.innerText = "no order_id"
-      return
-    }
 
     const res = await fetch(`/api/get-order?order_id=${orderId}`)
     const order = await res.json()
@@ -211,13 +139,13 @@ async function main(){
 
       subtotal += i.price
 
-      // 🟢 ชื่อสินค้า
+      // ชื่อสินค้า
       left(i.name,24,true)
 
-      // qty
+      // จำนวน
       row(` 1 x ${i.price}`, i.price)
 
-      // 🔥 modifiers
+      // modifiers
       if(i.modifiers){
 
         const map = {}
