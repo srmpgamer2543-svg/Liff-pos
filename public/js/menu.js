@@ -402,7 +402,10 @@ export function openModifier(item,previousSelections=null,indexes=null){
 
      const price=Number(i.dataset.price||0)
      extraPrice+=price
-     return i.dataset.name
+     return {
+  name: i.dataset.name,
+  price: Number(i.dataset.price || 0)
+     }
 
     })
 
@@ -422,7 +425,10 @@ export function openModifier(item,previousSelections=null,indexes=null){
 
      for(let i=0;i<q;i++){
 
-      selections["ท็อปปิ้ง"].push(name)
+      selections["ท็อปปิ้ง"].push({
+  name: name,
+  price: price
+})
       extraPrice+=price
 
      }
