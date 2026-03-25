@@ -133,7 +133,7 @@ module.exports = async function handler(req, res) {
               },
               {
                 type:"text",
-                text: m.price ? `${m.price}.-` : "",
+                text: m.price > 0 ? `${m.price}.-` : "-"
                 size:"sm",
                 color:"#666666",
                 align:"end",
