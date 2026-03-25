@@ -105,30 +105,31 @@ async function main(){
     // 🔥 BUILD RECEIPT TEXT
     // =========================
     let text = ""
-    text += "🧾 ร้านน้ำ\n"
-    text += "----------------\n"
-    text += "Order #" + order.id + "\n"
+    let text = ""
 
-    let total = 0
+text += "ร้านน้ำ\n"
+text += "----------------\n"
+text += "Order #" + order.id + "\n"
+text += "----------------\n"
 
-    items.forEach(i=>{
+let total = 0
 
-      const lineTotal = i.price * i.qty
-      total += lineTotal
+items.forEach(i=>{
 
-      text += `${i.name} x${i.qty}\n`
+  const lineTotal = i.price * i.qty
+  total += lineTotal
 
-      const mods = formatModifiers(i.modifiers)
+  text += i.name + " x" + i.qty + "\n"
 
-      if(mods.length){
-        mods.forEach(m=>{
-          text += `  - ${m}\n`
-        })
-      }
+  const mods = formatModifiers(i.modifiers)
 
-      text += `${lineTotal} บาท\n`
-      text += "----------------\n"
-    })
+  mods.forEach(m=>{
+    text += "  + " + m + "\n"
+  })
+
+  text += "  = " + lineTotal + " บาท\n"
+  text += "----------------\n"
+})
 
     text += `รวม ${total} บาท\n`
     text += "\nขอบคุณครับ\n"
