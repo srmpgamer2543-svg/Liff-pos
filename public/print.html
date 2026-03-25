@@ -150,7 +150,13 @@ async function main(){
         Object.values(i.modifiers).forEach(arr=>{
           arr.forEach(m=>{
             const name = typeof m==="object"?m.name:m
-            row("   + " + name,"",18)
+const price = typeof m==="object"?m.price||0:0
+
+row(
+  "   + " + name,
+  price ? price.toFixed(0) : "",
+  18
+)
           })
         })
       }
