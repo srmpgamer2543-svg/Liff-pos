@@ -59,58 +59,150 @@ async function main(){
     const order = await res.json()
 
     // ======================
-    // 🧾 canvas
+    // 🧾 canvas (iOS STYLE)
     // ======================
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")
 
     const width = 384
-    let y = 40
+    const scale = 2
 
-    canvas.width = width
-    canvas.height = 2000
+    canvas.width = width * scale
+    canvas.height = 2000 * scale
+
+    ctx.scale(scale, scale)
+
+    let y = 30
 
     ctx.fillStyle = "#fff"
     ctx.fillRect(0,0,width,2000)
 
     ctx.fillStyle = "#000"
-    ctx.font = "24px monospace"
 
-    function t(x){ ctx.fillText(x,10,y); y+=28 }
-    function c(x){
-      const w = ctx.measureText(x).width
-      ctx.fillText(x,(width-w)/2,y)
-      y+=30
+    // ========= helpers =========
+    function center(text, size=26, bold=false){
+      ctx.font = `${bold?"bold ":""}${size}px -apple-system, BlinkMacSystemFont, sans-serif`
+      const w = ctx.measureText(text).width
+      ctx.fillText(text,(width-w)/2,y)
+      y += size + 6
     }
-    function line(){ t("-----------------------------") }
 
-    c("ร้านน้ำ")
-    c("DRINK SHOP")
-    line()
-    t("Order #" + order.id)
+    function left(text, size=22, bold=false){
+      ctx.font = `${bold?"bold ":""}${size}px -apple-system, BlinkMacSystemFont, sans-serif`
+      ctx.fillText(text,10,y)
+      y += size + 6
+    }
+
+    function right(text, size=22, bold=false){
+      ctx.font = `${bold?"bold ":""}${size}px -apple-system, BlinkMacSystemFont, sans-serif`
+      const w = ctx.measureText(text).width
+      ctx.fillText(text,width-w-10,y)
+      y += size + 6
+    }
+
+    function row(l,r,size=22,bold=false){
+      ctx.font = `${bold?"bold ":""}${size}px -apple-system, BlinkMacSystemFont, sans-serif`
+      ctx.fillText(l,10,y)
+      const w = ctx.measureText(r).width
+      ctx.fillText(r,width-w-10,y)
+      y += size + 6
+    }
+
+    function line(){
+      ctx.fillRect(10,y,width-20,1.5)
+      y += 12
+    }
+
+    function gap(h=10){ y+=h }
+
+    function formatMods(modifiers){
+      if(!modifiers) return []
+
+      const result=[]
+
+      Object.values(modifiers).forEach(arr=>{
+        const map={}
+        arr.forEach(m=>{
+          const name = typeof m==="object"?m.name:m
+          const price = typeof m==="object"?m.price||0:0
+
+          if(!map[name]) map[name]={count:0,price}
+          map[name].count++
+        })
+
+        Object.entries(map).forEach(([name,data])=>{
+          result.push({
+            name,
+            qty:data.count,
+            price:data.price
+          })
+        })
+      })
+
+      return result
+    }
+
+    // ========= HEADER =========
+    center("ร้านน้ำ",28,true)
+    center("DRINK SHOP",22,false)
+    gap(6)
     line()
 
+    left("Order #" + order.id,20,true)
+    line()
+
+    gap(6)
+
+    // ========= ITEMS =========
     let total = 0
 
     order.items.forEach(i=>{
-      total += i.price
-      t(i.name)
-      t("= " + i.price + " บาท")
+
+      const itemTotal = i.price
+      total += itemTotal
+
+      // ชื่อสินค้า
+      left(i.name,22,true)
+
+      // modifier
+      const mods = formatMods(i.modifiers)
+
+      mods.forEach(m=>{
+        const name = m.qty > 1 ? `${m.name} x${m.qty}` : m.name
+        const price = m.price ? `+${m.price * m.qty}` : ""
+
+        row("  + " + name, price ? price+"฿" : "",18,false)
+      })
+
+      // ราคา item
+      row(" ", itemTotal + "฿",22,true)
+
+      gap(4)
       line()
+      gap(6)
+
     })
 
-    ctx.font = "bold 26px monospace"
-    t("รวม " + total + " บาท")
+    // ========= TOTAL =========
+    row("รวม", total + " บาท",26,true)
 
-    y+=20
-    ctx.font = "22px monospace"
-    c("ขอบคุณครับ")
+    gap(10)
 
-    // crop
+    center("ขอบคุณครับ",20,false)
+
+    gap(20)
+
+    // ======================
+    // ✂️ crop
+    // ======================
     const final = document.createElement("canvas")
     final.width = width
-    final.height = y+20
-    final.getContext("2d").drawImage(canvas,0,0)
+    final.height = y + 10
+
+    const fctx = final.getContext("2d")
+    fctx.fillStyle="#fff"
+    fctx.fillRect(0,0,final.width,final.height)
+    fctx.drawImage(canvas,0,0)
 
     const dataUrl = final.toDataURL("image/png")
 
