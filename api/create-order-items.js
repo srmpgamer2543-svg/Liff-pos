@@ -125,7 +125,7 @@ module.exports = async function handler(req, res) {
             contents:[
               {
                 type:"text",
-                text:`• ${m.name}${m.qty>1?` x${m.qty}`:""}`,
+                text:`• ${m.name}${m.qty>1?` x${m.qty}`:"-"}`,
                 size:"sm",
                 color:"#666666",
                 flex:3,
