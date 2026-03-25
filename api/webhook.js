@@ -712,7 +712,7 @@ const result = await pushRes.text()
 
 console.log("📤 PUSH CUSTOMER STATUS:", pushRes.status)
 console.log("📤 PUSH CUSTOMER RESULT:", result)
-            })
+            }
           }
         )
       }
