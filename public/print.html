@@ -27,9 +27,21 @@ async function main(){
 
     const status = document.getElementById("status")
 
+    // =========================
+    // 🔥 FORCE OPEN CHROME
+    // =========================
+    const params = new URLSearchParams(window.location.search)
+
+    if(params.get("external") === "1"){
+      const url = window.location.href.replace("external=1","external=0")
+      window.location.href =
+        "intent://" + url.replace("https://","") +
+        "#Intent;scheme=https;package=com.android.chrome;end;"
+      return
+    }
+
     await liff.init({ liffId: "2009308319-yTnMMIYi" })
 
-    const params = new URLSearchParams(window.location.search)
     const orderId = params.get("order_id")
 
     if(!orderId){
@@ -164,43 +176,15 @@ async function main(){
     fctx.fillRect(0,0,finalCanvas.width,finalCanvas.height)
     fctx.drawImage(canvas,0,0)
 
-    status.innerText = "Preparing file..."
-
     // =========================
-    // 🔥 CONVERT TO BLOB (สำคัญมาก)
+    // 🔥 PRINT DIRECT RAWBT
     // =========================
-    const blob = await new Promise(resolve => 
-      finalCanvas.toBlob(resolve, "image/png")
-    )
+    status.innerText = "Printing..."
 
-    if(!blob){
-      status.innerText = "Create image failed"
-      return
-    }
+    const base64 = finalCanvas.toDataURL("image/png").split(",")[1]
 
-    // =========================
-    // 📥 DOWNLOAD FILE
-    // =========================
-    const url = URL.createObjectURL(blob)
-
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `receipt-${order.id}.png`
-
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-
-    URL.revokeObjectURL(url)
-
-    status.innerText = "Sent to printer..."
-
-    // ปิด LIFF (optional)
-    setTimeout(()=>{
-      if(liff.isInClient()){
-        liff.closeWindow()
-      }
-    }, 1500)
+    window.location.href =
+      "rawbt:base64:image/png;base64," + base64
 
   }catch(err){
     console.log(err)
