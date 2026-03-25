@@ -130,9 +130,14 @@ async function main(){
     gap(6)
 
     // ========= ITEMS =========
-    let subtotal = 0
 
-    order.items.forEach(i=>{
+// ⚠️ IMPORTANT:
+// i.price = รวม modifier แล้ว
+// ห้ามเอา modifier price ไปบวก subtotal ซ้ำ
+
+let subtotal = 0
+
+order.items.forEach(i=>{
 
       subtotal += i.price
 
@@ -147,19 +152,34 @@ async function main(){
 
       // modifier
       if(i.modifiers){
-        Object.values(i.modifiers).forEach(arr=>{
-          arr.forEach(m=>{
-            const name = typeof m==="object"?m.name:m
-const price = typeof m==="object"?m.price||0:0
 
-row(
-  "   + " + name,
-  price ? price.toFixed(0) : "",
-  18
-)
-          })
-        })
+  const map = {}
+
+  Object.values(i.modifiers).forEach(arr=>{
+    arr.forEach(m=>{
+      const name = typeof m==="object"?m.name:m
+      const price = typeof m==="object"?m.price||0:0
+
+      if(!map[name]){
+        map[name] = { count:0, price }
       }
+
+      map[name].count++
+    })
+  })
+
+  Object.entries(map).forEach(([name,data])=>{
+
+    const qty = data.count > 1 ? ` x${data.count}` : ""
+    const priceText = data.price ? `+${data.price * data.count}` : ""
+
+    row(
+      "   + " + name + qty,
+      priceText,
+      18
+    )
+  })
+}
 
       gap(6)
     })
