@@ -99,106 +99,173 @@ async function main(){
       ctx.fillText(l, LEFT, y)
 
       ctx.textAlign = "right"
+<script>
+async function main(){
+
+  const status = document.getElementById("status")
+  const preview = document.getElementById("preview")
+
+  try{
+
+    const params = new URLSearchParams(location.search)
+
+    if(params.get("external")==="1"){
+      const url = location.href.replace("external=1","external=0")
+      location.href =
+        "intent://" + url.replace("https://","") +
+        "#Intent;scheme=https;package=com.android.chrome;end;"
+      return
+    }
+
+    await liff.init({ liffId:"2009308319-yTnMMIYi" })
+
+    const orderId = params.get("order_id")
+    if(!orderId){
+      status.innerText = "no order_id"
+      return
+    }
+
+    const res = await fetch(`/api/get-order?order_id=${orderId}`)
+    const order = await res.json()
+
+    // ======================
+    // 🧾 CANVAS
+    // ======================
+    const canvas = document.createElement("canvas")
+    const ctx = canvas.getContext("2d")
+
+    const width = 384
+    const LEFT = 12
+    const RIGHT = width - 12
+
+    let y = 30
+
+    canvas.width = width
+    canvas.height = 2000
+
+    ctx.fillStyle = "#fff"
+    ctx.fillRect(0,0,width,2000)
+    ctx.fillStyle = "#000"
+
+    // ========= helpers =========
+    function center(text, size=24, bold=false){
+      ctx.font = `${bold?"bold ":""}${size}px monospace`
+      ctx.textAlign = "center"
+      ctx.fillText(text, width/2, y)
+      y += size + 10
+    }
+
+    function left(text, size=20, bold=false){
+      ctx.font = `${bold?"bold ":""}${size}px monospace`
+      ctx.textAlign = "left"
+      ctx.fillText(text, LEFT, y)
+      y += size + 8
+    }
+
+    function row(l,r,size=20,bold=false){
+      ctx.font = `${bold?"bold ":""}${size}px monospace`
+
+      ctx.textAlign = "left"
+      ctx.fillText(l, LEFT, y)
+
+      ctx.textAlign = "right"
       ctx.fillText(r, RIGHT, y)
 
       y += size + 8
     }
 
-    function line(){
-      ctx.fillRect(10, y, width-20, 1)
+    function dashedLine(){
+      ctx.setLineDash([5,3])
+      ctx.beginPath()
+      ctx.moveTo(LEFT,y)
+      ctx.lineTo(RIGHT,y)
+      ctx.stroke()
+      ctx.setLineDash([])
       y += 12
     }
 
     function gap(h=10){ y+=h }
 
     // ========= HEADER =========
-    center("ใบเสร็จรับเงิน",26,true)
-    center("ร้านมีนม.ขนมปัง!ยินดีให้บริการ",18)
+    center("Cafe POS",28,true)
+    center("มีนม.ขนมปัง",20,true)
+    center("Thank you",16)
 
     gap(4)
-    line()
+    dashedLine()
 
-    // วันที่
     const now = new Date()
     const date = now.toLocaleDateString("th-TH")
     const time = now.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})
 
-    left("วันที่: " + date + " เวลา: " + time)
-    left("Order: #" + order.id)
+    left(`วันที่: ${date}`)
+    left(`เวลา: ${time}`)
+    left(`Order: #${order.id}`)
 
-    line()
-    gap(6)
+    dashedLine()
 
     // ========= ITEMS =========
+    let subtotal = 0
 
-// ⚠️ IMPORTANT:
-// i.price = รวม modifier แล้ว
-// ห้ามเอา modifier price ไปบวก subtotal ซ้ำ
-
-let subtotal = 0
-
-order.items.forEach(i=>{
+    order.items.forEach(i=>{
 
       subtotal += i.price
 
-      // ชื่อสินค้า
-      left(i.name,22)
+      // 🟢 ชื่อสินค้า
+      left(i.name,24,true)
 
-      // qty x price
-      const textLeft = ` 1 x ${i.price}`
-      const textRight = `${i.price}`
+      // qty
+      row(` 1 x ${i.price}`, i.price)
 
-      row(textLeft, textRight,20)
-
-      // modifier
+      // 🔥 modifiers
       if(i.modifiers){
 
-  const map = {}
+        const map = {}
 
-  Object.values(i.modifiers).forEach(arr=>{
-    arr.forEach(m=>{
-      const name = typeof m==="object"?m.name:m
-      const price = typeof m==="object"?m.price||0:0
+        Object.values(i.modifiers).forEach(arr=>{
+          arr.forEach(m=>{
+            const name = typeof m==="object"?m.name:m
+            const price = typeof m==="object"?m.price||0:0
 
-      if(!map[name]){
-        map[name] = { count:0, price }
+            if(!map[name]){
+              map[name] = { count:0, price }
+            }
+            map[name].count++
+          })
+        })
+
+        Object.entries(map).forEach(([name,data])=>{
+          const qty = data.count > 1 ? ` x${data.count}` : ""
+          const priceText = data.price ? `+${data.price * data.count}` : ""
+
+          row(
+            "   + " + name + qty,
+            priceText,
+            18
+          )
+        })
       }
 
-      map[name].count++
-    })
-  })
-
-  Object.entries(map).forEach(([name,data])=>{
-
-    const qty = data.count > 1 ? ` x${data.count}` : ""
-    const priceText = data.price ? `+${data.price * data.count}` : ""
-
-    row(
-      "   + " + name + qty,
-      priceText,
-      18
-    )
-  })
-}
-
-      gap(6)
+      gap(10)
     })
 
-    line()
+    dashedLine()
 
-    // ========= SUMMARY =========
+    // ========= TOTAL =========
     const total = subtotal
 
-    line()
+    ctx.font = "bold 28px monospace"
+    row(
+      "TOTAL",
+      total.toLocaleString("th-TH",{minimumFractionDigits:2}),
+      28,
+      true
+    )
 
-row("💰 ยอดรวมสุทธิ", total.toFixed(2),24,true)
-    
-gap(10)
-center("ขอบคุณที่ใช้บริการ!",18)
+    gap(12)
+    center("ขอบคุณที่ใช้บริการ!",18)
 
-    // ======================
-    // ✂️ crop
-    // ======================
+    // ========= crop =========
     const final = document.createElement("canvas")
     final.width = width
     final.height = y + 20
@@ -211,7 +278,7 @@ center("ขอบคุณที่ใช้บริการ!",18)
     const dataUrl = final.toDataURL("image/png")
 
     preview.src = dataUrl
-    status.innerText = "Preparing print..."
+    status.innerText = "Printing..."
 
     setTimeout(()=>{
       location.href = "rawbt:" + dataUrl
