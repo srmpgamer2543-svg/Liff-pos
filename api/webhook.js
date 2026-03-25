@@ -663,6 +663,8 @@ module.exports = async function handler(req, res) {
     }
   }
 }
+        const flexStaff = buildStaffFlex(orderId, statusText, statusColor, itemsData, order.total)
+const flexCustomer = buildOrderFlexUniversal(orderId, itemsData, order.total)
 
         await fetch(
           "https://api.line.me/v2/bot/message/reply",
