@@ -179,19 +179,12 @@ module.exports = async function handler(req, res) {
       if (processedEvents.has(event.replyToken)) continue
       processedEvents.add(event.replyToken)
 
-      // ✅ FIX: define text safely
       const text = event?.message?.text || ""
 
-      // ======================
-      // MESSAGE
-      // ======================
       if (event.type === "message" && event.message.type === "text") {
 
         const userId = event.source.userId
 
-        // ======================
-        // ตรวจสอบสถานะออเดอร์
-        // ======================
         if (text.includes("ตรวจสอบสถานะออเดอร์")) {
 
           const orderRes = await fetch(
@@ -250,9 +243,6 @@ module.exports = async function handler(req, res) {
           })
         }
 
-        // ======================
-        // สรุปยอด
-        // ======================
         if (text.includes("สรุปยอด")) {
 
           let start = ""
@@ -373,89 +363,76 @@ module.exports = async function handler(req, res) {
         }
       }
 
-      // 🔥 แทนของเดิมทั้งหมดใน postback ส่วนนี้
+      if (event.type === "postback") {
 
-// ======================
-// POSTBACK HANDLER
-// ======================
-if (event.type === "postback") {
+        const params = new URLSearchParams(event.postback.data)
 
-  const params = new URLSearchParams(event.postback.data)
+        const action = params.get("action")
+        const orderId = Number(params.get("order_id"))
 
-  const action = params.get("action")
-  const orderId = Number(params.get("order_id"))
+        if (!orderId) continue
 
-  if (!orderId) continue
+        let newStatus = "pending"
+        let statusText = ""
+        let statusColor = "#FF9500"
 
-  let newStatus = "pending"
-  let statusText = ""
-  let statusColor = "#FF9500"
+        if (action === "accept") {
+          newStatus = "preparing"
+          statusText = "ร้านกำลังเตรียมเครื่องดื่มของคุณ 🧑‍🍳"
+          statusColor = "#FF9500"
+        }
 
-  if (action === "accept") {
-    newStatus = "preparing"
-    statusText = "ร้านกำลังเตรียมเครื่องดื่มของคุณ 🧑‍🍳"
-    statusColor = "#FF9500"
-  }
-
-  if (action === "done") {
-    newStatus = "completed"
-    statusText = "ออเดอร์ของคุณลูกค้าเสร็จแล้ว 🎉"
-    statusColor = "#34C759"
-  }
-
-  // ✅ UPDATE STATUS
-  await fetch(
-    `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
-    {
-      method: "PATCH",
-      headers: {
-        apikey: process.env.SUPABASE_KEY,
-        Authorization: `Bearer ${process.env.SUPABASE_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ status: newStatus })
-    }
-  )
-
-  // ✅ ดึง ORDER เต็ม (แก้ตรงนี้)
-  const orderRes = await fetch(
-    `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
-    {
-      headers: {
-        apikey: process.env.SUPABASE_KEY,
-        Authorization: `Bearer ${process.env.SUPABASE_KEY}`
-      }
-    }
-  )
-
-  const orderData = await orderRes.json()
-  const order = orderData?.[0]
-
-  console.log("🧾 ORDER FULL:", order)
-
-  if (!order || !order.line_user_id) {
-    console.log("❌ ไม่มี customerId ส่งไม่ได้")
-    continue
-  }
-
-  const customerId = order.line_user_id
-
-  // ✅ ดึง items
-  const itemsRes = await fetch(
-    `${process.env.SUPABASE_URL}/rest/v1/order_items?order_id=eq.${orderId}`,
-    {
-      headers: {
-        apikey: process.env.SUPABASE_KEY,
-        Authorization: `Bearer ${process.env.SUPABASE_KEY}`
-      }
-    }
-  )
-
-  const itemsData = await itemsRes.json()
-
-  const flex = buildOrderFlex(orderId, statusText, statusColor, itemsData, order.total)
+        if (action === "done") {
+          newStatus = "completed"
+          statusText = "ออเดอร์ของคุณลูกค้าเสร็จแล้ว 🎉"
+          statusColor = "#34C759"
+        }
 
         await fetch(
+          `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
+          {
+            method: "PATCH",
+            headers: {
+              apikey: process.env.SUPABASE_KEY,
+              Authorization: `Bearer ${process.env.SUPABASE_KEY}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ status: newStatus })
+          }
+        )
+
+        const orderRes = await fetch(
+          `${process.env.SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
+          {
+            headers: {
+              apikey: process.env.SUPABASE_KEY,
+              Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+            }
+          }
+        )
+
+        const orderData = await orderRes.json()
+        const order = orderData?.[0]
+
+        if (!order || !order.line_user_id) continue
+
+        const customerId = order.line_user_id
+
+        const itemsRes = await fetch(
+          `${process.env.SUPABASE_URL}/rest/v1/order_items?order_id=eq.${orderId}`,
+          {
+            headers: {
+              apikey: process.env.SUPABASE_KEY,
+              Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+            }
+          }
+        )
+
+        const itemsData = await itemsRes.json()
+
+        const flex = buildOrderFlex(orderId, statusText, statusColor, itemsData, order.total)
+
+        const pushRes = await fetch(
           "https://api.line.me/v2/bot/message/push",
           {
             method: "POST",
@@ -469,12 +446,9 @@ if (event.type === "postback") {
             })
           }
         )
-      }
-    }
 
-  const pushText = await pushRes.text()
-  console.log("📤 PUSH STATUS:", pushRes.status, pushText)
-}
+        const pushText = await pushRes.text()
+        console.log("📤 PUSH STATUS:", pushRes.status, pushText)
       }
     }
 
@@ -484,4 +458,4 @@ if (event.type === "postback") {
     console.log("🔥 ERROR:", err)
     res.status(500).end()
   }
-            }
+}
