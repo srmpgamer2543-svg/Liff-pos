@@ -18,7 +18,7 @@ body{
 
 <body>
 
-<h2 id="status">กำลังเริ่ม...</h2>
+<h2 id="status">Starting...</h2>
 
 <script>
 async function main(){
@@ -26,36 +26,36 @@ async function main(){
   try{
 
     // =========================
-    // 🔥 INIT LIFF
+    // INIT LIFF
     // =========================
     await liff.init({ liffId: "2009308319-yTnMMIYi" })
 
     // =========================
-    // 🔥 GET ORDER ID
+    // GET ORDER ID
     // =========================
     const params = new URLSearchParams(window.location.search)
     const orderId = params.get("order_id")
 
     if(!orderId){
-      document.getElementById("status").innerText = "❌ ไม่มี order_id"
+      document.getElementById("status").innerText = "No order_id"
       return
     }
 
-    document.getElementById("status").innerText = "📦 กำลังโหลดออเดอร์..."
+    document.getElementById("status").innerText = "Loading order..."
 
     // =========================
-    // ✅ ใช้ API ที่ถูกต้อง
+    // GET ORDER
     // =========================
     const orderRes = await fetch(`/api/get-order?order_id=${orderId}`)
     const order = await orderRes.json()
 
     if(!order || !order.id){
-      document.getElementById("status").innerText = "❌ ไม่พบออเดอร์"
+      document.getElementById("status").innerText = "Order not found"
       return
     }
 
     // =========================
-    // 🔥 MERGE ITEM
+    // MERGE ITEMS
     // =========================
     function mergeItems(items){
       const merged = {}
@@ -73,7 +73,7 @@ async function main(){
     }
 
     // =========================
-    // 🔥 FORMAT MODIFIER
+    // FORMAT MODIFIERS
     // =========================
     function formatModifiers(modifiers){
 
@@ -102,50 +102,51 @@ async function main(){
     const items = mergeItems(order.items || [])
 
     // =========================
-    // 🔥 BUILD RECEIPT TEXT
+    // BUILD RECEIPT TEXT
     // =========================
     let text = ""
-    let text = ""
 
-text += "ร้านน้ำ\n"
-text += "----------------\n"
-text += "Order #" + order.id + "\n"
-text += "----------------\n"
+    text += "DRINK SHOP\n"
+    text += "----------------\n"
+    text += "Order #" + order.id + "\n"
+    text += "----------------\n"
 
-let total = 0
+    let total = 0
 
-items.forEach(i=>{
+    items.forEach(i=>{
 
-  const lineTotal = i.price * i.qty
-  total += lineTotal
+      const lineTotal = i.price * i.qty
+      total += lineTotal
 
-  text += i.name + " x" + i.qty + "\n"
+      text += i.name + " x" + i.qty + "\n"
 
-  const mods = formatModifiers(i.modifiers)
+      const mods = formatModifiers(i.modifiers)
 
-  mods.forEach(m=>{
-    text += "  + " + m + "\n"
-  })
+      mods.forEach(m=>{
+        text += "  + " + m + "\n"
+      })
 
-  text += "  = " + lineTotal + " บาท\n"
-  text += "----------------\n"
-})
+      text += "  = " + lineTotal + " BAHT\n"
+      text += "----------------\n"
+    })
 
-    text += `รวม ${total} บาท\n`
-    text += "\nขอบคุณครับ\n"
+    text += "TOTAL " + total + " BAHT\n"
+    text += "\nTHANK YOU\n"
 
     console.log("PRINT:", text)
 
-    document.getElementById("status").innerText = "🖨️ กำลังพิมพ์..."
+    document.getElementById("status").innerText = "Printing..."
 
     // =========================
-    // 🔥 PRINT VIA RAWBT
+    // PRINT VIA RAWBT (BASE64)
     // =========================
-    window.location.href = "rawbt:print?text=" + encodeURIComponent(text)
+    const encoded = btoa(unescape(encodeURIComponent(text)))
+
+    window.location.href = "rawbt:print?text=" + encoded
 
   }catch(err){
     console.log(err)
-    document.getElementById("status").innerText = "❌ " + err.message
+    document.getElementById("status").innerText = "ERROR: " + err.message
   }
 
 }
