@@ -693,17 +693,25 @@ const flexCustomer = buildOrderFlexUniversal(orderId, itemsData, order.total)
           }
         )
 
-        await fetch(
-          "https://api.line.me/v2/bot/message/push",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type":"application/json",
-              Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
-            },
-            body: JSON.stringify({
-              to: customerId,
-              messages: [flexCustomer]
+        const pushRes = await fetch(
+  "https://api.line.me/v2/bot/message/push",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
+    },
+    body: JSON.stringify({
+      to: customerId,
+      messages: [flexCustomer]
+    })
+  }
+)
+
+const result = await pushRes.text()
+
+console.log("📤 PUSH CUSTOMER STATUS:", pushRes.status)
+console.log("📤 PUSH CUSTOMER RESULT:", result)
             })
           }
         )
