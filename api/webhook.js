@@ -324,7 +324,7 @@ module.exports = async function handler(req, res) {
     Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
   },
   body: JSON.stringify({
-    to: userId
+    to: userId,
     messages: [flex]
   })
 })
