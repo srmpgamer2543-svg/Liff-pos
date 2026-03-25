@@ -42,97 +42,119 @@ export default async function handler(req, res) {
     }
 
     // ======================
-    // 🔥 FORMAT MODIFIER
+    // 🔥 BUILD FLEX UNIVERSAL
     // ======================
-    function formatModifiers(modifiers){
+    function buildOrderFlexUniversal(orderId, items, total){
 
-      if(!modifiers) return []
+      const merged = {}
 
-      const result = []
-
-      Object.entries(modifiers).forEach(([group, arr])=>{
-
-        const map = {}
-
-        arr.forEach(m=>{
-          const name = typeof m === "object" ? m.name : m
-          const price = typeof m === "object" ? (m.price || 0) : 0
-
-          if(!map[name]){
-            map[name] = { count:0, price }
-          }
-
-          map[name].count++
-        })
-
-        Object.entries(map).forEach(([name,data])=>{
-          const qty = data.count > 1 ? ` x${data.count}` : ""
-          const price = data.price ? ` (+${data.price * data.count})` : ""
-
-          result.push(`${name}${qty}${price}`)
-        })
-
-      })
-
-      return result
-    }
-
-    // ======================
-    // 🔥 MERGE ITEM
-    // ======================
-    function mergeItems(items){
-      const merged={}
       items.forEach(i=>{
-        const key=i.name+JSON.stringify(i.modifiers||{})
+        const key = i.name + JSON.stringify(i.modifiers || {})
         if(!merged[key]){
-          merged[key]={...i,qty:1}
+          merged[key] = { ...i, qty:1 }
         }else{
           merged[key].qty++
         }
       })
-      return Object.values(merged)
-    }
 
-    // ======================
-    // 🔥 BUILD FLEX (ใหม่)
-    // ======================
-    function buildStaffFlex(orderId, items){
+      const mergedItems = Object.values(merged)
 
-      const LIFF_URL = process.env.LIFF_PRINT_URL
+      function formatMods(modifiers){
 
-      const merged = mergeItems(items)
+        if(!modifiers) return []
 
-      const itemBlocks = merged.map(item=>{
+        const map = {}
 
-        const mods = formatModifiers(item.modifiers)
-        const totalPrice = item.price * item.qty
+        Object.values(modifiers).forEach(arr=>{
+          arr.forEach(m=>{
+            const name = typeof m==="object"?m.name:m
+            const price = typeof m==="object"?(m.price||0):0
 
-        let text = `${item.name} x${item.qty}`
+            if(!map[name]){
+              map[name] = { count:0, price }
+            }
 
-        if(mods.length){
-          text += `\n- ${mods.join("\n- ")}`
-        }
+            map[name].count++
+          })
+        })
 
-        text += `\n💰 ${totalPrice} บาท`
+        return Object.entries(map).map(([name,data])=>{
+          return {
+            name: name,
+            qty: data.count,
+            price: data.price * data.count
+          }
+        })
+      }
 
-        return {
+      const contents = []
+
+      mergedItems.forEach((item, index)=>{
+
+        const mods = formatMods(item.modifiers)
+        const itemTotal = item.price * item.qty
+
+        contents.push({
           type:"box",
-          layout:"vertical",
+          layout:"horizontal",
           contents:[
             {
               type:"text",
-              text:text,
-              wrap:true,
-              size:"sm"
+              text:`${item.name} x${item.qty}`,
+              weight:"bold",
+              size:"md",
+              flex:3,
+              wrap:true
+            },
+            {
+              type:"text",
+              text:`${itemTotal}฿`,
+              weight:"bold",
+              size:"md",
+              align:"end",
+              flex:1
             }
           ]
+        })
+
+        mods.forEach(m=>{
+          contents.push({
+            type:"box",
+            layout:"horizontal",
+            margin:"sm",
+            contents:[
+              {
+                type:"text",
+                text:`• ${m.name}${m.qty>1?` x${m.qty}`:""}`,
+                size:"sm",
+                color:"#666666",
+                flex:3,
+                wrap:true
+              },
+              {
+                type:"text",
+                text: m.price ? `${m.price}.-` : "",
+                size:"sm",
+                color:"#666666",
+                align:"end",
+                flex:1
+              }
+            ]
+          })
+        })
+
+        if(index < mergedItems.length - 1){
+          contents.push({
+            type:"separator",
+            margin:"md"
+          })
         }
 
       })
 
       return {
         type:"flex",
-        altText:`ออเดอร์ใหม่ #${orderId}`,
+        altText:`ออเดอร์ #${orderId}`,
         contents:{
           type:"bubble",
           size:"mega",
@@ -151,10 +173,18 @@ export default async function handler(req, res) {
                 type:"text",
                 text:`#${orderId}`,
                 size:"sm",
-                color:"#888888"
+                color:"#999999"
               },
               { type:"separator" },
-              ...itemBlocks
+              ...contents,
+              { type:"separator", margin:"lg" },
+              {
+                type:"text",
+                text:`💰 รวม ${total} บาท`,
+                weight:"bold",
+                size:"lg",
+                align:"end"
+              }
             ]
           },
           footer:{
@@ -188,7 +218,7 @@ export default async function handler(req, res) {
                 action:{
                   type:"uri",
                   label:"🖨️ พิมพ์ใบเสร็จ",
-                  uri:`${LIFF_URL}?order_id=${orderId}&external=1`
+                  uri:`${process.env.LIFF_PRINT_URL}?order_id=${orderId}&external=1`
                 }
               }
             ]
@@ -220,9 +250,10 @@ export default async function handler(req, res) {
     }
 
     // ======================
-    // PUSH พนักงาน
+    // PUSH พนักงาน (ใช้ FLEX ใหม่)
     // ======================
-    const flex = buildStaffFlex(orderId, body)
+    const total = body.reduce((sum,i)=>sum + i.price,0)
+    const flex = buildOrderFlexUniversal(orderId, body, total)
 
     await fetch("https://api.line.me/v2/bot/message/push",{
       method:"POST",
