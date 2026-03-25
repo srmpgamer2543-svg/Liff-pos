@@ -1,10 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Print</title>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<style>
+body{
+  font-family: sans-serif;
+  text-align: center;
+  padding: 40px;
+}
+</style>
+</head>
+
+<body>
+
+<h2 id="status">กำลังเริ่ม...</h2>
+
 <script>
 async function main(){
 
   try{
 
+    // =========================
+    // 🔥 INIT LIFF
+    // =========================
     await liff.init({ liffId: "2009308319-yTnMMIYi" })
 
+    // =========================
+    // 🔥 GET ORDER ID
+    // =========================
     const params = new URLSearchParams(window.location.search)
     const orderId = params.get("order_id")
 
@@ -16,23 +44,65 @@ async function main(){
     document.getElementById("status").innerText = "📦 กำลังโหลดออเดอร์..."
 
     // =========================
-    // 🔥 ดึง order
+    // ✅ ใช้ API ที่ถูกต้อง
     // =========================
-    const orderRes = await fetch(
-      `/api/get-latest-order`
-    )
+    const orderRes = await fetch(`/api/get-order?order_id=${orderId}`)
+    const order = await orderRes.json()
 
-    const orders = await orderRes.json()
-
-    const order = orders.find(o => String(o.id) === String(orderId))
-
-    if(!order){
+    if(!order || !order.id){
       document.getElementById("status").innerText = "❌ ไม่พบออเดอร์"
       return
     }
 
     // =========================
-    // 🔥 สร้าง TEXT ใบเสร็จ
+    // 🔥 MERGE ITEM
+    // =========================
+    function mergeItems(items){
+      const merged = {}
+
+      items.forEach(i=>{
+        const key = i.name + JSON.stringify(i.modifiers || {})
+        if(!merged[key]){
+          merged[key] = {...i, qty:1}
+        }else{
+          merged[key].qty++
+        }
+      })
+
+      return Object.values(merged)
+    }
+
+    // =========================
+    // 🔥 FORMAT MODIFIER
+    // =========================
+    function formatModifiers(modifiers){
+
+      if(!modifiers) return []
+
+      const result = []
+
+      Object.entries(modifiers).forEach(([group, arr])=>{
+
+        const map = {}
+
+        arr.forEach(m=>{
+          const name = typeof m === "object" ? m.name : m
+          map[name] = (map[name] || 0) + 1
+        })
+
+        Object.entries(map).forEach(([name,count])=>{
+          result.push(count > 1 ? `${name} x${count}` : name)
+        })
+
+      })
+
+      return result
+    }
+
+    const items = mergeItems(order.items || [])
+
+    // =========================
+    // 🔥 BUILD RECEIPT TEXT
     // =========================
     let text = ""
     text += "🧾 ร้านน้ำ\n"
@@ -41,12 +111,25 @@ async function main(){
 
     let total = 0
 
-    order.items.forEach(i=>{
-      text += `${i.name} - ${i.price} บาท\n`
-      total += Number(i.price)
+    items.forEach(i=>{
+
+      const lineTotal = i.price * i.qty
+      total += lineTotal
+
+      text += `${i.name} x${i.qty}\n`
+
+      const mods = formatModifiers(i.modifiers)
+
+      if(mods.length){
+        mods.forEach(m=>{
+          text += `  - ${m}\n`
+        })
+      }
+
+      text += `${lineTotal} บาท\n`
+      text += "----------------\n"
     })
 
-    text += "----------------\n"
     text += `รวม ${total} บาท\n`
     text += "\nขอบคุณครับ\n"
 
@@ -55,11 +138,12 @@ async function main(){
     document.getElementById("status").innerText = "🖨️ กำลังพิมพ์..."
 
     // =========================
-    // 🔥 ยิง RawBT
+    // 🔥 PRINT VIA RAWBT
     // =========================
     window.location.href = "rawbt:print?text=" + encodeURIComponent(text)
 
   }catch(err){
+    console.log(err)
     document.getElementById("status").innerText = "❌ " + err.message
   }
 
@@ -67,3 +151,6 @@ async function main(){
 
 main()
 </script>
+
+</body>
+</html>
