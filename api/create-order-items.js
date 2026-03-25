@@ -176,7 +176,7 @@ export default async function handler(req, res) {
                 action:{
                   type:"uri",
                   label:"🖨️ พิมพ์ใบเสร็จ",
-                  uri:`${LIFF_URL}?order_id=${orderId}`
+                  uri:`${LIFF_URL}?order_id=${orderId}&external=1`
                 }
               }
             ]
