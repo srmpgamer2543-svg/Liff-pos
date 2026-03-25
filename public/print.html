@@ -36,7 +36,6 @@ async function main(){
 
     const params = new URLSearchParams(location.search)
 
-    // 🔥 force chrome
     if(params.get("external")==="1"){
       const url = location.href.replace("external=1","external=0")
       location.href =
@@ -59,7 +58,7 @@ async function main(){
     const order = await res.json()
 
     // ======================
-    // 🧾 canvas FIX (FINAL)
+    // 🧾 CANVAS POS STYLE
     // ======================
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")
@@ -83,24 +82,17 @@ async function main(){
       ctx.font = `${bold?"bold ":""}${size}px monospace`
       ctx.textAlign = "center"
       ctx.fillText(text, width/2, y)
-      y += size + 12
+      y += size + 10
     }
 
-    function textLeft(text, size=22, bold=false){
-      ctx.font = `${bold?"bold ":""}${size}px monospace`
+    function left(text, size=20){
+      ctx.font = `${size}px monospace`
       ctx.textAlign = "left"
       ctx.fillText(text, LEFT, y)
-      y += size + 10
+      y += size + 8
     }
 
-    function textRight(text, size=22, bold=false){
-      ctx.font = `${bold?"bold ":""}${size}px monospace`
-      ctx.textAlign = "right"
-      ctx.fillText(text, RIGHT, y)
-      y += size + 10
-    }
-
-    function row(l, r, size=22, bold=false){
+    function row(l,r,size=20,bold=false){
       ctx.font = `${bold?"bold ":""}${size}px monospace`
 
       ctx.textAlign = "left"
@@ -109,7 +101,7 @@ async function main(){
       ctx.textAlign = "right"
       ctx.fillText(r, RIGHT, y)
 
-      y += size + 10
+      y += size + 8
     }
 
     function line(){
@@ -117,85 +109,75 @@ async function main(){
       y += 12
     }
 
-    function gap(h=12){ y+=h }
-
-    function formatMods(modifiers){
-      if(!modifiers) return []
-
-      const result=[]
-
-      Object.values(modifiers).forEach(arr=>{
-        const map={}
-        arr.forEach(m=>{
-          const name = typeof m==="object"?m.name:m
-          const price = typeof m==="object"?m.price||0:0
-
-          if(!map[name]) map[name]={count:0,price}
-          map[name].count++
-        })
-
-        Object.entries(map).forEach(([name,data])=>{
-          result.push({
-            name,
-            qty:data.count,
-            price:data.price
-          })
-        })
-      })
-
-      return result
-    }
+    function gap(h=10){ y+=h }
 
     // ========= HEADER =========
-    center("ร้านน้ำ",26,true)
-    center("DRINK SHOP",20)
+    center("ร้านน้ำอร่อยเว่อร์",26,true)
+    center("อร่อย สด ชื่นใจ",18)
 
-    gap(6)
+    gap(4)
     line()
 
-    textLeft("Order #" + order.id,20,true)
+    // วันที่
+    const now = new Date()
+    const date = now.toLocaleDateString("th-TH")
+    const time = now.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})
 
-    gap(6)
+    left("วันที่: " + date + " เวลา: " + time)
+    left("Order: #" + order.id)
+
     line()
-    gap(10)
+    gap(6)
 
     // ========= ITEMS =========
-    let total = 0
+    let subtotal = 0
 
     order.items.forEach(i=>{
 
-      const itemTotal = i.price
-      total += itemTotal
+      subtotal += i.price
 
-      textLeft(i.name,22,true)
+      // ชื่อสินค้า
+      left(i.name,22)
 
-      const mods = formatMods(i.modifiers)
+      // qty x price
+      const textLeft = ` 1 x ${i.price}`
+      const textRight = `${i.price}`
 
-      mods.forEach(m=>{
-        const name = m.qty > 1 ? `${m.name} x${m.qty}` : m.name
-        const price = m.price ? `+${m.price * m.qty}฿` : ""
+      row(textLeft, textRight,20)
 
-        row("   + " + name, price,18)
-      })
-
-      row("", itemTotal + "฿",22,true)
+      // modifier
+      if(i.modifiers){
+        Object.values(i.modifiers).forEach(arr=>{
+          arr.forEach(m=>{
+            const name = typeof m==="object"?m.name:m
+            row("   + " + name,"",18)
+          })
+        })
+      }
 
       gap(6)
-      line()
-      gap(6)
-
     })
 
-    // ========= TOTAL =========
-    row("รวม", total + " บาท",26,true)
+    line()
 
-    gap(14)
-    center("ขอบคุณครับ",20)
+    // ========= SUMMARY =========
+    const vat = subtotal * 0.07
+    const total = subtotal + vat
+
+    row("รวมย่อย", subtotal.toFixed(2))
+    row("VAT 7%", vat.toFixed(2))
+
+    line()
+
+    row("ยอดรวม", total.toFixed(2),24,true)
+
+    gap(10)
+    center("ขอบคุณที่ใช้บริการ!",18)
 
     gap(20)
 
     // ======================
-    // ✂️ crop FIX
+    // ✂️ crop
     // ======================
     const final = document.createElement("canvas")
     final.width = width
@@ -208,15 +190,9 @@ async function main(){
 
     const dataUrl = final.toDataURL("image/png")
 
-    // ======================
-    // 👀 preview
-    // ======================
     preview.src = dataUrl
     status.innerText = "Preparing print..."
 
-    // ======================
-    // 🚀 send to rawbt
-    // ======================
     setTimeout(()=>{
       location.href = "rawbt:" + dataUrl
     },400)
