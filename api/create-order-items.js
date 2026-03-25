@@ -44,29 +44,38 @@ export default async function handler(req, res) {
     // ======================
     // 🔥 FORMAT MODIFIER
     // ======================
-    function formatModifiers(modifiers){
+function formatModifiers(modifiers){
 
-      if(!modifiers) return []
+  if(!modifiers) return []
 
-      const result = []
+  const result = []
 
-      Object.entries(modifiers).forEach(([group, arr])=>{
+  Object.entries(modifiers).forEach(([group, arr])=>{
 
-        const map = {}
+    const map = {}
 
-        arr.forEach(m=>{
-          const name = typeof m === "object" ? m.name : m
-          map[name] = (map[name] || 0) + 1
-        })
+    arr.forEach(m=>{
+      const name = typeof m === "object" ? m.name : m
+      const price = typeof m === "object" ? (m.price || 0) : 0
 
-        Object.entries(map).forEach(([name,count])=>{
-          result.push(count > 1 ? `${name} x${count}` : name)
-        })
+      if(!map[name]){
+        map[name] = { count:0, price }
+      }
 
-      })
+      map[name].count++
+    })
 
-      return result
-    }
+    Object.entries(map).forEach(([name,data])=>{
+      const qty = data.count > 1 ? ` x${data.count}` : ""
+      const price = data.price ? ` (+${data.price * data.count})` : ""
+
+      result.push(`${name}${qty}${price}`)
+    })
+
+  })
+
+  return result
+}
 
     // ======================
     // 🔥 MERGE ITEM
@@ -94,6 +103,33 @@ export default async function handler(req, res) {
       const merged = mergeItems(items)
 
       const itemBlocks = merged.map(item=>{
+
+  const mods = formatModifiers(item.modifiers)
+
+  const totalPrice = item.price * item.qty
+
+  let text = `${item.name} x${item.qty}`
+
+  if(mods.length){
+    text += `\n- ${mods.join("\n- ")}`
+  }
+
+  text += `\n💰 ${totalPrice} บาท`
+
+  return {
+    type:"box",
+    layout:"vertical",
+    contents:[
+      {
+        type:"text",
+        text:text,
+        wrap:true,
+        size:"sm"
+      }
+    ]
+  }
+
+})
 
         const mods = formatModifiers(item.modifiers)
 
