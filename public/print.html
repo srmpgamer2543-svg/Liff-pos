@@ -164,36 +164,43 @@ async function main(){
     fctx.fillRect(0,0,finalCanvas.width,finalCanvas.height)
     fctx.drawImage(canvas,0,0)
 
-    const base64 = finalCanvas.toDataURL("image/png")
-
-    status.innerText = "Uploading..."
+    status.innerText = "Preparing file..."
 
     // =========================
-    // 📤 UPLOAD IMAGE TO SERVER
+    // 🔥 CONVERT TO BLOB (สำคัญมาก)
     // =========================
-    const upload = await fetch("/api/upload-image", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        image: base64
-      })
-    })
+    const blob = await new Promise(resolve => 
+      finalCanvas.toBlob(resolve, "image/png")
+    )
 
-    const result = await upload.json()
-
-    if(!result.url){
-      status.innerText = "Upload failed"
+    if(!blob){
+      status.innerText = "Create image failed"
       return
     }
 
-    status.innerText = "Downloading..."
+    // =========================
+    // 📥 DOWNLOAD FILE
+    // =========================
+    const url = URL.createObjectURL(blob)
 
-    // =========================
-    // 📥 DOWNLOAD → AUTOPRINT
-    // =========================
-    window.location.href = result.url
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `receipt-${order.id}.png`
+
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+
+    URL.revokeObjectURL(url)
+
+    status.innerText = "Sent to printer..."
+
+    // ปิด LIFF (optional)
+    setTimeout(()=>{
+      if(liff.isInClient()){
+        liff.closeWindow()
+      }
+    }, 1500)
 
   }catch(err){
     console.log(err)
