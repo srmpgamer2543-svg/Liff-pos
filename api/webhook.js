@@ -317,18 +317,20 @@ module.exports = async function handler(req, res) {
 
           const flex = buildOrderFlex(orderId, statusText, color, itemsData, order.total)
 
-          await fetch("https://api.line.me/v2/bot/message/reply",{
-            method:"POST",
-            headers:{
-              "Content-Type":"application/json",
-              Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
-            },
-            body:JSON.stringify({
-              replyToken:event.replyToken,
-              messages:[flex]
-            })
-          })
-        }
+          const pushRes = await fetch("https://api.line.me/v2/bot/message/push",{
+  method: "POST",
+  headers: {
+    "Content-Type":"application/json",
+    Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
+  },
+  body: JSON.stringify({
+    to: customerId,
+    messages: [flexCustomer]
+  })
+})
+
+const pushText = await pushRes.text()
+console.log("📤 PUSH CUSTOMER:", pushRes.status, pushText)
 
         if (text.includes("สรุปยอด")) {
 
