@@ -668,7 +668,13 @@ console.log("📤 PUSH CUSTOMER:", pushRes.status, pushText)
   }
 }
         const flexStaff = buildStaffFlex(orderId, statusText, statusColor, itemsData, order.total)
-const flexCustomer = buildOrderFlexUniversal(orderId, itemsData, order.total)
+const flexCustomer = buildOrderFlex(
+  orderId,
+  statusText,
+  statusColor,
+  itemsData,
+  order.total
+)
 
         await fetch(
           "https://api.line.me/v2/bot/message/reply",
