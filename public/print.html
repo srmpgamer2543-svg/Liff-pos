@@ -1,57 +1,69 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Print Receipt</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-</head>
-<body style="font-family:sans-serif; text-align:center; padding-top:40px;">
-
-<h2>🖨️ กำลังพิมพ์ใบเสร็จ...</h2>
-<p id="status">กำลังโหลด...</p>
-
 <script>
 async function main(){
 
   try{
 
-    // 🔧 ใส่ LIFF ID ของคุณตรงนี้
     await liff.init({ liffId: "2009308319-yTnMMIYi" })
 
-    document.getElementById("status").innerText = "เชื่อมต่อ LINE แล้ว"
-
     const params = new URLSearchParams(window.location.search)
+    const orderId = params.get("order_id")
 
-    const text = params.get("text")
-    const orderId = params.get("orderId")
-
-    if(!text){
-      document.getElementById("status").innerText = "❌ ไม่มีข้อมูลสำหรับพิมพ์"
+    if(!orderId){
+      document.getElementById("status").innerText = "❌ ไม่มี order_id"
       return
     }
 
-    // 👇 debug แสดงข้อความก่อนพิมพ์
-    console.log("PRINT TEXT:", text)
+    document.getElementById("status").innerText = "📦 กำลังโหลดออเดอร์..."
 
-    // 🔥 ยิงเข้า RawBT (พิมพ์จริง)
+    // =========================
+    // 🔥 ดึง order
+    // =========================
+    const orderRes = await fetch(
+      `/api/get-latest-order`
+    )
+
+    const orders = await orderRes.json()
+
+    const order = orders.find(o => String(o.id) === String(orderId))
+
+    if(!order){
+      document.getElementById("status").innerText = "❌ ไม่พบออเดอร์"
+      return
+    }
+
+    // =========================
+    // 🔥 สร้าง TEXT ใบเสร็จ
+    // =========================
+    let text = ""
+    text += "🧾 ร้านน้ำ\n"
+    text += "----------------\n"
+    text += "Order #" + order.id + "\n"
+
+    let total = 0
+
+    order.items.forEach(i=>{
+      text += `${i.name} - ${i.price} บาท\n`
+      total += Number(i.price)
+    })
+
+    text += "----------------\n"
+    text += `รวม ${total} บาท\n`
+    text += "\nขอบคุณครับ\n"
+
+    console.log("PRINT:", text)
+
+    document.getElementById("status").innerText = "🖨️ กำลังพิมพ์..."
+
+    // =========================
+    // 🔥 ยิง RawBT
+    // =========================
     window.location.href = "rawbt:print?text=" + encodeURIComponent(text)
 
-    // 👇 แสดง fallback เผื่อไม่เด้ง
-    setTimeout(()=>{
-      document.getElementById("status").innerHTML =
-        "📄 ส่งคำสั่งพิมพ์แล้ว<br><br>" +
-        "ถ้าไม่พิมพ์อัตโนมัติ 👉 กรุณากดเปิด RawBT";
-    }, 1500)
-
   }catch(err){
-
-    console.log("ERROR:", err)
-    document.getElementById("status").innerText = "❌ เกิดข้อผิดพลาด: " + err.message
+    document.getElementById("status").innerText = "❌ " + err.message
   }
+
 }
 
 main()
 </script>
-
-</body>
-</html>
