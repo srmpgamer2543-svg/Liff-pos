@@ -1,4 +1,5 @@
 module.exports = async function handler(req, res) {
+
   console.log("=== START create-order-items ===")
 
   try {
@@ -230,20 +231,7 @@ module.exports = async function handler(req, res) {
     // PUSH ลูกค้า
     // ======================
     if (customerId) {
-      const pushRes = await fetch("https://api.line.me/v2/bot/message/push",{
-  method:"POST",
-  headers:{
-    "Content-Type":"application/json",
-    Authorization:`Bearer ${process.env.LINE_ACCESS_TOKEN}`
-  },
-  body:JSON.stringify({
-    to:process.env.SHOP_LINE_GROUP_ID,
-    messages:[flex]
-  })
-})
-
-const pushText = await pushRes.text()
-console.log("📤 PUSH GROUP:", pushRes.status, pushText)
+      await fetch("https://api.line.me/v2/bot/message/push",{
         method:"POST",
         headers:{
           "Content-Type":"application/json",
@@ -262,12 +250,12 @@ console.log("📤 PUSH GROUP:", pushRes.status, pushText)
     }
 
     // ======================
-    // PUSH พนักงาน (ใช้ FLEX ใหม่)
+    // PUSH พนักงาน (FLEX)
     // ======================
     const total = body.reduce((sum,i)=>sum + i.price,0)
     const flex = buildOrderFlexUniversal(orderId, body, total)
 
-    await fetch("https://api.line.me/v2/bot/message/push",{
+    const pushRes = await fetch("https://api.line.me/v2/bot/message/push",{
       method:"POST",
       headers:{
         "Content-Type":"application/json",
@@ -278,6 +266,9 @@ console.log("📤 PUSH GROUP:", pushRes.status, pushText)
         messages:[flex]
       })
     })
+
+    const pushText = await pushRes.text()
+    console.log("📤 PUSH GROUP:", pushRes.status, pushText)
 
     res.status(200).json({ ok: true })
 
