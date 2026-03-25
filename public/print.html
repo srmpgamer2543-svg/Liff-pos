@@ -9,97 +9,58 @@
 
 <style>
 body{
-  font-family: sans-serif;
-  text-align: center;
-  padding: 40px;
+  font-family:sans-serif;
+  text-align:center;
+  padding:20px;
+}
+
+img{
+  max-width:100%;
+  border:1px solid #ddd;
 }
 </style>
 </head>
 
 <body>
 
-<h2 id="status">Starting...</h2>
+<h3 id="status">Loading...</h3>
+<img id="preview"/>
 
 <script>
 async function main(){
 
+  const status = document.getElementById("status")
+  const preview = document.getElementById("preview")
+
   try{
 
-    const status = document.getElementById("status")
+    const params = new URLSearchParams(location.search)
 
-    // =========================
-    // 🔥 FORCE OPEN CHROME
-    // =========================
-    const params = new URLSearchParams(window.location.search)
-
-    if(params.get("external") === "1"){
-      const url = window.location.href.replace("external=1","external=0")
-      window.location.href =
+    // 🔥 force chrome
+    if(params.get("external")==="1"){
+      const url = location.href.replace("external=1","external=0")
+      location.href =
         "intent://" + url.replace("https://","") +
         "#Intent;scheme=https;package=com.android.chrome;end;"
       return
     }
 
-    await liff.init({ liffId: "2009308319-yTnMMIYi" })
+    await liff.init({ liffId:"2009308319-yTnMMIYi" })
 
     const orderId = params.get("order_id")
-
     if(!orderId){
-      status.innerText = "No order_id"
+      status.innerText = "no order_id"
       return
     }
 
     status.innerText = "Loading order..."
 
-    const orderRes = await fetch(`/api/get-order?order_id=${orderId}`)
-    const order = await orderRes.json()
+    const res = await fetch(`/api/get-order?order_id=${orderId}`)
+    const order = await res.json()
 
-    if(!order || !order.id){
-      status.innerText = "Order not found"
-      return
-    }
-
-    function mergeItems(items){
-      const merged = {}
-
-      items.forEach(i=>{
-        const key = i.name + JSON.stringify(i.modifiers || {})
-        if(!merged[key]){
-          merged[key] = {...i, qty:1}
-        }else{
-          merged[key].qty++
-        }
-      })
-
-      return Object.values(merged)
-    }
-
-    function formatModifiers(modifiers){
-      if(!modifiers) return []
-
-      const result = []
-
-      Object.entries(modifiers).forEach(([group, arr])=>{
-        const map = {}
-
-        arr.forEach(m=>{
-          const name = typeof m === "object" ? m.name : m
-          map[name] = (map[name] || 0) + 1
-        })
-
-        Object.entries(map).forEach(([name,count])=>{
-          result.push(count > 1 ? `${name} x${count}` : name)
-        })
-      })
-
-      return result
-    }
-
-    const items = mergeItems(order.items || [])
-
-    // =========================
-    // 🧾 CREATE CANVAS
-    // =========================
+    // ======================
+    // 🧾 canvas
+    // ======================
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")
 
@@ -110,87 +71,65 @@ async function main(){
     canvas.height = 2000
 
     ctx.fillStyle = "#fff"
-    ctx.fillRect(0,0,canvas.width,canvas.height)
+    ctx.fillRect(0,0,width,2000)
 
     ctx.fillStyle = "#000"
     ctx.font = "24px monospace"
 
-    function centerText(text){
-      const w = ctx.measureText(text).width
-      ctx.fillText(text,(width-w)/2,y)
-      y += 30
+    function t(x){ ctx.fillText(x,10,y); y+=28 }
+    function c(x){
+      const w = ctx.measureText(x).width
+      ctx.fillText(x,(width-w)/2,y)
+      y+=30
     }
+    function line(){ t("-----------------------------") }
 
-    function leftText(text){
-      ctx.fillText(text,10,y)
-      y += 28
-    }
-
-    function line(){
-      ctx.fillText("--------------------------------",10,y)
-      y += 28
-    }
-
-    // HEADER
-    centerText("ร้านน้ำ")
-    centerText("DRINK SHOP")
+    c("ร้านน้ำ")
+    c("DRINK SHOP")
     line()
-    leftText("Order #" + order.id)
+    t("Order #" + order.id)
     line()
 
     let total = 0
 
-    items.forEach(i=>{
-
-      const lineTotal = i.price * i.qty
-      total += lineTotal
-
-      leftText(i.name + " x" + i.qty)
-
-      const mods = formatModifiers(i.modifiers)
-
-      mods.forEach(m=>{
-        leftText("  + " + m)
-      })
-
-      leftText("  = " + lineTotal + " บาท")
+    order.items.forEach(i=>{
+      total += i.price
+      t(i.name)
+      t("= " + i.price + " บาท")
       line()
     })
 
     ctx.font = "bold 26px monospace"
-    leftText("รวม " + total + " บาท")
+    t("รวม " + total + " บาท")
 
-    y += 20
+    y+=20
     ctx.font = "22px monospace"
-    centerText("ขอบคุณครับ")
+    c("ขอบคุณครับ")
 
-    // =========================
-    // ✂️ CROP HEIGHT
-    // =========================
-    const finalCanvas = document.createElement("canvas")
-    finalCanvas.width = width
-    finalCanvas.height = y + 20
+    // crop
+    const final = document.createElement("canvas")
+    final.width = width
+    final.height = y+20
+    final.getContext("2d").drawImage(canvas,0,0)
 
-    const fctx = finalCanvas.getContext("2d")
-    fctx.fillStyle = "#fff"
-    fctx.fillRect(0,0,finalCanvas.width,finalCanvas.height)
-    fctx.drawImage(canvas,0,0)
+    const dataUrl = final.toDataURL("image/png")
 
-    // =========================
-    // 🔥 PRINT DIRECT RAWBT
-    // =========================
-    status.innerText = "Printing..."
+    // ======================
+    // 👀 preview
+    // ======================
+    preview.src = dataUrl
+    status.innerText = "Preparing print..."
 
-    const base64 = finalCanvas.toDataURL("image/png").split(",")[1]
-
-    window.location.href =
-  "rawbt:image/png;base64," + base64
+    // ======================
+    // 🚀 send to rawbt
+    // ======================
+    setTimeout(()=>{
+      location.href = "rawbt:" + dataUrl
+    },400)
 
   }catch(err){
-    console.log(err)
-    document.getElementById("status").innerText = "ERROR: " + err.message
+    status.innerText = "ERROR: " + err.message
   }
-
 }
 
 main()
