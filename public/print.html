@@ -81,7 +81,7 @@ async function main(){
       // 🔥 ปรับเส้นแยกจุด
       LINE_HEADER_OFFSET: -14,
       LINE_INFO_OFFSET: -14,
-      LINE_TOTAL_OFFSET: -14,
+      LINE_TOTAL_OFFSET: -16,
 
       LINE_WIDTH: 1.2,
       LINE_DASH: [4,2]
@@ -143,9 +143,9 @@ async function main(){
     function gap(h){ y += h }
 
     // ========= HEADER =========
-    center("pos:เจ้าของร้าน", CFG.FONT_TITLE, true)
-    center("มีนม.ขนมปัง!", CFG.FONT_SUB, true)
-    center("098-0320953", CFG.FONT_SMALL)
+    center("ร้านมีนม.ขนมปัง!", CFG.FONT_TITLE, true)
+    center("098-0320953", CFG.FONT_SUB, true)
+    center("pos:เจ้าของร้าน", CFG.FONT_SMALL)
 
     dashedLine(CFG.LINE_HEADER_OFFSET)
 
@@ -213,7 +213,7 @@ async function main(){
     )
 
     gap(6)
-    center("อย่าลืม! สแกนแต้มสะสมบนใบเสร็จทุกครั้ง", CFG.FONT_SMALL)
+    center("อย่าลืม! สแกนแต้มสะสมบนใบเสร็จทุกครั้ง!", CFG.FONT_SMALL)
 
     const final = document.createElement("canvas")
     final.width = width
