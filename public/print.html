@@ -142,6 +142,26 @@ async function main(){
 
     function gap(h){ y += h }
 
+    // ========= LOGO RECEIPT =========
+const img = new Image()
+img.src = "/logo-receipt.png"
+
+await new Promise((resolve) => {
+  img.onload = resolve
+  img.onerror = resolve
+})
+
+if(img.complete && img.naturalWidth !== 0){
+
+  const logoWidth = 320
+  const logoHeight = 220
+  const logoX = (width - logoWidth) / 2
+
+  ctx.drawImage(img, logoX, y, logoWidth, logoHeight)
+
+  y += logoHeight + 10
+}
+    
     // ========= HEADER =========
     center("ร้านมีนม.ขนมปัง!", CFG.FONT_TITLE, true)
     center("098-0320953", CFG.FONT_SUB, true)
