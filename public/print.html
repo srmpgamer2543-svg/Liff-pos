@@ -70,10 +70,10 @@ async function main(){
 
       START_Y: 30,
 
-      FONT_TITLE: 28,
+      FONT_TITLE: 24,
       FONT_SUB: 20,
       FONT_NORMAL: 20,
-      FONT_SMALL: 18,
+      FONT_SMALL: 20,
 
       SPACE_TEXT: 8,
       SPACE_SECTION: 10,
@@ -81,7 +81,7 @@ async function main(){
       // 🔥 ปรับเส้นแยกจุด
       LINE_HEADER_OFFSET: -14,
       LINE_INFO_OFFSET: -14,
-      LINE_TOTAL_OFFSET: -12,
+      LINE_TOTAL_OFFSET: -14,
 
       LINE_WIDTH: 1.2,
       LINE_DASH: [4,2]
@@ -143,9 +143,9 @@ async function main(){
     function gap(h){ y += h }
 
     // ========= HEADER =========
-    center("Cafe POS", CFG.FONT_TITLE, true)
-    center("มีนม.ขนมปัง", CFG.FONT_SUB, true)
-    center("Thank you", CFG.FONT_SMALL)
+    center("pos:เจ้าของร้าน", CFG.FONT_TITLE, true)
+    center("มีนม.ขนมปัง!", CFG.FONT_SUB, true)
+    center("098-0320953", CFG.FONT_SMALL)
 
     dashedLine(CFG.LINE_HEADER_OFFSET)
 
@@ -206,14 +206,14 @@ async function main(){
     const total = subtotal
 
     row(
-      "TOTAL",
+      "ยอดรวมทั้งหมด",
       total.toLocaleString("th-TH",{minimumFractionDigits:2}),
       CFG.FONT_TITLE,
       true
     )
 
     gap(6)
-    center("ขอบคุณที่ใช้บริการ!", CFG.FONT_SMALL)
+    center("อย่าลืม! สแกนแต้มสะสมบนใบเสร็จทุกครั้ง", CFG.FONT_SMALL)
 
     const final = document.createElement("canvas")
     final.width = width
