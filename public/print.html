@@ -60,10 +60,34 @@ async function main(){
     const ctx = canvas.getContext("2d")
 
     const width = 384
-    const LEFT = 12
-    const RIGHT = width - 12
 
-    let y = 30
+    // =========================
+    // 🎯 CONFIG (ปรับได้ทั้งหมด)
+    // =========================
+    const CFG = {
+      LEFT: 12,
+      RIGHT: width - 12,
+
+      START_Y: 30,
+
+      FONT_TITLE: 28,
+      FONT_SUB: 20,
+      FONT_NORMAL: 20,
+      FONT_SMALL: 18,
+
+      SPACE_TEXT: 8,
+      SPACE_SECTION: 10,
+
+      // 🔥 ปรับเส้นแยกจุด
+      LINE_HEADER_OFFSET: -12,
+      LINE_INFO_OFFSET: -10,
+      LINE_TOTAL_OFFSET: -8,
+
+      LINE_WIDTH: 1.2,
+      LINE_DASH: [4,2]
+    }
+
+    let y = CFG.START_Y
 
     canvas.width = width
     canvas.height = 2000
@@ -72,57 +96,58 @@ async function main(){
     ctx.fillRect(0,0,width,2000)
     ctx.fillStyle = "#000"
 
-    function center(text, size=24, bold=false){
+    // ========= helpers =========
+    function center(text, size=CFG.FONT_NORMAL, bold=false){
       ctx.font = `${bold?"bold ":""}${size}px monospace`
       ctx.textAlign = "center"
       ctx.fillText(text, width/2, y)
-      y += size + 10
+      y += size + CFG.SPACE_TEXT
     }
 
-    function left(text, size=20, bold=false){
+    function left(text, size=CFG.FONT_NORMAL, bold=false){
       ctx.font = `${bold?"bold ":""}${size}px monospace`
       ctx.textAlign = "left"
-      ctx.fillText(text, LEFT, y)
-      y += size + 8
+      ctx.fillText(text, CFG.LEFT, y)
+      y += size + CFG.SPACE_TEXT
     }
 
-    function row(l,r,size=20,bold=false){
+    function row(l,r,size=CFG.FONT_NORMAL,bold=false){
       ctx.font = `${bold?"bold ":""}${size}px monospace`
 
       ctx.textAlign = "left"
-      ctx.fillText(l, LEFT, y)
+      ctx.fillText(l, CFG.LEFT, y)
 
       ctx.textAlign = "right"
-      ctx.fillText(r, RIGHT, y)
+      ctx.fillText(r, CFG.RIGHT, y)
 
-      y += size + 8
+      y += size + CFG.SPACE_TEXT
     }
 
-    // ✅ แก้ตรงนี้ (เส้นไม่ทับข้อความ)
-    function dashedLine(){
-      y -= 20
+    // ✅ เส้นแบบควบคุมละเอียด
+    function dashedLine(offset=0){
+      const lineY = y + offset
 
-      ctx.setLineDash([4,2])
-      ctx.lineWidth = 1.5
+      ctx.setLineDash(CFG.LINE_DASH)
+      ctx.lineWidth = CFG.LINE_WIDTH
 
       ctx.beginPath()
-      ctx.moveTo(LEFT,y)
-      ctx.lineTo(RIGHT,y)
+      ctx.moveTo(CFG.LEFT, lineY)
+      ctx.lineTo(CFG.RIGHT, lineY)
       ctx.stroke()
 
       ctx.setLineDash([])
 
-      y += 6
+      y += CFG.SPACE_SECTION
     }
 
-    function gap(h=10){ y+=h }
+    function gap(h){ y += h }
 
     // ========= HEADER =========
-    center("Cafe POS",28,true)
-    center("มีนม.ขนมปัง",20,true)
-    center("Thank you",16)
+    center("Cafe POS", CFG.FONT_TITLE, true)
+    center("มีนม.ขนมปัง", CFG.FONT_SUB, true)
+    center("Thank you", CFG.FONT_SMALL)
 
-    dashedLine()
+    dashedLine(CFG.LINE_HEADER_OFFSET)
 
     const now = new Date()
     const date = now.toLocaleDateString("th-TH")
@@ -132,7 +157,7 @@ async function main(){
     left(`เวลา: ${time}`)
     left(`Order: #${order.id}`)
 
-    dashedLine()
+    dashedLine(CFG.LINE_INFO_OFFSET)
 
     // ========= ITEMS =========
     let subtotal = 0
@@ -141,7 +166,7 @@ async function main(){
 
       subtotal += i.price
 
-      left(i.name,24,true)
+      left(i.name, CFG.FONT_SUB, true)
 
       row(` 1 x ${i.price}`, i.price)
 
@@ -168,7 +193,7 @@ async function main(){
           row(
             "   + " + name + qty,
             priceText,
-            18
+            CFG.FONT_SMALL
           )
         })
       }
@@ -176,20 +201,19 @@ async function main(){
       gap(4)
     })
 
-    dashedLine()
+    dashedLine(CFG.LINE_TOTAL_OFFSET)
 
     const total = subtotal
 
-    ctx.font = "bold 28px monospace"
     row(
       "TOTAL",
       total.toLocaleString("th-TH",{minimumFractionDigits:2}),
-      28,
+      CFG.FONT_TITLE,
       true
     )
 
-    gap(4)
-    center("ขอบคุณที่ใช้บริการ!",18)
+    gap(6)
+    center("ขอบคุณที่ใช้บริการ!", CFG.FONT_SMALL)
 
     const final = document.createElement("canvas")
     final.width = width
