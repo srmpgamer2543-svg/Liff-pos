@@ -153,8 +153,7 @@ async function main(){
     const date = now.toLocaleDateString("th-TH")
     const time = now.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})
 
-    left(`วันที่: ${date}`)
-    left(`เวลา: ${time}`)
+    row(`วันที่: ${date}`, `เวลา: ${time}`)
     left(`Order: #${order.id}`)
 
     dashedLine(CFG.LINE_INFO_OFFSET)
