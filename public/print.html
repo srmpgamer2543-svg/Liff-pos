@@ -56,9 +56,6 @@ async function main(){
     const res = await fetch(`/api/get-order?order_id=${orderId}`)
     const order = await res.json()
 
-    // ======================
-    // 🧾 CANVAS
-    // ======================
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")
 
@@ -75,7 +72,6 @@ async function main(){
     ctx.fillRect(0,0,width,2000)
     ctx.fillStyle = "#000"
 
-    // ========= helpers =========
     function center(text, size=24, bold=false){
       ctx.font = `${bold?"bold ":""}${size}px monospace`
       ctx.textAlign = "center"
@@ -102,14 +98,21 @@ async function main(){
       y += size + 8
     }
 
+    // ✅ แก้ตรงนี้ (เส้นไม่ทับข้อความ)
     function dashedLine(){
-      ctx.setLineDash([5,3])
+      y += 4
+
+      ctx.setLineDash([4,2])
+      ctx.lineWidth = 1.5
+
       ctx.beginPath()
       ctx.moveTo(LEFT,y)
       ctx.lineTo(RIGHT,y)
       ctx.stroke()
+
       ctx.setLineDash([])
-      y += 12
+
+      y += 6
     }
 
     function gap(h=10){ y+=h }
@@ -119,7 +122,6 @@ async function main(){
     center("มีนม.ขนมปัง",20,true)
     center("Thank you",16)
 
-    gap(2)
     dashedLine()
 
     const now = new Date()
@@ -139,13 +141,10 @@ async function main(){
 
       subtotal += i.price
 
-      // ชื่อสินค้า
       left(i.name,24,true)
 
-      // จำนวน
       row(` 1 x ${i.price}`, i.price)
 
-      // modifiers
       if(i.modifiers){
 
         const map = {}
@@ -179,7 +178,6 @@ async function main(){
 
     dashedLine()
 
-    // ========= TOTAL =========
     const total = subtotal
 
     ctx.font = "bold 28px monospace"
@@ -193,7 +191,6 @@ async function main(){
     gap(4)
     center("ขอบคุณที่ใช้บริการ!",18)
 
-    // ========= crop =========
     const final = document.createElement("canvas")
     final.width = width
     final.height = y + 20
