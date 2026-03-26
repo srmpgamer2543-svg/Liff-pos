@@ -154,7 +154,7 @@ await new Promise((resolve) => {
 if(img.complete && img.naturalWidth !== 0){
 
   const logoWidth = 320
-  const logoHeight = 220
+  const logoHeight = 300
   const logoX = (width - logoWidth) / 2
 
   ctx.drawImage(img, logoX, y, logoWidth, logoHeight)
@@ -163,8 +163,8 @@ if(img.complete && img.naturalWidth !== 0){
 }
     
     // ========= HEADER =========
-    center("ร้านมีนม.ขนมปัง!", CFG.FONT_TITLE, true)
-    center("098-0320953", CFG.FONT_SUB, true)
+    center("", CFG.FONT_TITLE, true)
+    center("▪️◾️◾️◼️◼️◼️⬛ ⬛ ⬛◼️◼️◼️◾️◾️▪️", CFG.FONT_SUB, true)
     center("pos:เจ้าของร้าน", CFG.FONT_SMALL)
 
     dashedLine(CFG.LINE_HEADER_OFFSET)
